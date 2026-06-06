@@ -1,0 +1,13 @@
+.app-header {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+}
+
+.app-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.app-header p {
+  font-size: 0.9rem;
+}
