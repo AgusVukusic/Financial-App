@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useTransactions } from './hooks/useTransactions';
 import { useTheme } from './hooks/useTheme';
+import { useUser } from './hooks/useUser';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
 import Reports from './components/Reports';
 import Profile from './components/Profile';
+import WelcomeScreen from './components/WelcomeScreen';
 import { exportToCSV } from './utils/formatters';
 import { Moon, Sun } from 'lucide-react';
 import './App.css';
@@ -18,6 +20,7 @@ function App() {
 
   const { transactions, allTransactions, addTransaction, deleteTransaction, totalIncome, totalExpense, balance } = useTransactions(selectedMonth, selectedYear);
   const { theme, toggleTheme } = useTheme();
+  const { userName, saveUserName, clearUser } = useUser();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
@@ -25,6 +28,9 @@ function App() {
 
   const handleClearData = () => {
     window.localStorage.removeItem('financial_app_transactions');
+    window.localStorage.removeItem('financial_app_budgets');
+    window.localStorage.removeItem('financial_app_subscriptions');
+    clearUser();
     window.location.reload();
   };
 
@@ -52,6 +58,10 @@ function App() {
 
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+  if (!userName) {
+    return <WelcomeScreen onSaveName={saveUserName} />;
+  }
+
   return (
     <Layout 
       activeTab={activeTab} 
@@ -60,7 +70,7 @@ function App() {
     >
       <header className="app-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h2>Hola, Agustín 👋</h2>
+          <h2>Hola, {userName} 👋</h2>
           <p className="text-secondary">
             {activeTab === 'home' && "Aquí está tu resumen financiero"}
             {activeTab === 'reports' && "Analiza en qué estás gastando"}
@@ -102,6 +112,7 @@ function App() {
 
       {activeTab === 'profile' && (
         <Profile 
+          userName={userName}
           onClearData={handleClearData} 
           onExportData={handleExportData} 
           onPaySubscription={handlePaySubscription}

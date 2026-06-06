@@ -3,7 +3,7 @@ import { User, Settings, Trash2, Shield, PlusCircle, CreditCard } from 'lucide-r
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { formatCurrency } from '../utils/formatters';
 
-const Profile = ({ onClearData, onExportData, onPaySubscription }) => {
+const Profile = ({ userName, onClearData, onExportData, onPaySubscription }) => {
   const { subscriptions, addSubscription, deleteSubscription } = useSubscriptions();
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [subForm, setSubForm] = useState({ description: '', amount: '', category: 'Servicios' });
@@ -31,11 +31,11 @@ const Profile = ({ onClearData, onExportData, onPaySubscription }) => {
       <h2 style={{ marginBottom: 'var(--spacing-lg)' }}>Mi Perfil</h2>
       
       <div className="glass-panel" style={{ padding: 'var(--spacing-lg)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
           <User size={32} color="white" />
         </div>
-        <div>
-          <h3 style={{ fontSize: '1.2rem', margin: '0 0 4px 0' }}>Agustín</h3>
+        <div style={{ overflow: 'hidden' }}>
+          <h3 style={{ fontSize: '1.2rem', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userName}</h3>
           <p className="text-secondary" style={{ margin: 0, fontSize: '0.9rem' }}>Plan Local Activo</p>
         </div>
       </div>
