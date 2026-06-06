@@ -8,6 +8,7 @@ import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
 import Reports from './components/Reports';
 import Profile from './components/Profile';
+import Groups from './components/Groups';
 import WelcomeScreen from './components/WelcomeScreen';
 import { exportToCSV } from './utils/formatters';
 import { Moon, Sun } from 'lucide-react';
@@ -18,9 +19,9 @@ function App() {
   const selectedMonth = currentDate.getMonth();
   const selectedYear = currentDate.getFullYear();
 
-  const { transactions, allTransactions, addTransaction, deleteTransaction, totalIncome, totalExpense, balance } = useTransactions(selectedMonth, selectedYear);
   const { theme, toggleTheme } = useTheme();
-  const { userName, saveUserName, clearUser } = useUser();
+  const { user, loading, userName, clearUser } = useUser();
+  const { transactions, allTransactions, addTransaction, deleteTransaction, totalIncome, totalExpense, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
@@ -58,8 +59,16 @@ function App() {
 
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-  if (!userName) {
-    return <WelcomeScreen onSaveName={saveUserName} />;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-base)' }}>
+        <p style={{ color: 'var(--text-primary)' }}>Cargando...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <WelcomeScreen />;
   }
 
   return (
@@ -107,16 +116,23 @@ function App() {
       )}
 
       {activeTab === 'reports' && (
-        <Reports transactions={transactions} />
+        <Reports transactions={transactions} allTransactions={allTransactions} uid={user?.uid} />
       )}
 
       {activeTab === 'profile' && (
         <Profile 
           userName={userName}
+          uid={user?.uid}
           onClearData={handleClearData} 
           onExportData={handleExportData} 
           onPaySubscription={handlePaySubscription}
+          onAddTransaction={addTransaction}
+          allTransactions={allTransactions}
         />
+      )}
+
+      {activeTab === 'groups' && (
+        <Groups uid={user?.uid} userName={userName} />
       )}
 
       <AddTransactionModal 

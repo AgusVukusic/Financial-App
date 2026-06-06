@@ -1,6 +1,7 @@
 import React from 'react';
 import { Coffee, ShoppingBag, Home, Car, Zap, DollarSign, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { motion, AnimatePresence } from 'framer-motion';
 import './TransactionList.css';
 
 const categoryIcons = {
@@ -25,34 +26,43 @@ const TransactionList = ({ transactions, onDelete }) => {
     <div className="transaction-list-container animate-slide-up" style={{ animationDelay: '0.2s' }}>
       <h3 className="section-title">Movimientos Recientes</h3>
       <div className="transaction-list">
-        {transactions.map((transaction) => (
-          <div key={transaction.id} className="transaction-item glass-panel">
-            <div className="transaction-icon-wrapper">
-              <div className={`transaction-icon ${transaction.type}`}>
-                {categoryIcons[transaction.category] || <DollarSign size={20} />}
+        <AnimatePresence>
+          {transactions.map((transaction) => (
+            <motion.div 
+              key={transaction.id} 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95, x: -20 }}
+              layout
+              className="transaction-item glass-panel"
+            >
+              <div className="transaction-icon-wrapper">
+                <div className={`transaction-icon ${transaction.type}`}>
+                  {categoryIcons[transaction.category] || <DollarSign size={20} />}
+                </div>
               </div>
-            </div>
-            
-            <div className="transaction-details">
-              <div className="transaction-header">
-                <span className="transaction-title">{transaction.description || transaction.category}</span>
-                <span className={`transaction-amount ${transaction.type === 'income' ? 'text-success' : ''}`}>
-                  {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                </span>
+              
+              <div className="transaction-details">
+                <div className="transaction-header">
+                  <span className="transaction-title">{transaction.description || transaction.category}</span>
+                  <span className={`transaction-amount ${transaction.type === 'income' ? 'text-success' : ''}`}>
+                    {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                  </span>
+                </div>
+                <div className="transaction-footer">
+                  <span className="transaction-date">{formatDate(transaction.date)}</span>
+                  <button 
+                    className="delete-btn" 
+                    onClick={() => onDelete(transaction.id)}
+                    aria-label="Eliminar transacción"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
-              <div className="transaction-footer">
-                <span className="transaction-date">{formatDate(transaction.date)}</span>
-                <button 
-                  className="delete-btn" 
-                  onClick={() => onDelete(transaction.id)}
-                  aria-label="Eliminar transacción"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

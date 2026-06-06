@@ -1,26 +1,36 @@
 import { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
-const BUDGETS_KEY = 'financial_app_budgets';
-
-export const useBudgets = () => {
-  const [budgets, setBudgets] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(BUDGETS_KEY);
-      return item ? JSON.parse(item) : {};
-    } catch (error) {
-      return {};
-    }
-  });
+export const useBudgets = (uid) => {
+  const [budgets, setBudgets] = useState({});
 
   useEffect(() => {
-    window.localStorage.setItem(BUDGETS_KEY, JSON.stringify(budgets));
-  }, [budgets]);
+    if (!uid) return;
 
-  const updateBudget = (category, amount) => {
-    setBudgets(prev => ({
-      ...prev,
-      [category]: parseFloat(amount) || 0
-    }));
+    const unsubscribe = onSnapshot(doc(db, 'budgets', uid), (docSnap) => {
+      if (docSnap.exists()) {
+        setBudgets(docSnap.data());
+      } else {
+        setBudgets({});
+      }
+    });
+
+    return () => unsubscribe();
+  }, [uid]);
+
+  const updateBudget = async (category, amount) => {
+    if (!uid) return;
+    try {
+      const newBudgets = {
+        ...budgets,
+        [category]: parseFloat(amount) || 0,
+        userId: uid
+      };
+      await setDoc(doc(db, 'budgets', uid), newBudgets, { merge: true });
+    } catch (error) {
+      console.error("Error updating budget: ", error);
+    }
   };
 
   return { budgets, updateBudget };

@@ -1,30 +1,51 @@
 import { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 
-const SUBS_KEY = 'financial_app_subscriptions';
-
-export const useSubscriptions = () => {
-  const [subscriptions, setSubscriptions] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(SUBS_KEY);
-      return item ? JSON.parse(item) : [];
-    } catch (error) {
-      return [];
-    }
-  });
+export const useSubscriptions = (uid) => {
+  const [subscriptions, setSubscriptions] = useState([]);
 
   useEffect(() => {
-    window.localStorage.setItem(SUBS_KEY, JSON.stringify(subscriptions));
-  }, [subscriptions]);
+    if (!uid) return;
 
-  const addSubscription = (sub) => {
-    setSubscriptions(prev => [
-      ...prev,
-      { ...sub, id: crypto.randomUUID() }
-    ]);
+    const q = query(
+      collection(db, 'subscriptions'),
+      where('userId', '==', uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setSubscriptions(data);
+    }, (error) => {
+      console.error("Error fetching subscriptions: ", error);
+    });
+
+    return () => unsubscribe();
+  }, [uid]);
+
+  const addSubscription = async (sub) => {
+    if (!uid) return;
+    try {
+      await addDoc(collection(db, 'subscriptions'), {
+        ...sub,
+        userId: uid,
+        createdAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error adding subscription: ", error);
+    }
   };
 
-  const deleteSubscription = (id) => {
-    setSubscriptions(prev => prev.filter(s => s.id !== id));
+  const deleteSubscription = async (id) => {
+    if (!uid) return;
+    try {
+      await deleteDoc(doc(db, 'subscriptions', id));
+    } catch (error) {
+      console.error("Error deleting subscription: ", error);
+    }
   };
 
   return { subscriptions, addSubscription, deleteSubscription };

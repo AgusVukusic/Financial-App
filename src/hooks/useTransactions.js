@@ -1,21 +1,37 @@
 import { useState, useEffect, useMemo } from 'react';
+import { db } from '../firebase';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, orderBy } from 'firebase/firestore';
 
-const STORAGE_KEY = 'financial_app_transactions';
+export const useTransactions = (selectedMonth, selectedYear, uid) => {
+  const [transactions, setTransactions] = useState([]);
 
-export const useTransactions = (selectedMonth, selectedYear) => {
-  const [transactions, setTransactions] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(STORAGE_KEY);
-      return item ? JSON.parse(item) : [];
-    } catch (error) {
-      console.error('Error reading from localStorage', error);
-      return [];
-    }
-  });
+  useEffect(() => {
+    if (!uid) return;
+
+    const q = query(
+      collection(db, 'transactions'),
+      where('userId', '==', uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      // Sort locally to avoid needing a composite index in Firestore
+      data.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setTransactions(data);
+    }, (error) => {
+      console.error("Error fetching transactions: ", error);
+    });
+
+    return () => unsubscribe();
+  }, [uid]);
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
+      if (!t.date) return false;
       const date = new Date(t.date);
       return date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
     });
@@ -32,25 +48,27 @@ export const useTransactions = (selectedMonth, selectedYear) => {
 
   const balance = totalIncome - totalExpense;
 
-  useEffect(() => {
+  const addTransaction = async (transaction) => {
+    if (!uid) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+      await addDoc(collection(db, 'transactions'), {
+        ...transaction,
+        userId: uid,
+        date: new Date().toISOString(),
+        createdAt: serverTimestamp()
+      });
     } catch (error) {
-      console.error('Error saving to localStorage', error);
+      console.error("Error adding transaction: ", error);
     }
-  }, [transactions]);
-
-  const addTransaction = (transaction) => {
-    const newTransaction = {
-      ...transaction,
-      id: crypto.randomUUID(),
-      date: new Date().toISOString(),
-    };
-    setTransactions(prev => [newTransaction, ...prev]);
   };
 
-  const deleteTransaction = (id) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+  const deleteTransaction = async (id) => {
+    if (!uid) return;
+    try {
+      await deleteDoc(doc(db, 'transactions', id));
+    } catch (error) {
+      console.error("Error deleting transaction: ", error);
+    }
   };
 
   return {

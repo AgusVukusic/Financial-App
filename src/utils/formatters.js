@@ -1,3 +1,6 @@
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -37,4 +40,36 @@ export const exportToCSV = (transactions) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+export const exportToPDF = (transactions) => {
+  const doc = new jsPDF();
+  
+  doc.setFontSize(18);
+  doc.text('Reporte de Finanzas', 14, 22);
+  
+  const tableColumn = ["Fecha", "Tipo", "Categoría", "Monto", "Descripción"];
+  const tableRows = [];
+
+  transactions.forEach(t => {
+    const transactionData = [
+      formatDate(t.date),
+      t.type === 'income' ? 'Ingreso' : 'Gasto',
+      t.category,
+      formatCurrency(t.amount),
+      t.description || ''
+    ];
+    tableRows.push(transactionData);
+  });
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 30,
+    theme: 'grid',
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [59, 130, 246] }
+  });
+
+  doc.save(`mis_finanzas_${new Date().toISOString().split('T')[0]}.pdf`);
 };

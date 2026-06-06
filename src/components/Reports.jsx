@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import React, { useState, useMemo } from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { formatCurrency } from '../utils/formatters';
 import { useBudgets } from '../hooks/useBudgets';
 import { Settings, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const Reports = ({ transactions }) => {
-  const { budgets, updateBudget } = useBudgets();
+const Reports = ({ transactions, allTransactions, uid }) => {
+  const { budgets, updateBudget } = useBudgets(uid);
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
+  
   const expensesByCategory = transactions
     .filter(t => t.type === 'expense')
     .reduce((acc, curr) => {
@@ -29,14 +31,66 @@ const Reports = ({ transactions }) => {
     setEditingBudget(null);
   };
 
+  // Prepare data for temporal evolution (last 6 months)
+  const temporalData = useMemo(() => {
+    if (!allTransactions) return [];
+    
+    const monthsData = {};
+    const today = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+      const monthName = d.toLocaleString('es-ES', { month: 'short' });
+      monthsData[monthKey] = { name: monthName, Ingresos: 0, Gastos: 0, order: d.getTime() };
+    }
+
+    allTransactions.forEach(t => {
+      if (!t.date) return;
+      const d = new Date(t.date);
+      const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+      if (monthsData[monthKey]) {
+        if (t.type === 'income') monthsData[monthKey].Ingresos += t.amount;
+        else monthsData[monthKey].Gastos += t.amount;
+      }
+    });
+
+    return Object.values(monthsData).sort((a, b) => a.order - b.order);
+  }, [allTransactions]);
+
   return (
-    <div className="reports-container animate-fade-in" style={{ padding: 'var(--spacing-md) 0' }}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="reports-container" style={{ padding: 'var(--spacing-md) 0' }}>
       <h2 style={{ marginBottom: 'var(--spacing-md)' }}>Reportes Detallados</h2>
       
+      {/* Temporal Evolution Chart */}
+      <div className="glass-panel" style={{ padding: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
+        <h3 style={{ marginBottom: 'var(--spacing-md)', fontSize: '1rem', color: 'var(--text-secondary)' }}>
+          Evolución (Últimos 6 meses)
+        </h3>
+        <div style={{ width: '100%', height: 250 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={temporalData} margin={{ top: 5, right: 0, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+              <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
+              <Tooltip 
+                cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                contentStyle={{ backgroundColor: 'var(--bg-surface)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
+                formatter={(value) => formatCurrency(value)}
+              />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+              <Bar dataKey="Ingresos" fill="var(--success)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              <Bar dataKey="Gastos" fill="var(--danger)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {chartData.length > 0 ? (
         <div className="glass-panel" style={{ padding: 'var(--spacing-lg)' }}>
           <h3 style={{ marginBottom: 'var(--spacing-md)', fontSize: '1rem', color: 'var(--text-secondary)' }}>
-            Distribución de Gastos
+            Distribución de Gastos (Mes Actual)
           </h3>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <ResponsiveContainer width="100%" height={250}>
@@ -74,7 +128,7 @@ const Reports = ({ transactions }) => {
               let barColor = 'var(--accent-primary)';
               if (hasBudget) {
                 if (percentage >= 100) barColor = 'var(--danger)';
-                else if (percentage >= 80) barColor = '#f59e0b'; // amber/warning
+                else if (percentage >= 80) barColor = '#f59e0b';
                 else barColor = 'var(--success)';
               }
 
@@ -121,10 +175,10 @@ const Reports = ({ transactions }) => {
         </div>
       ) : (
         <div className="glass-panel" style={{ padding: 'var(--spacing-xl)', textAlign: 'center' }}>
-          <p className="text-secondary">Aún no hay suficientes gastos para generar reportes.</p>
+          <p className="text-secondary">Aún no hay suficientes gastos este mes para el gráfico de torta.</p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

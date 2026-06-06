@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, PlusCircle, PieChart, User } from 'lucide-react';
+import { Home, PlusCircle, PieChart, User, Users } from 'lucide-react';
 import './Layout.css';
 
 const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
@@ -30,6 +30,14 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
             <PlusCircle size={32} color="#fff" />
           </button>
         </div>
+
+        <button 
+          className={`nav-item ${activeTab === 'groups' ? 'active' : ''}`}
+          onClick={() => onTabChange('groups')}
+        >
+          <Users size={24} />
+          <span>Grupos</span>
+        </button>
         
         <button 
           className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}

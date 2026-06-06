@@ -1,27 +1,26 @@
 import { useState, useEffect } from 'react';
-
-const USER_KEY = 'financial_app_user';
+import { auth } from '../firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 export const useUser = () => {
-  const [userName, setUserName] = useState(() => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const clearUser = async () => {
     try {
-      return window.localStorage.getItem(USER_KEY) || '';
+      await signOut(auth);
     } catch (error) {
-      return '';
-    }
-  });
-
-  const saveUserName = (name) => {
-    if (name.trim()) {
-      setUserName(name.trim());
-      window.localStorage.setItem(USER_KEY, name.trim());
+      console.error('Error signing out', error);
     }
   };
 
-  const clearUser = () => {
-    setUserName('');
-    window.localStorage.removeItem(USER_KEY);
-  };
-
-  return { userName, saveUserName, clearUser };
+  return { user, loading, clearUser, userName: user?.displayName || user?.email?.split('@')[0] || '' };
 };
