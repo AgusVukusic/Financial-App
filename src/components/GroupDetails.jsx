@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
 import { useDialog } from '../contexts/DialogContext';
 
 const GroupDetails = ({ groupId, onBack, uid, userName }) => {
-  const { group, expenses, addSharedExpense, deleteSharedExpense, deleteGroup } = useGroupDetails(groupId);
+  const { group, expenses, addSharedExpense, updateSharedExpense, deleteSharedExpense, deleteGroup } = useGroupDetails(groupId);
   const { confirm, alert } = useDialog();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [splitMethod, setSplitMethod] = useState('equal'); // 'equal' | 'custom'
@@ -44,14 +45,21 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
       }
     }
 
-    await addSharedExpense({
+    const expenseData = {
       description,
       amount: totalAmount,
       paidBy: uid,
       splits
-    });
+    };
+
+    if (editingExpenseId) {
+      await updateSharedExpense(editingExpenseId, expenseData);
+    } else {
+      await addSharedExpense(expenseData);
+    }
 
     setIsAdding(false);
+    setEditingExpenseId(null);
     setDescription('');
     setAmount('');
     setCustomSplits({});
@@ -94,6 +102,8 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     const amount = Math.min(debtor.amount, creditor.amount);
     
     settlements.push({
+      fromUid: debtor.uid,
+      toUid: creditor.uid,
       from: group.members.find(m => m.uid === debtor.uid)?.name,
       to: group.members.find(m => m.uid === creditor.uid)?.name,
       amount
@@ -105,6 +115,20 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     if (debtor.amount < 0.01) i++;
     if (creditor.amount < 0.01) j++;
   }
+
+  const handleSettleDebt = async (settlement) => {
+    const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
+    if (isConfirmed) {
+      await addSharedExpense({
+        description: "Liquidación de deuda",
+        amount: settlement.amount,
+        paidBy: settlement.fromUid,
+        splits: {
+          [settlement.toUid]: settlement.amount
+        }
+      });
+    }
+  };
 
   const handleDeleteGroup = async () => {
     const isConfirmed = await confirm("¿Estás seguro de que quieres eliminar este grupo de forma definitiva?");
@@ -175,7 +199,15 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
             settlements.map((s, idx) => (
               <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
                 <span><strong>{s.from}</strong> le debe a <strong>{s.to}</strong></span>
-                <span style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{formatCurrency(s.amount)}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{formatCurrency(s.amount)}</span>
+                  <button 
+                    onClick={() => handleSettleDebt(s)}
+                    style={{ background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                  >
+                    Saldar
+                  </button>
+                </div>
               </div>
             ))
           )}
@@ -184,7 +216,14 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
         <h3>Gastos Compartidos</h3>
-        <button onClick={() => setIsAdding(!isAdding)} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}><Plus size={20} /></button>
+        <button onClick={() => {
+          setEditingExpenseId(null);
+          setDescription('');
+          setAmount('');
+          setCustomSplits({});
+          setSplitMethod('equal');
+          setIsAdding(!isAdding);
+        }} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}><Plus size={20} /></button>
       </div>
 
       {isAdding && (
@@ -240,16 +279,32 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                     </div>
                   </div>
                   {(exp.paidBy === uid) && (
-                    <button 
-                      onClick={async () => { 
-                        const isConfirmed = await confirm('¿Eliminar este gasto compartido?');
-                        if (isConfirmed) deleteSharedExpense(exp.id); 
-                      }}
-                      style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
-                      title="Eliminar gasto"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                    </button>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button 
+                        onClick={() => {
+                          setEditingExpenseId(exp.id);
+                          setDescription(exp.description);
+                          setAmount(exp.amount.toString());
+                          setSplitMethod('custom');
+                          setCustomSplits(exp.splits);
+                          setIsAdding(true);
+                        }}
+                        style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '4px' }}
+                        title="Editar gasto"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                      </button>
+                      <button 
+                        onClick={async () => { 
+                          const isConfirmed = await confirm('¿Eliminar este gasto compartido?');
+                          if (isConfirmed) deleteSharedExpense(exp.id); 
+                        }}
+                        style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
+                        title="Eliminar gasto"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

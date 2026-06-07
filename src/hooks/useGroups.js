@@ -139,5 +139,14 @@ export const useGroupDetails = (groupId) => {
     }
   };
 
-  return { group, expenses, addSharedExpense, deleteSharedExpense, deleteGroup };
+  const updateSharedExpense = async (expenseId, updatedData) => {
+    if (!groupId) return;
+    try {
+      await updateDoc(doc(db, `groups/${groupId}/expenses`, expenseId), updatedData);
+    } catch (error) {
+      console.error("Error updating shared expense: ", error);
+    }
+  };
+
+  return { group, expenses, addSharedExpense, updateSharedExpense, deleteSharedExpense, deleteGroup };
 };

@@ -4,7 +4,7 @@ import './AddTransactionModal.css';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const AddTransactionModal = ({ isOpen, onClose, onAdd, initialData }) => {
+const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) => {
   const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -32,12 +32,18 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, initialData }) => {
     e.preventDefault();
     if (!amount || isNaN(amount)) return;
 
-    onAdd({
+    const data = {
       type,
       amount: parseFloat(amount),
       category: type === 'income' ? 'Ingreso' : category,
       description
-    });
+    };
+
+    if (initialData && initialData.id && onEdit) {
+      onEdit(initialData.id, data);
+    } else {
+      onAdd(data);
+    }
 
     // Reset and close
     setAmount('');
@@ -49,7 +55,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, initialData }) => {
     <div className="modal-overlay animate-fade-in">
       <div className="modal-content glass-panel animate-slide-up">
         <div className="modal-header">
-          <h2>Nuevo Movimiento</h2>
+          <h2>{initialData && initialData.id ? 'Editar Movimiento' : 'Nuevo Movimiento'}</h2>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />
           </button>

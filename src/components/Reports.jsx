@@ -1,14 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { formatCurrency } from '../utils/formatters';
-import { useBudgets } from '../hooks/useBudgets';
 import { Settings, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const Reports = ({ transactions, allTransactions, uid }) => {
-  const { budgets, updateBudget } = useBudgets(uid);
+const Reports = ({ transactions, allTransactions, uid, budgets = {}, updateBudget }) => {
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
   

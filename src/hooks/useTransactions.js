@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, orderBy, updateDoc } from 'firebase/firestore';
 
 export const useTransactions = (selectedMonth, selectedYear, uid) => {
   const [transactions, setTransactions] = useState([]);
@@ -62,6 +62,15 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
     }
   };
 
+  const updateTransaction = async (id, updatedData) => {
+    if (!uid) return;
+    try {
+      await updateDoc(doc(db, 'transactions', id), updatedData);
+    } catch (error) {
+      console.error("Error updating transaction: ", error);
+    }
+  };
+
   const deleteTransaction = async (id) => {
     if (!uid) return;
     try {
@@ -75,6 +84,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
     transactions: filteredTransactions,
     allTransactions: transactions,
     addTransaction,
+    updateTransaction,
     deleteTransaction,
     totalIncome,
     totalExpense,

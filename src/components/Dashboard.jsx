@@ -4,7 +4,10 @@ import { formatCurrency } from '../utils/formatters';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import './Dashboard.css';
 
-const Dashboard = ({ balance, income, expense, transactions }) => {
+import { AlertTriangle, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const Dashboard = ({ balance, income, expense, transactions, budgets = {} }) => {
   // Aggregate data for pie chart
   const expensesByCategory = transactions
     .filter(t => t.type === 'expense')
@@ -20,8 +23,49 @@ const Dashboard = ({ balance, income, expense, transactions }) => {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+  // Calculate budget alerts
+  const budgetAlerts = [];
+  Object.entries(budgets).forEach(([category, limit]) => {
+    if (limit > 0) {
+      const spent = expensesByCategory[category] || 0;
+      const percentage = (spent / limit) * 100;
+      if (percentage >= 100) {
+        budgetAlerts.push({ category, type: 'danger', message: `Has superado tu presupuesto de ${category}` });
+      } else if (percentage >= 80) {
+        budgetAlerts.push({ category, type: 'warning', message: `Estás al ${percentage.toFixed(0)}% de tu presupuesto de ${category}` });
+      }
+    }
+  });
+
   return (
     <div className="dashboard animate-fade-in">
+      {budgetAlerts.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: 'var(--spacing-md)' }}>
+          {budgetAlerts.map((alert, idx) => (
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                padding: '12px 16px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                backgroundColor: alert.type === 'danger' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                border: `1px solid ${alert.type === 'danger' ? 'var(--danger)' : '#f59e0b'}`,
+                color: alert.type === 'danger' ? '#fca5a5' : '#fcd34d',
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }}
+            >
+              {alert.type === 'danger' ? <AlertTriangle size={18} /> : <Info size={18} />}
+              {alert.message}
+            </motion.div>
+          ))}
+        </div>
+      )}
+
       <div className="balance-card glass-panel">
         <div className="balance-header">
           <span className="text-secondary">Balance Total</span>

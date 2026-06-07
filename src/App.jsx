@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTransactions } from './hooks/useTransactions';
+import { useBudgets } from './hooks/useBudgets';
 import { useTheme } from './hooks/useTheme';
 import { useUser } from './hooks/useUser';
 import Layout from './components/Layout';
@@ -21,7 +22,8 @@ function App() {
 
   const { theme, toggleTheme } = useTheme();
   const { user, loading, userName, clearUser } = useUser();
-  const { transactions, allTransactions, addTransaction, deleteTransaction, totalIncome, totalExpense, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
+  const { transactions, allTransactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
+  const { budgets, updateBudget } = useBudgets(user?.uid);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
@@ -107,16 +109,24 @@ function App() {
             income={totalIncome} 
             expense={totalExpense} 
             transactions={transactions} 
+            budgets={budgets}
           />
           <TransactionList 
             transactions={transactions} 
             onDelete={deleteTransaction} 
+            onEdit={(t) => { setModalInitialData(t); setIsModalOpen(true); }}
           />
         </>
       )}
 
       {activeTab === 'reports' && (
-        <Reports transactions={transactions} allTransactions={allTransactions} uid={user?.uid} />
+        <Reports 
+          transactions={transactions} 
+          allTransactions={allTransactions} 
+          uid={user?.uid} 
+          budgets={budgets} 
+          updateBudget={updateBudget} 
+        />
       )}
 
       {activeTab === 'profile' && (
@@ -140,6 +150,7 @@ function App() {
         initialData={modalInitialData}
         onClose={() => setIsModalOpen(false)} 
         onAdd={addTransaction} 
+        onEdit={updateTransaction}
       />
     </Layout>
   );
