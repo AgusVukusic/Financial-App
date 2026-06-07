@@ -130,5 +130,14 @@ export const useGroupDetails = (groupId) => {
     }
   };
 
-  return { group, expenses, addSharedExpense, deleteSharedExpense };
+  const deleteGroup = async () => {
+    if (!groupId) return;
+    try {
+      await deleteDoc(doc(db, 'groups', groupId));
+    } catch (error) {
+      console.error("Error deleting group: ", error);
+    }
+  };
+
+  return { group, expenses, addSharedExpense, deleteSharedExpense, deleteGroup };
 };

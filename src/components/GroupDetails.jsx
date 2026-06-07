@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useGroupDetails } from '../hooks/useGroups';
-import { ArrowLeft, User, DollarSign, Plus } from 'lucide-react';
+import { ArrowLeft, User, DollarSign, Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import { motion } from 'framer-motion';
 
 const GroupDetails = ({ groupId, onBack, uid, userName }) => {
-  const { group, expenses, addSharedExpense, deleteSharedExpense } = useGroupDetails(groupId);
+  const { group, expenses, addSharedExpense, deleteSharedExpense, deleteGroup } = useGroupDetails(groupId);
   const [isAdding, setIsAdding] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -104,11 +104,23 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     if (creditor.amount < 0.01) j++;
   }
 
+  const handleDeleteGroup = async () => {
+    if (window.confirm("¿Estás seguro de que quieres eliminar este grupo de forma definitiva?")) {
+      await deleteGroup();
+      onBack();
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="group-details-container" style={{ padding: 'var(--spacing-md) 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}><ArrowLeft size={24} /></button>
-        <h2 style={{ margin: 0 }}>{group.name}</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-lg)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}><ArrowLeft size={24} /></button>
+          <h2 style={{ margin: 0 }}>{group.name}</h2>
+        </div>
+        <button onClick={handleDeleteGroup} style={{ background: 'var(--danger-bg)', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}>
+          <Trash2 size={20} />
+        </button>
       </div>
 
       <div className="glass-panel" style={{ padding: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
