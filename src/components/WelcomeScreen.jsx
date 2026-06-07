@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const WelcomeScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -16,11 +16,13 @@ const WelcomeScreen = () => {
     setError('');
     setLoading(true);
 
+    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@financialapp.local`;
+
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, fakeEmail, password);
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, password);
         await updateProfile(userCredential.user, { displayName: name });
         // Trigger a reload or state update to reflect the display name if needed
         window.location.reload(); 
@@ -28,9 +30,9 @@ const WelcomeScreen = () => {
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Email o contraseña incorrectos.');
+        setError('Usuario o contraseña incorrectos.');
       } else if (err.code === 'auth/email-already-in-use') {
-        setError('El email ya está registrado.');
+        setError('El usuario ya está registrado.');
       } else if (err.code === 'auth/weak-password') {
         setError('La contraseña debe tener al menos 6 caracteres.');
       } else {
@@ -99,10 +101,10 @@ const WelcomeScreen = () => {
           </AnimatePresence>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Email</label>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Usuario</label>
             <input 
-              type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
-              placeholder="tu@email.com" required
+              type="text" value={username} onChange={(e) => setUsername(e.target.value)} 
+              placeholder="juan123" required
               style={{
                 padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
                 background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
