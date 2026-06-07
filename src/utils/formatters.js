@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-AR', {
@@ -62,7 +62,7 @@ export const exportToPDF = (transactions) => {
     tableRows.push(transactionData);
   });
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
     startY: 30,
