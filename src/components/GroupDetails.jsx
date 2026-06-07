@@ -3,9 +3,11 @@ import { useGroupDetails } from '../hooks/useGroups';
 import { ArrowLeft, User, DollarSign, Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import { motion } from 'framer-motion';
+import { useDialog } from '../contexts/DialogContext';
 
 const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   const { group, expenses, addSharedExpense, deleteSharedExpense, deleteGroup } = useGroupDetails(groupId);
+  const { confirm, alert } = useDialog();
   const [isAdding, setIsAdding] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -37,7 +39,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
       splits = customSplits;
       const totalCustom = Object.values(splits).reduce((a, b) => a + b, 0);
       if (Math.abs(totalCustom - totalAmount) > 0.01) {
-        alert('La suma de las partes no coincide con el total.');
+        await alert('La suma de las partes no coincide con el total.');
         return;
       }
     }
@@ -105,7 +107,8 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   }
 
   const handleDeleteGroup = async () => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este grupo de forma definitiva?")) {
+    const isConfirmed = await confirm("¿Estás seguro de que quieres eliminar este grupo de forma definitiva?");
+    if (isConfirmed) {
       await deleteGroup();
       onBack();
     }
@@ -238,7 +241,10 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                   </div>
                   {(exp.paidBy === uid) && (
                     <button 
-                      onClick={() => { if(window.confirm('¿Eliminar este gasto compartido?')) deleteSharedExpense(exp.id); }}
+                      onClick={async () => { 
+                        const isConfirmed = await confirm('¿Eliminar este gasto compartido?');
+                        if (isConfirmed) deleteSharedExpense(exp.id); 
+                      }}
                       style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
                       title="Eliminar gasto"
                     >

@@ -3,14 +3,17 @@ import { User, Settings, Trash2, Shield, PlusCircle, CreditCard, FileText, Zap }
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { formatCurrency, exportToPDF } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDialog } from '../contexts/DialogContext';
 
 const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, onAddTransaction, allTransactions }) => {
   const { subscriptions, addSubscription, deleteSubscription } = useSubscriptions(uid);
+  const { confirm, alert } = useDialog();
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [subForm, setSubForm] = useState({ description: '', amount: '', category: 'Servicios' });
 
-  const handleClearData = () => {
-    if (window.confirm("¿Estás seguro de que deseas cerrar sesión? (Tus datos en la nube no se borrarán)")) {
+  const handleClearData = async () => {
+    const isConfirmed = await confirm("¿Estás seguro de que deseas cerrar sesión? (Tus datos en la nube no se borrarán)");
+    if (isConfirmed) {
       onClearData();
     }
   };
@@ -28,12 +31,13 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
     setSubForm({ description: '', amount: '', category: 'Servicios' });
   };
 
-  const handleExecuteSubscriptions = () => {
+  const handleExecuteSubscriptions = async () => {
     if (subscriptions.length === 0) {
-      alert('No tienes cobros fijos configurados.');
+      await alert('No tienes cobros fijos configurados.');
       return;
     }
-    if (window.confirm(`¿Ejecutar ${subscriptions.length} cobros fijos ahora? Esto añadirá los gastos a tus transacciones del mes.`)) {
+    const isConfirmed = await confirm(`¿Ejecutar ${subscriptions.length} cobros fijos ahora? Esto añadirá los gastos a tus transacciones del mes.`);
+    if (isConfirmed) {
       subscriptions.forEach(sub => {
         onAddTransaction({
           description: sub.description,
@@ -42,7 +46,7 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
           type: 'expense'
         });
       });
-      alert('Cobros fijos ejecutados correctamente.');
+      await alert('Cobros fijos ejecutados correctamente.');
     }
   };
 
