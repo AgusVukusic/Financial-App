@@ -122,6 +122,18 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   const handleSettleDebt = async (settlement) => {
     const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
     if (isConfirmed) {
+      const settledExpensesToSave = [];
+      expenses.forEach((exp) => {
+        if (!exp.isSettlement) {
+          if (exp.paidBy === settlement.toUid && exp.splits[settlement.fromUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.fromUid])) {
+            settledExpensesToSave.push({ expId: exp.id, uidToSettle: settlement.fromUid });
+          }
+          if (exp.paidBy === settlement.fromUid && exp.splits[settlement.toUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.toUid])) {
+            settledExpensesToSave.push({ expId: exp.id, uidToSettle: settlement.toUid });
+          }
+        }
+      });
+
       await addSharedExpense({
         description: "Liquidación de deuda",
         incomeDescription: `Pago de deuda de ${settlement.from}`,
@@ -132,7 +144,8 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
         isSettlement: true,
         splits: {
           [settlement.toUid]: settlement.amount
-        }
+        },
+        settledExpenses: settledExpensesToSave
       });
 
       expenses.forEach(async (exp) => {
@@ -336,7 +349,8 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                               isSettlement: true,
                               splits: {
                                 [exp.paidBy]: mySplit
-                              }
+                              },
+                              settledExpenses: [{ expId: exp.id, uidToSettle: uid }]
                             });
                             await updateSharedExpense(exp.id, {
                               settledSplits: {

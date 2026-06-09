@@ -52,21 +52,27 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
                 <div className="transaction-footer">
                   <span className="transaction-date">{formatDate(transaction.date)}</span>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      className="edit-btn" 
-                      onClick={() => onEdit && onEdit(transaction)}
-                      aria-label="Editar transacción"
-                      style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '4px' }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                    </button>
-                    <button 
-                      className="delete-btn" 
-                      onClick={() => onDelete(transaction.id)}
-                      aria-label="Eliminar transacción"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {transaction.groupId ? (
+                      <span className="text-secondary" style={{ fontSize: '0.75rem', alignSelf: 'center', marginRight: '8px' }}>Gestionado en Grupo</span>
+                    ) : (
+                      <>
+                        <button 
+                          className="edit-btn" 
+                          onClick={() => onEdit && onEdit(transaction)}
+                          aria-label="Editar transacción"
+                          style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '4px' }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                        </button>
+                        <button 
+                          className="delete-btn" 
+                          onClick={() => onDelete(transaction.id)}
+                          aria-label="Eliminar transacción"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

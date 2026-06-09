@@ -169,7 +169,28 @@ export const useGroupDetails = (groupId) => {
   const deleteSharedExpense = async (expenseId) => {
     if (!groupId) return;
     try {
-      await deleteDoc(doc(db, `groups/${groupId}/expenses`, expenseId));
+      const expenseDocRef = doc(db, `groups/${groupId}/expenses`, expenseId);
+      const expenseDoc = await getDoc(expenseDocRef);
+      
+      if (expenseDoc.exists()) {
+        const data = expenseDoc.data();
+        if (data.isSettlement && data.settledExpenses) {
+          for (const { expId, uidToSettle } of data.settledExpenses) {
+            const expToRevertRef = doc(db, `groups/${groupId}/expenses`, expId);
+            const expToRevertDoc = await getDoc(expToRevertRef);
+            if (expToRevertDoc.exists()) {
+              const currentSettledSplits = expToRevertDoc.data().settledSplits || {};
+              const newSettledSplits = { ...currentSettledSplits };
+              delete newSettledSplits[uidToSettle];
+              await updateDoc(expToRevertRef, {
+                settledSplits: newSettledSplits
+              });
+            }
+          }
+        }
+      }
+
+      await deleteDoc(expenseDocRef);
       
       const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
       const querySnapshot = await getDocs(q);
