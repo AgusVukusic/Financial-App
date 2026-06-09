@@ -63,17 +63,26 @@
 .transaction-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .transaction-title {
   font-weight: 500;
   font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .transaction-amount {
   font-weight: 600;
   font-size: 0.95rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .transaction-footer {
