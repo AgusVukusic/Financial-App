@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { useGroupDetails } from '../hooks/useGroups';
-import { ArrowLeft, User, DollarSign, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, Plus, Trash2, Edit2 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import { motion } from 'framer-motion';
 import { useDialog } from '../contexts/DialogContext';
+import { calculateSettlements } from '../utils/settlementAlgorithm';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Select from './ui/Select';
+import Card from './ui/Card';
 
 const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   const { group, expenses, addSharedExpense, updateSharedExpense, deleteSharedExpense, deleteGroup } = useGroupDetails(groupId);
@@ -60,64 +65,20 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
       await addSharedExpense(expenseData);
     }
 
+    resetForm();
+  };
+
+  const resetForm = () => {
     setIsAdding(false);
     setEditingExpenseId(null);
     setDescription('');
     setAmount('');
     setCategory('Comida');
     setCustomSplits({});
+    setSplitMethod('equal');
   };
 
-  // Calculate Balances
-  const balances = {}; // uid -> amount (positive means they are owed money, negative means they owe money)
-  group.members.forEach(m => { balances[m.uid] = 0; });
-
-  expenses.forEach(exp => {
-    if (balances[exp.paidBy] !== undefined) {
-      balances[exp.paidBy] += exp.amount;
-    }
-    
-    Object.entries(exp.splits).forEach(([memberUid, splitAmount]) => {
-      if (balances[memberUid] !== undefined) {
-        balances[memberUid] -= splitAmount;
-      }
-    });
-  });
-
-  // Settlement Algorithm (Who owes whom)
-  const settlements = [];
-  const debtors = [];
-  const creditors = [];
-
-  Object.entries(balances).forEach(([mUid, bal]) => {
-    if (bal < -0.01) debtors.push({ uid: mUid, amount: Math.abs(bal) });
-    else if (bal > 0.01) creditors.push({ uid: mUid, amount: bal });
-  });
-
-  debtors.sort((a, b) => b.amount - a.amount);
-  creditors.sort((a, b) => b.amount - a.amount);
-
-  let i = 0, j = 0;
-  while (i < debtors.length && j < creditors.length) {
-    const debtor = debtors[i];
-    const creditor = creditors[j];
-    
-    const amount = Math.min(debtor.amount, creditor.amount);
-    
-    settlements.push({
-      fromUid: debtor.uid,
-      toUid: creditor.uid,
-      from: group.members.find(m => m.uid === debtor.uid)?.name,
-      to: group.members.find(m => m.uid === creditor.uid)?.name,
-      amount
-    });
-
-    debtor.amount -= amount;
-    creditor.amount -= amount;
-
-    if (debtor.amount < 0.01) i++;
-    if (creditor.amount < 0.01) j++;
-  }
+  const { balances, settlements } = calculateSettlements(group.members, expenses);
 
   const handleSettleDebt = async (settlement) => {
     const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
@@ -180,26 +141,26 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="group-details-container" style={{ padding: 'var(--spacing-md) 0' }}>
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ padding: 'var(--spacing-md) 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}><ArrowLeft size={24} /></button>
+          <Button variant="ghost" isIcon onClick={onBack}><ArrowLeft size={24} /></Button>
           <h2 style={{ margin: 0 }}>{group.name}</h2>
         </div>
-        <button onClick={handleDeleteGroup} style={{ background: 'var(--danger-bg)', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}>
+        <Button variant="danger" isIcon onClick={handleDeleteGroup}>
           <Trash2 size={20} />
-        </button>
+        </Button>
       </div>
 
-      <div className="glass-panel" style={{ padding: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Card style={{ marginBottom: 'var(--spacing-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span className="text-secondary" style={{ fontSize: '0.85rem' }}>Código de Invitación:</span>
           <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px', color: 'var(--accent-primary)' }}>{group.inviteCode}</div>
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
-        <div className="glass-panel" style={{ padding: 'var(--spacing-md)' }}>
+        <Card>
           <h3 style={{ fontSize: '1rem', marginBottom: 'var(--spacing-md)' }}>Balances</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {group.members.map(m => {
@@ -216,9 +177,9 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
               );
             })}
           </div>
-        </div>
+        </Card>
         
-        <div className="glass-panel" style={{ padding: 'var(--spacing-md)' }}>
+        <Card>
           <h3 style={{ fontSize: '1rem', marginBottom: 'var(--spacing-md)' }}>Miembros</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {group.members.map(m => (
@@ -228,10 +189,10 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div className="glass-panel" style={{ padding: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+      <Card style={{ marginBottom: 'var(--spacing-lg)' }}>
         <h3 style={{ fontSize: '1rem', marginBottom: 'var(--spacing-md)' }}>¿Quién debe a quién?</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {settlements.length === 0 ? (
@@ -243,69 +204,65 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{formatCurrency(s.amount)}</span>
                   {s.fromUid === uid && (
-                    <button 
-                      onClick={() => handleSettleDebt(s)}
-                      style={{ background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
-                    >
+                    <Button variant="success" size="sm" onClick={() => handleSettleDebt(s)}>
                       Saldar
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
         <h3>Gastos Compartidos</h3>
-        <button onClick={() => {
-          setEditingExpenseId(null);
-          setDescription('');
-          setAmount('');
-          setCategory('Comida');
-          setCustomSplits({});
-          setSplitMethod('equal');
-          setIsAdding(!isAdding);
-        }} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}><Plus size={20} /></button>
+        <Button isIcon onClick={() => {
+          resetForm();
+          setIsAdding(true);
+        }}>
+          <Plus size={20} />
+        </Button>
       </div>
 
       {isAdding && (
-        <motion.form initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleAddExpense} className="glass-panel" style={{ padding: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-          <input type="text" placeholder="Descripción del gasto" value={description} onChange={(e) => setDescription(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
-          <input type="number" placeholder="Monto Total" value={amount} onChange={(e) => setAmount(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
-          
-          <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
-            <option value="Comida">Comida</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Compras">Compras</option>
-            <option value="Otros">Otros</option>
-          </select>
-          
-          <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
-              <input type="radio" checked={splitMethod === 'equal'} onChange={() => setSplitMethod('equal')} /> Dividir en partes iguales
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
-              <input type="radio" checked={splitMethod === 'custom'} onChange={() => setSplitMethod('custom')} /> Personalizado
-            </label>
-          </div>
-
-          {splitMethod === 'custom' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', padding: '8px', backgroundColor: 'var(--bg-base)', borderRadius: '4px' }}>
-              {group.members.map(m => (
-                <div key={m.uid} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem' }}>{m.name} paga:</span>
-                  <input type="number" value={customSplits[m.uid] || ''} onChange={(e) => handleCustomSplitChange(m.uid, e.target.value)} placeholder="0.00" style={{ width: '100px', padding: '4px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
-                </div>
-              ))}
+        <motion.form initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleAddExpense} style={{ marginBottom: 'var(--spacing-md)' }}>
+          <Card style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+            <Input type="text" placeholder="Descripción del gasto" value={description} onChange={(e) => setDescription(e.target.value)} required fullWidth />
+            <Input type="number" placeholder="Monto Total" value={amount} onChange={(e) => setAmount(e.target.value)} required fullWidth />
+            
+            <Select value={category} onChange={(e) => setCategory(e.target.value)} fullWidth>
+              <option value="Comida">Comida</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Compras">Compras</option>
+              <option value="Otros">Otros</option>
+            </Select>
+            
+            <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+                <input type="radio" checked={splitMethod === 'equal'} onChange={() => setSplitMethod('equal')} /> Dividir en partes iguales
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+                <input type="radio" checked={splitMethod === 'custom'} onChange={() => setSplitMethod('custom')} /> Personalizado
+              </label>
             </div>
-          )}
 
-          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-            <button type="submit" style={{ flex: 1, background: 'var(--accent-primary)', color: 'white', padding: '8px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>Guardar</button>
-            <button type="button" onClick={() => setIsAdding(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', cursor: 'pointer' }}>Cancelar</button>
-          </div>
+            {splitMethod === 'custom' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', padding: '8px', backgroundColor: 'var(--bg-base)', borderRadius: '4px' }}>
+                {group.members.map(m => (
+                  <div key={m.uid} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem' }}>{m.name} paga:</span>
+                    <Input type="number" value={customSplits[m.uid] || ''} onChange={(e) => handleCustomSplitChange(m.uid, e.target.value)} placeholder="0.00" style={{ width: '100px' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <Button type="submit" style={{ flex: 1 }}>Guardar</Button>
+              <Button variant="outline" type="button" onClick={resetForm}>Cancelar</Button>
+            </div>
+          </Card>
         </motion.form>
       )}
 
@@ -319,7 +276,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
             const receiver = receiverUid ? group.members.find(m => m.uid === receiverUid) : null;
             const mySplit = exp.splits[uid] || 0;
             return (
-              <div key={exp.id} className="glass-panel" style={{ padding: 'var(--spacing-sm) var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Card key={exp.id} style={{ padding: 'var(--spacing-sm) var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: '500' }}>{exp.description}</div>
                   {exp.isSettlement ? (
@@ -335,7 +292,9 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                       {mySplit > 0 && (exp.isSettlement ? `Recibiste: ${formatCurrency(mySplit)}` : `Te toca: ${formatCurrency(mySplit)}`)}
                     </div>
                     {mySplit > 0 && exp.paidBy !== uid && !(exp.settledSplits && exp.settledSplits[uid]) && !exp.isSettlement && (
-                      <button 
+                      <Button 
+                        variant="success"
+                        size="sm"
                         onClick={async () => {
                           const isConfirmed = await confirm(`¿Pagar tu parte de ${formatCurrency(mySplit)} a ${payer?.name}?`);
                           if (isConfirmed) {
@@ -360,10 +319,10 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                             });
                           }
                         }}
-                        style={{ marginTop: '4px', background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+                        style={{ marginTop: '4px' }}
                       >
                         Saldar mi parte
-                      </button>
+                      </Button>
                     )}
                     {mySplit > 0 && exp.paidBy !== uid && exp.settledSplits && exp.settledSplits[uid] && (
                        <span style={{ fontSize: '0.75rem', color: 'var(--success)', display: 'block', marginTop: '4px' }}>✓ Parte pagada</span>
@@ -371,7 +330,10 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                   </div>
                   {(exp.paidBy === uid) && (
                     <div style={{ display: 'flex', gap: '4px' }}>
-                      <button 
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        isIcon
                         onClick={() => {
                           setEditingExpenseId(exp.id);
                           setDescription(exp.description);
@@ -381,25 +343,26 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                           setCustomSplits(exp.splits);
                           setIsAdding(true);
                         }}
-                        style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '4px' }}
                         title="Editar gasto"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                      </button>
-                      <button 
+                        <Edit2 size={16} color="var(--accent-primary)" />
+                      </Button>
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        isIcon
                         onClick={async () => { 
                           const isConfirmed = await confirm('¿Eliminar este gasto compartido?');
                           if (isConfirmed) deleteSharedExpense(exp.id); 
                         }}
-                        style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
                         title="Eliminar gasto"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                      </button>
+                        <Trash2 size={16} color="var(--danger)" />
+                      </Button>
                     </div>
                   )}
                 </div>
-              </div>
+              </Card>
             );
           })
         )}

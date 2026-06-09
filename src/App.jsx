@@ -12,7 +12,9 @@ import Profile from './components/Profile';
 import Groups from './components/Groups';
 import WelcomeScreen from './components/WelcomeScreen';
 import { exportToCSV } from './utils/formatters';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
+import Card from './components/ui/Card';
+import Button from './components/ui/Button';
 import './App.css';
 
 function App() {
@@ -89,17 +91,17 @@ function App() {
           </p>
         </div>
         
-        <button onClick={toggleTheme} className="theme-toggle" style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '8px' }}>
+        <Button variant="ghost" isIcon onClick={toggleTheme} className="theme-toggle">
           {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
-        </button>
+        </Button>
       </header>
 
       {(activeTab === 'home' || activeTab === 'reports') && (
-        <div className="date-filter glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-sm) var(--spacing-md)', marginBottom: 'var(--spacing-md)', borderRadius: 'var(--radius-full)' }}>
-          <button onClick={() => handleMonthChange(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>&larr;</button>
+        <Card noPadding style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-sm) var(--spacing-md)', marginBottom: 'var(--spacing-md)', borderRadius: 'var(--radius-full)' }}>
+          <Button variant="ghost" isIcon onClick={() => handleMonthChange(-1)}><ChevronLeft size={20} /></Button>
           <span style={{ fontWeight: '500' }}>{monthNames[selectedMonth]} {selectedYear}</span>
-          <button onClick={() => handleMonthChange(1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>&rarr;</button>
-        </div>
+          <Button variant="ghost" isIcon onClick={() => handleMonthChange(1)}><ChevronRight size={20} /></Button>
+        </Card>
       )}
 
       {activeTab === 'home' && (

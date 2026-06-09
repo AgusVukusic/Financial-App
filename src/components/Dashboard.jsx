@@ -6,6 +6,7 @@ import './Dashboard.css';
 
 import { AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Card from './ui/Card';
 
 const Dashboard = ({ balance, income, expense, transactions, budgets = {} }) => {
   // Aggregate data for pie chart
@@ -66,7 +67,7 @@ const Dashboard = ({ balance, income, expense, transactions, budgets = {} }) => 
         </div>
       )}
 
-      <div className="balance-card glass-panel">
+      <Card className="balance-card">
         <div className="balance-header">
           <span className="text-secondary">Balance Total</span>
           <Wallet size={20} className="text-secondary" />
@@ -94,10 +95,10 @@ const Dashboard = ({ balance, income, expense, transactions, budgets = {} }) => 
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {chartData.length > 0 && (
-        <div className="chart-container glass-panel animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <Card className="chart-container animate-slide-up" style={{ animationDelay: '0.1s' }}>
           <h3 className="chart-title">Gastos por Categoría</h3>
           <div className="chart-wrapper">
             <ResponsiveContainer width="100%" height={200}>
@@ -122,7 +123,7 @@ const Dashboard = ({ balance, income, expense, transactions, budgets = {} }) => 
               </PieChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

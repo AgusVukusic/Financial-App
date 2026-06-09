@@ -2,6 +2,9 @@ import React from 'react';
 import { Coffee, ShoppingBag, Home, Car, Zap, DollarSign, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Edit2 } from 'lucide-react';
+import Card from './ui/Card';
+import Button from './ui/Button';
 import './TransactionList.css';
 
 const categoryIcons = {
@@ -28,19 +31,20 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
       <div className="transaction-list">
         <AnimatePresence>
           {transactions.map((transaction) => (
-            <motion.div 
-              key={transaction.id} 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95, x: -20 }}
-              layout
-              className="transaction-item glass-panel"
-            >
-              <div className="transaction-icon-wrapper">
-                <div className={`transaction-icon ${transaction.type}`}>
-                  {categoryIcons[transaction.category] || <DollarSign size={20} />}
+            <Card key={transaction.id} noPadding>
+              <motion.div 
+                className="transaction-item"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95, x: -20 }}
+                layout
+                style={{ width: '100%' }}
+              >
+                <div className="transaction-icon-wrapper">
+                  <div className={`transaction-icon ${transaction.type}`}>
+                    {categoryIcons[transaction.category] || <DollarSign size={20} />}
+                  </div>
                 </div>
-              </div>
               
               <div className="transaction-details">
                 <div className="transaction-header">
@@ -56,27 +60,31 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
                       <span className="text-secondary" style={{ fontSize: '0.75rem', alignSelf: 'center', marginRight: '8px' }}>Gestionado en Grupo</span>
                     ) : (
                       <>
-                        <button 
-                          className="edit-btn" 
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          isIcon
                           onClick={() => onEdit && onEdit(transaction)}
                           aria-label="Editar transacción"
-                          style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '4px' }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                        </button>
-                        <button 
-                          className="delete-btn" 
+                          <Edit2 size={16} color="var(--accent-primary)" />
+                        </Button>
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          isIcon
                           onClick={() => onDelete(transaction.id)}
                           aria-label="Eliminar transacción"
                         >
-                          <Trash2 size={14} />
-                        </button>
+                          <Trash2 size={16} color="var(--danger)" />
+                        </Button>
                       </>
                     )}
                   </div>
                 </div>
               </div>
-            </motion.div>
+              </motion.div>
+            </Card>
           ))}
         </AnimatePresence>
       </div>
