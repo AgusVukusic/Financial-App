@@ -194,9 +194,11 @@ export const useGroupDetails = (groupId) => {
       
       const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
       const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(async (docSnap) => {
-        await deleteDoc(docSnap.ref);
+      const deletePromises = [];
+      querySnapshot.forEach((docSnap) => {
+        deletePromises.push(deleteDoc(docSnap.ref));
       });
+      await Promise.all(deletePromises);
     } catch (error) {
       console.error("Error deleting shared expense: ", error);
     }
@@ -214,22 +216,35 @@ export const useGroupDetails = (groupId) => {
   const updateSharedExpense = async (expenseId, updatedData) => {
     if (!groupId) return;
     try {
-      await updateDoc(doc(db, `groups/${groupId}/expenses`, expenseId), updatedData);
+      const expenseDocRef = doc(db, `groups/${groupId}/expenses`, expenseId);
+      const expenseDoc = await getDoc(expenseDocRef);
+      const isSettlement = expenseDoc.exists() ? expenseDoc.data().isSettlement : false;
 
-      if (updatedData.amount !== undefined && !updatedData.isSettlement) {
+      await updateDoc(expenseDocRef, updatedData);
+
+      if (updatedData.amount !== undefined) {
         const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (docSnap) => {
-          // Update only if it's the payer's expense transaction
-          if (docSnap.data().type === 'expense') {
-            await updateDoc(docSnap.ref, {
-              amount: updatedData.amount,
-              description: `Gasto de grupo: ${updatedData.description}`,
-              category: updatedData.category || 'Comida',
-              userId: updatedData.paidBy
-            });
+        const updatePromises = [];
+        
+        querySnapshot.forEach((docSnap) => {
+          const txData = docSnap.data();
+          if (isSettlement) {
+            updatePromises.push(updateDoc(docSnap.ref, {
+              amount: updatedData.amount
+            }));
+          } else {
+            if (txData.type === 'expense') {
+              updatePromises.push(updateDoc(docSnap.ref, {
+                amount: updatedData.amount,
+                description: updatedData.description ? `Gasto de grupo: ${updatedData.description}` : txData.description,
+                category: updatedData.category || txData.category,
+                userId: updatedData.paidBy || txData.userId
+              }));
+            }
           }
         });
+        await Promise.all(updatePromises);
       }
     } catch (error) {
       console.error("Error updating shared expense: ", error);
