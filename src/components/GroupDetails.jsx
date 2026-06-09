@@ -122,7 +122,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   const handleSettleDebt = async (settlement) => {
     const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
     if (isConfirmed) {
-      await addSharedExpense({
+      const settlementId = await addSharedExpense({
         description: "Liquidación de deuda",
         incomeDescription: `Pago de deuda de ${settlement.from}`,
         expenseDescription: `Pago a ${settlement.to} por deuda compartida`,
@@ -135,13 +135,15 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
         }
       });
 
+      if (!settlementId) return;
+
       expenses.forEach(async (exp) => {
         if (!exp.isSettlement) {
           if (exp.paidBy === settlement.toUid && exp.splits[settlement.fromUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.fromUid])) {
             await updateSharedExpense(exp.id, {
               settledSplits: {
                 ...(exp.settledSplits || {}),
-                [settlement.fromUid]: true
+                [settlement.fromUid]: settlementId
               }
             });
           }
@@ -149,7 +151,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
             await updateSharedExpense(exp.id, {
               settledSplits: {
                 ...(exp.settledSplits || {}),
-                [settlement.toUid]: true
+                [settlement.toUid]: settlementId
               }
             });
           }
@@ -326,7 +328,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                         onClick={async () => {
                           const isConfirmed = await confirm(`¿Pagar tu parte de ${formatCurrency(mySplit)} a ${payer?.name}?`);
                           if (isConfirmed) {
-                            await addSharedExpense({
+                            const settlementId = await addSharedExpense({
                               description: `Pago por: ${exp.description}`,
                               incomeDescription: `${userName} pagó su parte de: ${exp.description}`,
                               expenseDescription: `Pago a ${payer?.name} por ${exp.description}`,
@@ -338,12 +340,14 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                                 [exp.paidBy]: mySplit
                               }
                             });
-                            await updateSharedExpense(exp.id, {
-                              settledSplits: {
-                                ...(exp.settledSplits || {}),
-                                [uid]: true
-                              }
-                            });
+                            if (settlementId) {
+                              await updateSharedExpense(exp.id, {
+                                settledSplits: {
+                                  ...(exp.settledSplits || {}),
+                                  [uid]: settlementId
+                                }
+                              });
+                            }
                           }
                         }}
                         style={{ marginTop: '4px', background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
