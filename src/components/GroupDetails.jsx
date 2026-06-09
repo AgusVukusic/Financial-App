@@ -12,6 +12,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('Gastos Generales');
   const [splitMethod, setSplitMethod] = useState('equal'); // 'equal' | 'custom'
   const [customSplits, setCustomSplits] = useState({});
 
@@ -49,7 +50,8 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
       description,
       amount: totalAmount,
       paidBy: uid,
-      splits
+      splits,
+      category
     };
 
     if (editingExpenseId) {
@@ -62,6 +64,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     setEditingExpenseId(null);
     setDescription('');
     setAmount('');
+    setCategory('Gastos Generales');
     setCustomSplits({});
   };
 
@@ -120,9 +123,11 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
     if (isConfirmed) {
       await addSharedExpense({
-        description: "Liquidación de deuda",
+        description: `Liquidación de deuda a ${settlement.to}`,
+        incomeDescription: `Pago de deuda de ${settlement.from}`,
         amount: settlement.amount,
         paidBy: settlement.fromUid,
+        isSettlement: true,
         splits: {
           [settlement.toUid]: settlement.amount
         }
@@ -220,6 +225,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
           setEditingExpenseId(null);
           setDescription('');
           setAmount('');
+          setCategory('Gastos Generales');
           setCustomSplits({});
           setSplitMethod('equal');
           setIsAdding(!isAdding);
@@ -230,6 +236,16 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
         <motion.form initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleAddExpense} className="glass-panel" style={{ padding: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
           <input type="text" placeholder="Descripción del gasto" value={description} onChange={(e) => setDescription(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
           <input type="number" placeholder="Monto Total" value={amount} onChange={(e) => setAmount(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
+          
+          <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+            <option value="Gastos Generales">Gastos Generales</option>
+            <option value="Comida">Comida</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Entretenimiento">Entretenimiento</option>
+            <option value="Hogar">Hogar</option>
+            <option value="Viajes">Viajes</option>
+            <option value="Otros">Otros</option>
+          </select>
           
           <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
@@ -269,7 +285,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
               <div key={exp.id} className="glass-panel" style={{ padding: 'var(--spacing-sm) var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: '500' }}>{exp.description}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pagado por {payer?.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pagado por {payer?.name} {exp.category && `• ${exp.category}`}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ textAlign: 'right' }}>
@@ -277,6 +293,37 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                     <div style={{ fontSize: '0.8rem', color: mySplit > 0 ? 'var(--danger)' : 'var(--text-secondary)' }}>
                       {mySplit > 0 && `Te toca: ${formatCurrency(mySplit)}`}
                     </div>
+                    {mySplit > 0 && exp.paidBy !== uid && !(exp.settledSplits && exp.settledSplits[uid]) && !exp.isSettlement && (
+                      <button 
+                        onClick={async () => {
+                          const isConfirmed = await confirm(`¿Pagar tu parte de ${formatCurrency(mySplit)} a ${payer?.name}?`);
+                          if (isConfirmed) {
+                            await addSharedExpense({
+                              description: `Pago por: ${exp.description}`,
+                              incomeDescription: `${userName} pagó su parte de: ${exp.description}`,
+                              amount: mySplit,
+                              paidBy: uid,
+                              isSettlement: true,
+                              splits: {
+                                [exp.paidBy]: mySplit
+                              }
+                            });
+                            await updateSharedExpense(exp.id, {
+                              settledSplits: {
+                                ...(exp.settledSplits || {}),
+                                [uid]: true
+                              }
+                            });
+                          }
+                        }}
+                        style={{ marginTop: '4px', background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+                      >
+                        Saldar mi parte
+                      </button>
+                    )}
+                    {mySplit > 0 && exp.paidBy !== uid && exp.settledSplits && exp.settledSplits[uid] && (
+                       <span style={{ fontSize: '0.75rem', color: 'var(--success)', display: 'block', marginTop: '4px' }}>✓ Parte pagada</span>
+                    )}
                   </div>
                   {(exp.paidBy === uid) && (
                     <div style={{ display: 'flex', gap: '4px' }}>
@@ -285,6 +332,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                           setEditingExpenseId(exp.id);
                           setDescription(exp.description);
                           setAmount(exp.amount.toString());
+                          setCategory(exp.category || 'Gastos Generales');
                           setSplitMethod('custom');
                           setCustomSplits(exp.splits);
                           setIsAdding(true);

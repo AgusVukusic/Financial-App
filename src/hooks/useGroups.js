@@ -112,10 +112,55 @@ export const useGroupDetails = (groupId) => {
   const addSharedExpense = async (expenseData) => {
     if (!groupId) return;
     try {
-      await addDoc(collection(db, `groups/${groupId}/expenses`), {
+      const docRef = await addDoc(collection(db, `groups/${groupId}/expenses`), {
         ...expenseData,
         createdAt: serverTimestamp()
       });
+
+      // Handle personal transactions
+      if (expenseData.isSettlement) {
+        // Create Expense for payer
+        await addDoc(collection(db, 'transactions'), {
+          type: 'expense',
+          amount: expenseData.amount,
+          description: expenseData.description,
+          category: 'Saldo de deuda',
+          userId: expenseData.paidBy,
+          groupExpenseId: docRef.id,
+          groupId: groupId,
+          date: new Date().toISOString(),
+          createdAt: serverTimestamp()
+        });
+
+        // Create Income for receiver
+        const receiverUid = Object.keys(expenseData.splits)[0];
+        if (receiverUid) {
+          await addDoc(collection(db, 'transactions'), {
+            type: 'income',
+            amount: expenseData.amount,
+            description: expenseData.incomeDescription || 'Ingreso por saldo de deuda',
+            category: 'Saldo de deuda',
+            userId: receiverUid,
+            groupExpenseId: docRef.id,
+            groupId: groupId,
+            date: new Date().toISOString(),
+            createdAt: serverTimestamp()
+          });
+        }
+      } else {
+        // Normal group expense
+        await addDoc(collection(db, 'transactions'), {
+          type: 'expense',
+          amount: expenseData.amount,
+          description: `Gasto de grupo: ${expenseData.description}`,
+          category: expenseData.category || 'Gastos Generales',
+          userId: expenseData.paidBy,
+          groupExpenseId: docRef.id,
+          groupId: groupId,
+          date: new Date().toISOString(),
+          createdAt: serverTimestamp()
+        });
+      }
     } catch (error) {
       console.error("Error adding shared expense: ", error);
     }
@@ -125,6 +170,12 @@ export const useGroupDetails = (groupId) => {
     if (!groupId) return;
     try {
       await deleteDoc(doc(db, `groups/${groupId}/expenses`, expenseId));
+      
+      const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (docSnap) => {
+        await deleteDoc(docSnap.ref);
+      });
     } catch (error) {
       console.error("Error deleting shared expense: ", error);
     }
@@ -143,6 +194,22 @@ export const useGroupDetails = (groupId) => {
     if (!groupId) return;
     try {
       await updateDoc(doc(db, `groups/${groupId}/expenses`, expenseId), updatedData);
+
+      if (updatedData.amount !== undefined && !updatedData.isSettlement) {
+        const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (docSnap) => {
+          // Update only if it's the payer's expense transaction
+          if (docSnap.data().type === 'expense') {
+            await updateDoc(docSnap.ref, {
+              amount: updatedData.amount,
+              description: `Gasto de grupo: ${updatedData.description}`,
+              category: updatedData.category || 'Gastos Generales',
+              userId: updatedData.paidBy
+            });
+          }
+        });
+      }
     } catch (error) {
       console.error("Error updating shared expense: ", error);
     }
