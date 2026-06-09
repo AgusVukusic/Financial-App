@@ -125,8 +125,10 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
       await addSharedExpense({
         description: `Liquidación de deuda a ${settlement.to}`,
         incomeDescription: `Pago de deuda de ${settlement.from}`,
+        expenseDescription: `Pago a ${settlement.to} por deuda compartida`,
         amount: settlement.amount,
         paidBy: settlement.fromUid,
+        receiverUid: settlement.toUid,
         isSettlement: true,
         splits: {
           [settlement.toUid]: settlement.amount
@@ -280,18 +282,24 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
         ) : (
           expenses.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis()).map(exp => {
             const payer = group.members.find(m => m.uid === exp.paidBy);
+            const receiverUid = exp.isSettlement ? (exp.receiverUid || Object.keys(exp.splits)[0]) : null;
+            const receiver = receiverUid ? group.members.find(m => m.uid === receiverUid) : null;
             const mySplit = exp.splits[uid] || 0;
             return (
               <div key={exp.id} className="glass-panel" style={{ padding: 'var(--spacing-sm) var(--spacing-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: '500' }}>{exp.description}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pagado por {payer?.name} {exp.category && `• ${exp.category}`}</div>
+                  {exp.isSettlement ? (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{payer?.name} pagó a {receiver?.name || 'alguien'}</div>
+                  ) : (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pagado por {payer?.name} {exp.category && `• ${exp.category}`}</div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontWeight: 'bold' }}>{formatCurrency(exp.amount)}</div>
-                    <div style={{ fontSize: '0.8rem', color: mySplit > 0 ? 'var(--danger)' : 'var(--text-secondary)' }}>
-                      {mySplit > 0 && `Te toca: ${formatCurrency(mySplit)}`}
+                    <div style={{ fontSize: '0.8rem', color: exp.isSettlement ? 'var(--success)' : (mySplit > 0 ? 'var(--danger)' : 'var(--text-secondary)') }}>
+                      {mySplit > 0 && (exp.isSettlement ? `Recibiste: ${formatCurrency(mySplit)}` : `Te toca: ${formatCurrency(mySplit)}`)}
                     </div>
                     {mySplit > 0 && exp.paidBy !== uid && !(exp.settledSplits && exp.settledSplits[uid]) && !exp.isSettlement && (
                       <button 
@@ -301,8 +309,10 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                             await addSharedExpense({
                               description: `Pago por: ${exp.description}`,
                               incomeDescription: `${userName} pagó su parte de: ${exp.description}`,
+                              expenseDescription: `Pago a ${payer?.name} por ${exp.description}`,
                               amount: mySplit,
                               paidBy: uid,
+                              receiverUid: exp.paidBy,
                               isSettlement: true,
                               splits: {
                                 [exp.paidBy]: mySplit

@@ -123,7 +123,7 @@ export const useGroupDetails = (groupId) => {
         await addDoc(collection(db, 'transactions'), {
           type: 'expense',
           amount: expenseData.amount,
-          description: expenseData.description,
+          description: expenseData.expenseDescription || expenseData.description,
           category: 'Saldo de deuda',
           userId: expenseData.paidBy,
           groupExpenseId: docRef.id,
@@ -133,7 +133,7 @@ export const useGroupDetails = (groupId) => {
         });
 
         // Create Income for receiver
-        const receiverUid = Object.keys(expenseData.splits)[0];
+        const receiverUid = expenseData.receiverUid || Object.keys(expenseData.splits)[0];
         if (receiverUid) {
           await addDoc(collection(db, 'transactions'), {
             type: 'income',
