@@ -161,36 +161,14 @@ export const useGroupDetails = (groupId) => {
           createdAt: serverTimestamp()
         });
       }
-
-      return docRef.id;
     } catch (error) {
       console.error("Error adding shared expense: ", error);
-      return null;
     }
   };
 
   const deleteSharedExpense = async (expenseId) => {
     if (!groupId) return;
     try {
-      const expenseToDelete = expenses.find(e => e.id === expenseId);
-      if (expenseToDelete && expenseToDelete.isSettlement) {
-        expenses.forEach(async (exp) => {
-          if (exp.settledSplits) {
-            let updated = false;
-            const newSettledSplits = { ...exp.settledSplits };
-            for (const [uid, val] of Object.entries(newSettledSplits)) {
-              if (val === expenseId || val === true) {
-                delete newSettledSplits[uid];
-                updated = true;
-              }
-            }
-            if (updated) {
-               await updateDoc(doc(db, `groups/${groupId}/expenses`, exp.id), { settledSplits: newSettledSplits });
-            }
-          }
-        });
-      }
-
       await deleteDoc(doc(db, `groups/${groupId}/expenses`, expenseId));
       
       const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
