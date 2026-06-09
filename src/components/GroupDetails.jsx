@@ -12,7 +12,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Gastos Generales');
+  const [category, setCategory] = useState('Comida');
   const [splitMethod, setSplitMethod] = useState('equal'); // 'equal' | 'custom'
   const [customSplits, setCustomSplits] = useState({});
 
@@ -64,7 +64,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     setEditingExpenseId(null);
     setDescription('');
     setAmount('');
-    setCategory('Gastos Generales');
+    setCategory('Comida');
     setCustomSplits({});
   };
 
@@ -132,6 +132,27 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
         isSettlement: true,
         splits: {
           [settlement.toUid]: settlement.amount
+        }
+      });
+
+      expenses.forEach(async (exp) => {
+        if (!exp.isSettlement) {
+          if (exp.paidBy === settlement.toUid && exp.splits[settlement.fromUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.fromUid])) {
+            await updateSharedExpense(exp.id, {
+              settledSplits: {
+                ...(exp.settledSplits || {}),
+                [settlement.fromUid]: true
+              }
+            });
+          }
+          if (exp.paidBy === settlement.fromUid && exp.splits[settlement.toUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.toUid])) {
+            await updateSharedExpense(exp.id, {
+              settledSplits: {
+                ...(exp.settledSplits || {}),
+                [settlement.toUid]: true
+              }
+            });
+          }
         }
       });
     }
@@ -229,7 +250,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
           setEditingExpenseId(null);
           setDescription('');
           setAmount('');
-          setCategory('Gastos Generales');
+          setCategory('Comida');
           setCustomSplits({});
           setSplitMethod('equal');
           setIsAdding(!isAdding);
@@ -242,12 +263,9 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
           <input type="number" placeholder="Monto Total" value={amount} onChange={(e) => setAmount(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
           
           <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
-            <option value="Gastos Generales">Gastos Generales</option>
             <option value="Comida">Comida</option>
             <option value="Transporte">Transporte</option>
-            <option value="Entretenimiento">Entretenimiento</option>
-            <option value="Hogar">Hogar</option>
-            <option value="Viajes">Viajes</option>
+            <option value="Compras">Compras</option>
             <option value="Otros">Otros</option>
           </select>
           
@@ -344,7 +362,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                           setEditingExpenseId(exp.id);
                           setDescription(exp.description);
                           setAmount(exp.amount.toString());
-                          setCategory(exp.category || 'Gastos Generales');
+                          setCategory(exp.category || 'Comida');
                           setSplitMethod('custom');
                           setCustomSplits(exp.splits);
                           setIsAdding(true);

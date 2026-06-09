@@ -153,7 +153,7 @@ export const useGroupDetails = (groupId) => {
           type: 'expense',
           amount: expenseData.amount,
           description: `Gasto de grupo: ${expenseData.description}`,
-          category: expenseData.category || 'Gastos Generales',
+          category: expenseData.category || 'Comida',
           userId: expenseData.paidBy,
           groupExpenseId: docRef.id,
           groupId: groupId,
@@ -204,7 +204,7 @@ export const useGroupDetails = (groupId) => {
             await updateDoc(docSnap.ref, {
               amount: updatedData.amount,
               description: `Gasto de grupo: ${updatedData.description}`,
-              category: updatedData.category || 'Gastos Generales',
+              category: updatedData.category || 'Comida',
               userId: updatedData.paidBy
             });
           }
