@@ -123,7 +123,7 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
     if (isConfirmed) {
       await addSharedExpense({
-        description: `Liquidación de deuda a ${settlement.to}`,
+        description: "Liquidación de deuda",
         incomeDescription: `Pago de deuda de ${settlement.from}`,
         expenseDescription: `Pago a ${settlement.to} por deuda compartida`,
         amount: settlement.amount,
@@ -208,12 +208,14 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                 <span><strong>{s.from}</strong> le debe a <strong>{s.to}</strong></span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{formatCurrency(s.amount)}</span>
-                  <button 
-                    onClick={() => handleSettleDebt(s)}
-                    style={{ background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
-                  >
-                    Saldar
-                  </button>
+                  {s.fromUid === uid && (
+                    <button 
+                      onClick={() => handleSettleDebt(s)}
+                      style={{ background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                    >
+                      Saldar
+                    </button>
+                  )}
                 </div>
               </div>
             ))
