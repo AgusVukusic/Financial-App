@@ -117,10 +117,12 @@ export const useGroupDetails = (groupId) => {
         createdAt: serverTimestamp()
       });
 
+      const transactionIds = [];
+
       // Handle personal transactions
       if (expenseData.isSettlement) {
         // Create Expense for payer
-        await addDoc(collection(db, 'transactions'), {
+        const tx1 = await addDoc(collection(db, 'transactions'), {
           type: 'expense',
           amount: expenseData.amount,
           description: expenseData.expenseDescription || expenseData.description,
@@ -131,11 +133,12 @@ export const useGroupDetails = (groupId) => {
           date: new Date().toISOString(),
           createdAt: serverTimestamp()
         });
+        transactionIds.push(tx1.id);
 
         // Create Income for receiver
         const receiverUid = expenseData.receiverUid || Object.keys(expenseData.splits)[0];
         if (receiverUid) {
-          await addDoc(collection(db, 'transactions'), {
+          const tx2 = await addDoc(collection(db, 'transactions'), {
             type: 'income',
             amount: expenseData.amount,
             description: expenseData.incomeDescription || 'Ingreso por saldo de deuda',
@@ -146,10 +149,11 @@ export const useGroupDetails = (groupId) => {
             date: new Date().toISOString(),
             createdAt: serverTimestamp()
           });
+          transactionIds.push(tx2.id);
         }
       } else {
         // Normal group expense
-        await addDoc(collection(db, 'transactions'), {
+        const tx = await addDoc(collection(db, 'transactions'), {
           type: 'expense',
           amount: expenseData.amount,
           description: `Gasto de grupo: ${expenseData.description}`,
@@ -159,6 +163,13 @@ export const useGroupDetails = (groupId) => {
           groupId: groupId,
           date: new Date().toISOString(),
           createdAt: serverTimestamp()
+        });
+        transactionIds.push(tx.id);
+      }
+
+      if (transactionIds.length > 0) {
+        await updateDoc(doc(db, `groups/${groupId}/expenses`, docRef.id), {
+          transactionIds
         });
       }
     } catch (error) {
@@ -172,8 +183,11 @@ export const useGroupDetails = (groupId) => {
       const expenseDocRef = doc(db, `groups/${groupId}/expenses`, expenseId);
       const expenseDoc = await getDoc(expenseDocRef);
       
+      let transactionIdsToFallback = null;
+
       if (expenseDoc.exists()) {
         const data = expenseDoc.data();
+        transactionIdsToFallback = data.transactionIds;
         if (data.isSettlement && data.settledExpenses) {
           for (const { expId, uidToSettle } of data.settledExpenses) {
             const expToRevertRef = doc(db, `groups/${groupId}/expenses`, expId);
@@ -192,13 +206,18 @@ export const useGroupDetails = (groupId) => {
 
       await deleteDoc(expenseDocRef);
       
-      const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
-      const querySnapshot = await getDocs(q);
-      const deletePromises = [];
-      querySnapshot.forEach((docSnap) => {
-        deletePromises.push(deleteDoc(docSnap.ref));
-      });
-      await Promise.all(deletePromises);
+      if (transactionIdsToFallback) {
+        const deletePromises = transactionIdsToFallback.map(id => deleteDoc(doc(db, 'transactions', id)));
+        await Promise.all(deletePromises);
+      } else {
+        const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
+        const querySnapshot = await getDocs(q);
+        const deletePromises = [];
+        querySnapshot.forEach((docSnap) => {
+          deletePromises.push(deleteDoc(docSnap.ref));
+        });
+        await Promise.all(deletePromises);
+      }
     } catch (error) {
       console.error("Error deleting shared expense: ", error);
     }
@@ -223,28 +242,42 @@ export const useGroupDetails = (groupId) => {
       await updateDoc(expenseDocRef, updatedData);
 
       if (updatedData.amount !== undefined) {
-        const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
-        const querySnapshot = await getDocs(q);
-        const updatePromises = [];
+        const data = expenseDoc.exists() ? expenseDoc.data() : null;
         
-        querySnapshot.forEach((docSnap) => {
-          const txData = docSnap.data();
+        const processTxDoc = async (txRef, txData) => {
           if (isSettlement) {
-            updatePromises.push(updateDoc(docSnap.ref, {
-              amount: updatedData.amount
-            }));
+            return updateDoc(txRef, { amount: updatedData.amount });
           } else {
             if (txData.type === 'expense') {
-              updatePromises.push(updateDoc(docSnap.ref, {
+              return updateDoc(txRef, {
                 amount: updatedData.amount,
                 description: updatedData.description ? `Gasto de grupo: ${updatedData.description}` : txData.description,
                 category: updatedData.category || txData.category,
                 userId: updatedData.paidBy || txData.userId
-              }));
+              });
             }
           }
-        });
-        await Promise.all(updatePromises);
+        };
+
+        if (data && data.transactionIds) {
+          const updatePromises = data.transactionIds.map(async (id) => {
+            const txRef = doc(db, 'transactions', id);
+            const txDoc = await getDoc(txRef);
+            if (txDoc.exists()) {
+              return processTxDoc(txRef, txDoc.data());
+            }
+          });
+          await Promise.all(updatePromises);
+        } else {
+          const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
+          const querySnapshot = await getDocs(q);
+          const updatePromises = [];
+          
+          querySnapshot.forEach((docSnap) => {
+            updatePromises.push(processTxDoc(docSnap.ref, docSnap.data()));
+          });
+          await Promise.all(updatePromises);
+        }
       }
     } catch (error) {
       console.error("Error updating shared expense: ", error);
