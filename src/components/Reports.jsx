@@ -6,16 +6,9 @@ import { motion } from 'framer-motion';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const Reports = ({ transactions, allTransactions, uid, budgets = {}, updateBudget }) => {
+const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budgets = {}, updateBudget }) => {
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
-  
-  const expensesByCategory = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((acc, curr) => {
-      acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
-      return acc;
-    }, {});
 
   const chartData = Object.keys(expensesByCategory).map(key => ({
     name: key,

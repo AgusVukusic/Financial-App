@@ -131,22 +131,24 @@ export const useGroupDetails = (groupId) => {
           groupExpenseId: docRef.id,
           groupId: groupId,
           date: new Date().toISOString(),
+          categoryAdjustments: expenseData.categoryAdjustmentsPayer || null,
           createdAt: serverTimestamp()
         });
         transactionIds.push(tx1.id);
 
         // Create Income for receiver
-        const receiverUid = expenseData.receiverUid || Object.keys(expenseData.splits)[0];
+        const receiverUid = expenseData.isSettlement ? expenseData.receiverUid : null;
         if (receiverUid) {
           const tx2 = await addDoc(collection(db, 'transactions'), {
             type: 'income',
             amount: expenseData.amount,
             description: expenseData.incomeDescription || 'Ingreso por saldo de deuda',
             category: 'Saldo de deuda',
-            userId: receiverUid,
-            groupExpenseId: docRef.id,
             groupId: groupId,
+            groupExpenseId: docRef.id,
+            userId: receiverUid,
             date: new Date().toISOString(),
+            categoryAdjustments: expenseData.categoryAdjustmentsReceiver || null,
             createdAt: serverTimestamp()
           });
           transactionIds.push(tx2.id);

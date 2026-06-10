@@ -8,14 +8,7 @@ import { AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Card from './ui/Card';
 
-const Dashboard = ({ balance, income, expense, transactions, budgets = {} }) => {
-  // Aggregate data for pie chart
-  const expensesByCategory = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((acc, curr) => {
-      acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
-      return acc;
-    }, {});
+const Dashboard = ({ balance, income, expense, transactions, expensesByCategory, budgets = {} }) => {
 
   const chartData = Object.keys(expensesByCategory).map(key => ({
     name: key,

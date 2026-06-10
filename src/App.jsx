@@ -24,7 +24,7 @@ function App() {
 
   const { theme, toggleTheme } = useTheme();
   const { user, loading, userName, clearUser } = useUser();
-  const { transactions, allTransactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
+  const { transactions, allTransactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
   const { budgets, updateBudget } = useBudgets(user?.uid);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -111,6 +111,7 @@ function App() {
             income={totalIncome} 
             expense={totalExpense} 
             transactions={transactions} 
+            expensesByCategory={expensesByCategory}
             budgets={budgets}
           />
           <TransactionList 
@@ -126,6 +127,7 @@ function App() {
           transactions={transactions} 
           allTransactions={allTransactions} 
           uid={user?.uid} 
+          expensesByCategory={expensesByCategory}
           budgets={budgets} 
           updateBudget={updateBudget} 
         />

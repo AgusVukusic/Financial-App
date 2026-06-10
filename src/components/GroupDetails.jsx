@@ -84,13 +84,25 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
     const isConfirmed = await confirm(`¿Registrar que ${settlement.from} pagó ${formatCurrency(settlement.amount)} a ${settlement.to}?`);
     if (isConfirmed) {
       const settledExpensesToSave = [];
+      const categoryAdjustmentsFrom = {};
+      const categoryAdjustmentsTo = {};
+
       expenses.forEach((exp) => {
         if (!exp.isSettlement) {
           if (exp.paidBy === settlement.toUid && exp.splits[settlement.fromUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.fromUid])) {
+            const amount = exp.splits[settlement.fromUid];
             settledExpensesToSave.push({ expId: exp.id, uidToSettle: settlement.fromUid });
+            const cat = exp.category || 'Otros';
+            categoryAdjustmentsFrom[cat] = (categoryAdjustmentsFrom[cat] || 0) + amount;
+            categoryAdjustmentsTo[cat] = (categoryAdjustmentsTo[cat] || 0) - amount;
           }
           if (exp.paidBy === settlement.fromUid && exp.splits[settlement.toUid] > 0 && !(exp.settledSplits && exp.settledSplits[settlement.toUid])) {
+            const amount = exp.splits[settlement.toUid];
             settledExpensesToSave.push({ expId: exp.id, uidToSettle: settlement.toUid });
+            const cat = exp.category || 'Otros';
+            // from is receiving this part back from to
+            categoryAdjustmentsFrom[cat] = (categoryAdjustmentsFrom[cat] || 0) - amount;
+            categoryAdjustmentsTo[cat] = (categoryAdjustmentsTo[cat] || 0) + amount;
           }
         }
       });
@@ -106,7 +118,9 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
         splits: {
           [settlement.toUid]: settlement.amount
         },
-        settledExpenses: settledExpensesToSave
+        settledExpenses: settledExpensesToSave,
+        categoryAdjustmentsPayer: categoryAdjustmentsFrom,
+        categoryAdjustmentsReceiver: categoryAdjustmentsTo
       });
 
       expenses.forEach(async (exp) => {
@@ -309,7 +323,9 @@ const GroupDetails = ({ groupId, onBack, uid, userName }) => {
                               splits: {
                                 [exp.paidBy]: mySplit
                               },
-                              settledExpenses: [{ expId: exp.id, uidToSettle: uid }]
+                              settledExpenses: [{ expId: exp.id, uidToSettle: uid }],
+                              categoryAdjustmentsPayer: { [exp.category || 'Otros']: mySplit },
+                              categoryAdjustmentsReceiver: { [exp.category || 'Otros']: -mySplit }
                             });
                             await updateSharedExpense(exp.id, {
                               settledSplits: {
