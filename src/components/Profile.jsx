@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { User, Settings, Trash2, Shield, PlusCircle, CreditCard, FileText, Zap } from 'lucide-react';
+import { User, Settings, Trash2, Shield, PlusCircle, CreditCard, FileText, Zap, Edit2, X, Check } from 'lucide-react';
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { formatCurrency, exportToPDF } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDialog } from '../contexts/DialogContext';
+import Card from './ui/Card';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Select from './ui/Select';
 
 const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, onAddTransaction, allTransactions }) => {
-  const { subscriptions, addSubscription, deleteSubscription } = useSubscriptions(uid);
+  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(uid);
   const { confirm, alert } = useDialog();
   const [isAddingSub, setIsAddingSub] = useState(false);
+  const [editingSubId, setEditingSubId] = useState(null);
   const [subForm, setSubForm] = useState({ description: '', amount: '', category: 'Servicios' });
 
   const handleClearData = async () => {
@@ -18,17 +23,34 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
     }
   };
 
-  const handleAddSub = (e) => {
+  const handleAddOrEditSub = (e) => {
     e.preventDefault();
     if (!subForm.amount || !subForm.description) return;
-    addSubscription({
-      description: subForm.description,
-      amount: parseFloat(subForm.amount),
-      category: subForm.category,
-      type: 'expense'
-    });
+    
+    if (editingSubId) {
+      editSubscription(editingSubId, {
+        description: subForm.description,
+        amount: parseFloat(subForm.amount),
+        category: subForm.category
+      });
+      setEditingSubId(null);
+    } else {
+      addSubscription({
+        description: subForm.description,
+        amount: parseFloat(subForm.amount),
+        category: subForm.category,
+        type: 'expense'
+      });
+    }
+    
     setIsAddingSub(false);
     setSubForm({ description: '', amount: '', category: 'Servicios' });
+  };
+
+  const startEditing = (sub) => {
+    setEditingSubId(sub.id);
+    setSubForm({ description: sub.description, amount: sub.amount, category: sub.category || 'Servicios' });
+    setIsAddingSub(true);
   };
 
   const handleExecuteSubscriptions = async () => {
@@ -54,7 +76,7 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="profile-container" style={{ padding: 'var(--spacing-md) 0' }}>
       <h2 style={{ marginBottom: 'var(--spacing-lg)' }}>Mi Perfil</h2>
       
-      <div className="glass-panel" style={{ padding: 'var(--spacing-lg)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
+      <Card className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
         <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
           <User size={32} color="white" />
         </div>
@@ -62,34 +84,43 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
           <h3 style={{ fontSize: '1.2rem', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userName}</h3>
           <p className="text-secondary" style={{ margin: 0, fontSize: '0.9rem' }}>Plan Cloud Activo</p>
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-        <div className="glass-panel" style={{ padding: 'var(--spacing-lg)' }}>
+        <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
             <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>Gastos Fijos / Recurrentes</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={handleExecuteSubscriptions} title="Ejecutar cobros fijos" style={{ background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <Button variant="ghost" onClick={handleExecuteSubscriptions} title="Ejecutar cobros fijos" style={{ color: 'var(--success)', padding: '8px' }}>
                 <Zap size={20} />
-              </button>
-              <button onClick={() => setIsAddingSub(!isAddingSub)} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer' }}>
-                <PlusCircle size={24} />
-              </button>
+              </Button>
+              <Button variant="ghost" onClick={() => {
+                if (isAddingSub) {
+                  setIsAddingSub(false);
+                  setEditingSubId(null);
+                  setSubForm({ description: '', amount: '', category: 'Servicios' });
+                } else {
+                  setIsAddingSub(true);
+                }
+              }} style={{ color: 'var(--accent-primary)', padding: '8px' }}>
+                {isAddingSub ? <X size={24} /> : <PlusCircle size={24} />}
+              </Button>
             </div>
           </div>
 
           <AnimatePresence>
             {isAddingSub && (
-              <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} onSubmit={handleAddSub} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
-                <input type="text" placeholder="Ej. Universidad, Netflix" required value={subForm.description} onChange={e => setSubForm({...subForm, description: e.target.value})} style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
-                <input type="number" placeholder="Monto base estimado" required value={subForm.amount} onChange={e => setSubForm({...subForm, amount: e.target.value})} style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)' }} />
-                <select value={subForm.category} onChange={e => setSubForm({...subForm, category: e.target.value})} style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}>
-                  <option value="Servicios">Servicios</option>
-                  <option value="Hogar">Hogar</option>
-                  <option value="Transporte">Transporte</option>
-                  <option value="Otros">Otros</option>
-                </select>
-                <button type="submit" style={{ background: 'var(--accent-primary)', color: 'white', padding: '8px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>Guardar Fijo</button>
+              <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} onSubmit={handleAddOrEditSub} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
+                <Input type="text" placeholder="Ej. Universidad, Netflix" required value={subForm.description} onChange={e => setSubForm({...subForm, description: e.target.value})} />
+                <Input type="number" placeholder="Monto base estimado" required value={subForm.amount} onChange={e => setSubForm({...subForm, amount: e.target.value})} />
+                <Select value={subForm.category} onChange={e => setSubForm({...subForm, category: e.target.value})}>
+                  {['Servicios', 'Hogar', 'Transporte', 'Otros'].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </Select>
+                <Button type="submit" variant="primary" style={{ marginTop: '4px' }}>
+                  {editingSubId ? 'Actualizar Fijo' : 'Guardar Fijo'}
+                </Button>
               </motion.form>
             )}
           </AnimatePresence>
@@ -101,13 +132,16 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
                   <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>{sub.description}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{formatCurrency(sub.amount)} aprox.</div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => onPaySubscription(sub)} style={{ background: 'var(--success-bg)', color: 'var(--success)', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CreditCard size={14} /> Pagar
-                  </button>
-                  <button onClick={() => deleteSubscription(sub.id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <Button variant="ghost" onClick={() => onPaySubscription(sub)} style={{ color: 'var(--success)', padding: '6px' }} title="Pagar">
+                    <Check size={16} />
+                  </Button>
+                  <Button variant="ghost" onClick={() => startEditing(sub)} style={{ color: 'var(--accent-primary)', padding: '6px' }} title="Editar">
+                    <Edit2 size={16} />
+                  </Button>
+                  <Button variant="ghost" onClick={() => deleteSubscription(sub.id)} style={{ color: 'var(--danger)', padding: '6px' }} title="Eliminar">
                     <Trash2 size={16} />
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             ))}
@@ -115,27 +149,31 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>No tienes gastos fijos registrados.</p>
             )}
           </div>
-        </div>
+        </Card>
 
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-          <button onClick={() => exportToPDF(allTransactions || [])} className="glass-panel" style={{ padding: 'var(--spacing-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', flex: 1, cursor: 'pointer', color: 'var(--text-primary)' }}>
-            <FileText size={20} className="text-secondary" />
-            <span style={{ fontSize: '0.95rem' }}>PDF</span>
-          </button>
-          <button onClick={onExportData} className="glass-panel" style={{ padding: 'var(--spacing-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', flex: 1, cursor: 'pointer', color: 'var(--text-primary)' }}>
-            <Shield size={20} className="text-secondary" />
-            <span style={{ fontSize: '0.95rem' }}>CSV</span>
-          </button>
+          <Card style={{ flex: 1, padding: 0 }}>
+            <Button variant="ghost" onClick={() => exportToPDF(allTransactions || [])} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <FileText size={20} className="text-secondary" />
+              <span>PDF</span>
+            </Button>
+          </Card>
+          <Card style={{ flex: 1, padding: 0 }}>
+            <Button variant="ghost" onClick={onExportData} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <Shield size={20} className="text-secondary" />
+              <span>CSV</span>
+            </Button>
+          </Card>
         </div>
 
-        <button 
+        <Button 
+          variant="danger" 
           onClick={handleClearData}
-          className="glass-panel" 
-          style={{ padding: 'var(--spacing-md)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', border: '1px solid var(--danger-bg)', width: '100%', textAlign: 'left', cursor: 'pointer', color: 'var(--danger)', marginTop: 'var(--spacing-md)' }}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', justifyContent: 'center', marginTop: 'var(--spacing-md)' }}
         >
           <User size={20} />
-          <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: '500' }}>Cerrar sesión</span>
-        </button>
+          <span>Cerrar sesión</span>
+        </Button>
       </div>
     </motion.div>
   );

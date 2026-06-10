@@ -3,6 +3,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis
 import { formatCurrency } from '../utils/formatters';
 import { Settings, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Card from './ui/Card';
+import Input from './ui/Input';
+import Button from './ui/Button';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
@@ -54,7 +57,7 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
       <h2 style={{ marginBottom: 'var(--spacing-md)' }}>Reportes Detallados</h2>
       
       {/* Temporal Evolution Chart */}
-      <div className="glass-panel" style={{ padding: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
+      <Card style={{ padding: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
         <h3 style={{ marginBottom: 'var(--spacing-md)', fontSize: '1rem', color: 'var(--text-secondary)' }}>
           Evolución (Últimos 6 meses)
         </h3>
@@ -76,10 +79,10 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
 
       {chartData.length > 0 ? (
-        <div className="glass-panel" style={{ padding: 'var(--spacing-lg)' }}>
+        <Card style={{ padding: 'var(--spacing-lg)' }}>
           <h3 style={{ marginBottom: 'var(--spacing-md)', fontSize: '1rem', color: 'var(--text-secondary)' }}>
             Distribución de Gastos (Mes Actual)
           </h3>
@@ -133,23 +136,25 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
                     
                     {editingBudget === category ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <input 
+                        <Input 
                           type="number" 
                           autoFocus
                           value={budgetInput} 
                           onChange={(e) => setBudgetInput(e.target.value)}
-                          style={{ width: '80px', padding: '4px', borderRadius: '4px', border: '1px solid var(--accent-primary)', background: 'transparent', color: 'var(--text-primary)' }}
+                          style={{ width: '100px', padding: '4px' }}
                         />
-                        <button onClick={() => handleSaveBudget(category)} style={{ background: 'none', border: 'none', color: 'var(--success)', cursor: 'pointer' }}><Check size={16} /></button>
+                        <Button variant="ghost" onClick={() => handleSaveBudget(category)} style={{ color: 'var(--success)', padding: '4px' }}>
+                          <Check size={16} />
+                        </Button>
                       </div>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '0.85rem' }}>
                           {formatCurrency(spent)} {hasBudget ? `/ ${formatCurrency(limit)}` : ''}
                         </span>
-                        <button onClick={() => { setEditingBudget(category); setBudgetInput(limit); }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                        <Button variant="ghost" onClick={() => { setEditingBudget(category); setBudgetInput(limit); }} style={{ color: 'var(--text-secondary)', padding: '4px' }}>
                           <Settings size={14} />
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -163,11 +168,11 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
               );
             })}
           </div>
-        </div>
+        </Card>
       ) : (
-        <div className="glass-panel" style={{ padding: 'var(--spacing-xl)', textAlign: 'center' }}>
+        <Card style={{ padding: 'var(--spacing-xl)', textAlign: 'center' }}>
           <p className="text-secondary">Aún no hay suficientes gastos este mes para el gráfico de torta.</p>
-        </div>
+        </Card>
       )}
     </motion.div>
   );

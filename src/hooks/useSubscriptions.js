@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 export const useSubscriptions = (uid) => {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -48,5 +48,14 @@ export const useSubscriptions = (uid) => {
     }
   };
 
-  return { subscriptions, addSubscription, deleteSubscription };
+  const editSubscription = async (id, updatedData) => {
+    if (!uid) return;
+    try {
+      await updateDoc(doc(db, 'subscriptions', id), updatedData);
+    } catch (error) {
+      console.error("Error editing subscription: ", error);
+    }
+  };
+
+  return { subscriptions, addSubscription, deleteSubscription, editSubscription };
 };

@@ -61,22 +61,22 @@
   bottom: 10px;
   width: 56px;
   height: 56px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+  border-radius: 50%;
+  background: var(--accent-primary);
   border: none;
   display: flex;
-  justify-content: center;
   align-items: center;
-  cursor: pointer;
+  justify-content: center;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  transform: translateY(-20px);
+  transition: box-shadow 0.3s ease;
 }
 
 .fab:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
 }
 
 .fab:active {
-  transform: translateY(0) scale(0.95);
+  transform: translateY(-20px) scale(0.95);
 }

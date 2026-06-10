@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import Card from './ui/Card';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Select from './ui/Select';
 import './AddTransactionModal.css';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
@@ -53,35 +57,37 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
 
   return (
     <div className="modal-overlay animate-fade-in">
-      <div className="modal-content glass-panel animate-slide-up">
+      <Card className="modal-content animate-slide-up" style={{ padding: 'var(--spacing-xl)' }}>
         <div className="modal-header">
           <h2>{initialData && initialData.id ? 'Editar Movimiento' : 'Nuevo Movimiento'}</h2>
-          <button className="close-btn" onClick={onClose}>
+          <Button variant="ghost" className="close-btn" onClick={onClose} style={{ padding: '8px' }}>
             <X size={24} />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          <div className="type-selector">
-            <button
+          <div className="type-selector" style={{ display: 'flex', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
+            <Button
               type="button"
-              className={`type-btn ${type === 'expense' ? 'active-expense' : ''}`}
+              variant={type === 'expense' ? 'danger' : 'outline'}
+              style={{ flex: 1 }}
               onClick={() => setType('expense')}
             >
               Gasto
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className={`type-btn ${type === 'income' ? 'active-income' : ''}`}
+              variant={type === 'income' ? 'success' : 'outline'}
+              style={{ flex: 1 }}
               onClick={() => setType('income')}
             >
               Ingreso
-            </button>
+            </Button>
           </div>
 
-          <div className="form-group">
-            <label>Monto ($)</label>
-            <input
+          <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Monto ($)</label>
+            <Input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -94,19 +100,22 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
           </div>
 
           {type === 'expense' && (
-            <div className="form-group">
-              <label>Categoría</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Categoría</label>
+              <Select 
+                value={category} 
+                onChange={(e) => setCategory(e.target.value)}
+              >
                 {CATEGORIES.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 
-          <div className="form-group">
-            <label>Descripción (Opcional)</label>
-            <input
+          <div className="form-group" style={{ marginBottom: 'var(--spacing-xl)' }}>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Descripción (Opcional)</label>
+            <Input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -115,11 +124,11 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
             />
           </div>
 
-          <button type="submit" className="submit-btn">
+          <Button type="submit" variant="primary" style={{ width: '100%', padding: '16px' }}>
             Guardar {type === 'expense' ? 'Gasto' : 'Ingreso'}
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };

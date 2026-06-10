@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, PlusCircle, PieChart, User, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 import './Layout.css';
 
 const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
@@ -26,9 +27,14 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
         </button>
         
         <div className="nav-fab-container">
-          <button className="fab" onClick={onAddClick}>
+          <motion.button 
+            className="fab" 
+            onClick={onAddClick}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <PlusCircle size={32} color="#fff" />
-          </button>
+          </motion.button>
         </div>
 
         <button 
