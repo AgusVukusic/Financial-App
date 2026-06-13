@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
 
-const WelcomeScreen = () => {
+const WelcomeScreen = ({ onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -58,10 +59,19 @@ const WelcomeScreen = () => {
         style={{
           padding: 'var(--spacing-xl)', maxWidth: '400px', width: '100%',
           textAlign: 'center', display: 'flex', flexDirection: 'column',
-          gap: 'var(--spacing-lg)'
+          gap: 'var(--spacing-lg)', position: 'relative'
         }}
       >
-        <div style={{ fontSize: '3rem' }}>👋</div>
+        {onBack && (
+          <button 
+            onClick={onBack}
+            style={{ position: 'absolute', top: '24px', left: '24px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', padding: 0 }}
+          >
+            <ArrowLeft size={18} /> Volver
+          </button>
+        )}
+
+        <div style={{ fontSize: '3rem', marginTop: onBack ? '20px' : '0' }}>👋</div>
         
         <div>
           <h1 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>

@@ -11,6 +11,7 @@ import Reports from './components/Reports';
 import Profile from './components/Profile';
 import Groups from './components/Groups';
 import WelcomeScreen from './components/WelcomeScreen';
+import LandingPage from './components/LandingPage';
 import { exportToCSV } from './utils/formatters';
 import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from './components/ui/Card';
@@ -30,6 +31,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleClearData = () => {
     window.localStorage.removeItem('financial_app_transactions');
@@ -72,7 +74,10 @@ function App() {
   }
 
   if (!user) {
-    return <WelcomeScreen />;
+    if (showLogin) {
+      return <WelcomeScreen onBack={() => setShowLogin(false)} />;
+    }
+    return <LandingPage onLoginClick={() => setShowLogin(true)} />;
   }
 
   return (
