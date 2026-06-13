@@ -3,7 +3,7 @@ import { Coffee, ShoppingBag, Home, Car, Zap, DollarSign, Trash2 } from 'lucide-
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2 } from 'lucide-react';
-import Card from './ui/Card';
+
 import Button from './ui/Button';
 import './TransactionList.css';
 
@@ -30,21 +30,21 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
       <h3 className="section-title">Movimientos Recientes</h3>
       <div className="transaction-list">
         <AnimatePresence>
-          {transactions.map((transaction) => (
-            <Card key={transaction.id} noPadding>
-              <motion.div 
-                className="transaction-item"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95, x: -20 }}
-                layout
-                style={{ width: '100%' }}
-              >
-                <div className="transaction-icon-wrapper">
-                  <div className={`transaction-icon ${transaction.type}`}>
-                    {categoryIcons[transaction.category] || <DollarSign size={20} />}
-                  </div>
+          {transactions.map((transaction, index) => (
+            <motion.div 
+              key={transaction.id}
+              className="transaction-item"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, x: -20 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              layout
+            >
+              <div className="transaction-icon-wrapper">
+                <div className={`transaction-icon ${transaction.type}`}>
+                  {categoryIcons[transaction.category] || <DollarSign size={20} />}
                 </div>
+              </div>
               
               <div className="transaction-details">
                 <div className="transaction-header">
@@ -83,8 +83,7 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
                   </div>
                 </div>
               </div>
-              </motion.div>
-            </Card>
+            </motion.div>
           ))}
         </AnimatePresence>
       </div>

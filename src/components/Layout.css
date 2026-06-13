@@ -1,82 +1,165 @@
 .layout-container {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 80px; /* Space for bottom nav */
+  padding-bottom: 90px; /* Space for the floating nav bar */
+  position: relative;
+  overflow-x: hidden;
 }
 
 .main-content {
-  flex: 1;
-  padding: var(--spacing-md);
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
-  width: 100%;
+  padding: var(--spacing-md);
+  padding-top: var(--spacing-xl);
 }
 
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 70px;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 48px);
+  max-width: 400px;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  z-index: 100;
-  border-bottom: none;
+  padding: 8px 16px;
+  z-index: 1000;
+  border-radius: 32px;
+  /* Glassmorphism overrides if needed, using .glass-panel class from global */
 }
 
 .nav-item {
   background: none;
   border: none;
-  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  transition: color 0.2s ease;
-  padding: var(--spacing-sm);
+  padding: 8px;
+  color: var(--text-muted);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .nav-item span {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.65rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  bottom: -16px;
+  white-space: nowrap;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item.active {
   color: var(--accent-primary);
+  transform: translateY(-4px);
+}
+
+.nav-item.active span {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-item:hover:not(.active) {
+  color: var(--text-primary);
 }
 
 .nav-fab-container {
-  position: relative;
   display: flex;
   justify-content: center;
-  width: 60px;
+  align-items: center;
+  margin: 0 10px;
 }
 
 .fab {
-  position: absolute;
-  bottom: 10px;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 50%;
   width: 56px;
   height: 56px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  border: none;
   display: flex;
-  align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  align-items: center;
   cursor: pointer;
-  transform: translateY(-20px);
-  transition: box-shadow 0.3s ease;
+  box-shadow: var(--shadow-accent);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.fab::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  opacity: 0.4;
+  z-index: -1;
+  filter: blur(8px);
+  transition: opacity 0.3s ease;
 }
 
 .fab:hover {
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
-.fab:active {
-  transform: translateY(-20px) scale(0.95);
+.fab:hover::before {
+  opacity: 0.8;
+}
+
+/* Add a cool animation for the active state indicator */
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+@media (min-width: 768px) {
+  .layout-container {
+    padding-bottom: 0;
+    padding-left: 100px;
+  }
+  
+  .bottom-nav {
+    flex-direction: column;
+    left: 24px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: 72px;
+    height: auto;
+    padding: 32px 0;
+    gap: 32px;
+  }
+  
+  .nav-item span {
+    left: 48px;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%) translateX(-10px);
+  }
+  
+  .nav-item.active span {
+    transform: translateY(-50%) translateX(0);
+  }
+  
+  .nav-item.active::after {
+    top: 50%;
+    left: -12px;
+    transform: translateY(-50%);
+  }
+  
+  .nav-fab-container {
+    margin: 16px 0;
+  }
 }

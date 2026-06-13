@@ -8,6 +8,18 @@ import { AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Card from './ui/Card';
 
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip">
+        <div className="custom-tooltip-label">{payload[0].name}</div>
+        <div className="custom-tooltip-value">{formatCurrency(payload[0].value)}</div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const Dashboard = ({ balance, income, expense, transactions, expensesByCategory, budgets = {} }) => {
 
   const chartData = Object.keys(expensesByCategory).map(key => ({
@@ -15,7 +27,7 @@ const Dashboard = ({ balance, income, expense, transactions, expensesByCategory,
     value: expensesByCategory[key]
   }));
 
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#a855f7', '#ec4899'];
 
   // Calculate budget alerts
   const budgetAlerts = [];
@@ -98,21 +110,19 @@ const Dashboard = ({ balance, income, expense, transactions, expensesByCategory,
               <PieChart>
                 <Pie
                   data={chartData}
-                  innerRadius={60}
+                  innerRadius={55}
                   outerRadius={80}
-                  paddingAngle={5}
+                  paddingAngle={8}
                   dataKey="value"
-                  stroke="none"
+                  stroke="var(--bg-base)"
+                  strokeWidth={2}
+                  cornerRadius={8}
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value) => formatCurrency(value)}
-                  contentStyle={{ backgroundColor: 'var(--bg-surface)', border: 'none', borderRadius: '8px', color: '#fff' }}
-                  itemStyle={{ color: '#fff' }}
-                />
+                <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
