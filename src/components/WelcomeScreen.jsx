@@ -82,7 +82,7 @@ const WelcomeScreen = ({ onBack }) => {
       } else if (err.code === 'auth/weak-password') {
         setError('La contraseña debe tener al menos 6 caracteres.');
       } else {
-        setError('Ocurrió un error. Intenta de nuevo.');
+        setError('Ocurrió un error: ' + err.message);
       }
     } finally {
       setLoading(false);
