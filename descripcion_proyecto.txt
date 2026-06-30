@@ -1,0 +1,15 @@
+Descripción del proyecto: 
+Financial-App es una aplicación web integral enfocada en la gestión de finanzas personales. Permite a los usuarios registrar, editar y categorizar sus transacciones (ingresos y gastos), establecer presupuestos mensuales, generar reportes visuales de su actividad económica, exportar sus datos y administrar grupos financieros.
+
+Frontend:
+Está construido con React (v19) y utiliza Vite como entorno de desarrollo y empaquetador. Además, está configurado como una PWA (Progressive Web App).
+
+Backend:
+La aplicación tiene una arquitectura Serverless. No utiliza un entorno tradicional como Node.js/Express o Python/Django propio, sino que delega toda la lógica de backend directamente a la plataforma de Firebase (Backend-as-a-Service).
+
+Base de datos:
+Emplea Firebase Firestore, una base de datos NoSQL en la nube orientada a documentos.
+
+Otros:
+- Autenticación: Usa Firebase Authentication.
+- Librerías especiales destacadas: Framer-motion (animaciones), Recharts (gráficos), jsPDF / jspdf-autotable (generación de reportes en PDF), y Lucide-react (iconos).
