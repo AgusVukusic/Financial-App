@@ -13,6 +13,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -21,11 +22,13 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
         setAmount(initialData.amount || '');
         setCategory(initialData.category || CATEGORIES[0]);
         setDescription(initialData.description || '');
+        setDate(initialData.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
       } else {
         setType('expense');
         setAmount('');
         setCategory(CATEGORIES[0]);
         setDescription('');
+        setDate(new Date().toISOString().split('T')[0]);
       }
     }
   }, [isOpen, initialData]);
@@ -40,7 +43,8 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
       type,
       amount: parseFloat(amount),
       category: type === 'income' ? 'Ingreso' : category,
-      description
+      description,
+      date
     };
 
     if (initialData && initialData.id && onEdit) {
@@ -112,6 +116,16 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
               </Select>
             </div>
           )}
+
+          <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Fecha</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
+          </div>
 
           <div className="form-group" style={{ marginBottom: 'var(--spacing-xl)' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Descripción (Opcional)</label>

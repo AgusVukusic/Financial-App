@@ -1,39 +1,85 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
 const WelcomeScreen = ({ onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
-    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@financialapp.local`;
-
     try {
+      const lowerUsername = username.toLowerCase().replace(/\s+/g, '');
+
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, fakeEmail, password);
+        // 1. Fetch real email associated with this username
+        const userDocRef = doc(db, 'users', lowerUsername);
+        const userDoc = await getDoc(userDocRef);
+        
+        let loginEmail = '';
+        if (userDoc.exists()) {
+          loginEmail = userDoc.data().email;
+        } else {
+          // Fallback for old users registered with fake email
+          loginEmail = `${lowerUsername}@financialapp.local`;
+        }
+
+        // 2. Sign in with the fetched email
+        const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password);
+
+        // 3. Verify if email is verified (only for real emails)
+        if (!loginEmail.endsWith('@financialapp.local') && !userCredential.user.emailVerified) {
+          await signOut(auth);
+          setError('Por favor, verifica tu correo electrónico antes de ingresar.');
+          setLoading(false);
+          return;
+        }
+        
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, password);
+        // Register flow
+        // 1. Check if username is taken
+        const userDocRef = doc(db, 'users', lowerUsername);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setError('El nombre de usuario ya está en uso.');
+          setLoading(false);
+          return;
+        }
+
+        // 2. Create user in Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: name });
-        // Trigger a reload or state update to reflect the display name if needed
-        window.location.reload(); 
+
+        // 3. Save mapping in Firestore
+        await setDoc(userDocRef, { email: email.toLowerCase() });
+
+        // 4. Send verification email
+        await sendEmailVerification(userCredential.user);
+        await signOut(auth); // Sign them out until they verify
+
+        setSuccess('¡Registro exitoso! Revisa tu bandeja de entrada para verificar tu cuenta.');
+        setIsLogin(true); // Switch to login view
+        setPassword('');
       }
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         setError('Usuario o contraseña incorrectos.');
       } else if (err.code === 'auth/email-already-in-use') {
-        setError('El usuario ya está registrado.');
+        setError('El correo electrónico ya está registrado.');
       } else if (err.code === 'auth/weak-password') {
         setError('La contraseña debe tener al menos 6 caracteres.');
       } else {
@@ -87,6 +133,12 @@ const WelcomeScreen = ({ onBack }) => {
             {error}
           </div>
         )}
+        
+        {success && (
+          <div style={{ padding: '10px', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: 'var(--success)', borderRadius: '8px', fontSize: '0.9rem' }}>
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
           <AnimatePresence>
@@ -101,6 +153,16 @@ const WelcomeScreen = ({ onBack }) => {
                 <input 
                   type="text" value={name} onChange={(e) => setName(e.target.value)} 
                   placeholder="Ej. Juan Pérez" required={!isLogin} maxLength={20}
+                  style={{
+                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                    background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
+                  }}
+                />
+                
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>Correo Electrónico</label>
+                <input 
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
+                  placeholder="juan@ejemplo.com" required={!isLogin}
                   style={{
                     padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
                     background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
@@ -147,7 +209,7 @@ const WelcomeScreen = ({ onBack }) => {
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
           {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
           <button 
-            onClick={() => { setIsLogin(!isLogin); setError(''); }} 
+            onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess(''); }} 
             style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 'bold' }}
           >
             {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}

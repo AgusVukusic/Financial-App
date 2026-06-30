@@ -96,7 +96,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       await addDoc(collection(db, 'transactions'), {
         ...transaction,
         userId: uid,
-        date: new Date().toISOString(),
+        date: transaction.date ? new Date(transaction.date + 'T12:00:00').toISOString() : new Date().toISOString(),
         createdAt: serverTimestamp()
       });
     } catch (error) {
@@ -107,7 +107,11 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
   const updateTransaction = async (id, updatedData) => {
     if (!uid) return;
     try {
-      await updateDoc(doc(db, 'transactions', id), updatedData);
+      const dataToUpdate = { ...updatedData };
+      if (dataToUpdate.date) {
+        dataToUpdate.date = new Date(dataToUpdate.date + 'T12:00:00').toISOString();
+      }
+      await updateDoc(doc(db, 'transactions', id), dataToUpdate);
     } catch (error) {
       console.error("Error updating transaction: ", error);
     }
