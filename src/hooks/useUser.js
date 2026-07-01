@@ -8,7 +8,11 @@ export const useUser = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser && !currentUser.emailVerified) {
+        setUser(null);
+      } else {
+        setUser(currentUser);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
