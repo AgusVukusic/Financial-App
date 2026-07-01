@@ -3,21 +3,19 @@ import { auth } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import { useToast } from './ui/ToastContext';
 
 const WelcomeScreen = ({ onBack }) => {
+  const { showToast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState(''); // Usado como Display Name en registro
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setNeedsVerification(false);
     setLoading(true);
 
@@ -29,7 +27,7 @@ const WelcomeScreen = ({ onBack }) => {
         // Verify if email is verified
         if (!userCredential.user.emailVerified) {
           setNeedsVerification(true);
-          setError('Tu correo electrónico no está verificado.');
+          showToast('Tu correo electrónico no está verificado.', 'error', 0); // Duración 0 = No se cierra solo
           setLoading(false);
           // No cerramos sesión aquí para poder reenviar el correo
           return;
@@ -44,20 +42,20 @@ const WelcomeScreen = ({ onBack }) => {
         await sendEmailVerification(userCredential.user);
         await signOut(auth); // Sign them out until they verify
 
-        setSuccess('¡Registro exitoso! Revisa tu bandeja de entrada (o SPAM) para verificar tu cuenta antes de iniciar sesión.');
+        showToast('¡Registro exitoso! Revisa tu bandeja de entrada para verificar tu cuenta.', 'success', 5000);
         setIsLogin(true); // Switch to login view
         setPassword('');
       }
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Correo o contraseña incorrectos.');
+        showToast('Correo o contraseña incorrectos.', 'error');
       } else if (err.code === 'auth/email-already-in-use') {
-        setError('El correo electrónico ya está registrado.');
+        showToast('El correo electrónico ya está registrado.', 'error');
       } else if (err.code === 'auth/weak-password') {
-        setError('La contraseña debe tener al menos 6 caracteres.');
+        showToast('La contraseña debe tener al menos 6 caracteres.', 'error');
       } else {
-        setError('Ocurrió un error: ' + err.message);
+        showToast('Ocurrió un error: ' + err.message, 'error');
       }
     } finally {
       setLoading(false);
@@ -69,15 +67,14 @@ const WelcomeScreen = ({ onBack }) => {
       try {
         setLoading(true);
         await sendEmailVerification(auth.currentUser);
-        setSuccess('Se ha enviado un nuevo enlace de verificación a tu correo.');
-        setError('');
+        showToast('Se ha enviado un nuevo enlace de verificación a tu correo.', 'success');
         setNeedsVerification(false);
         await signOut(auth);
       } catch (err) {
         if (err.code === 'auth/too-many-requests') {
-          setError('Has pedido demasiados correos. Espera un momento.');
+          showToast('Has pedido demasiados correos. Espera un momento.', 'error');
         } else {
-          setError('Error al enviar el correo: ' + err.message);
+          showToast('Error al enviar el correo: ' + err.message, 'error');
         }
       } finally {
         setLoading(false);
@@ -123,24 +120,15 @@ const WelcomeScreen = ({ onBack }) => {
           </p>
         </div>
 
-        {error && (
-          <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)', borderRadius: '8px', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {error}
-            {needsVerification && (
-              <button 
-                type="button"
-                onClick={handleResendVerification}
-                style={{ background: 'var(--danger)', color: 'white', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Reenviar correo de verificación
-              </button>
-            )}
-          </div>
-        )}
-        
-        {success && (
-          <div style={{ padding: '10px', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: 'var(--success)', borderRadius: '8px', fontSize: '0.9rem' }}>
-            {success}
+        {needsVerification && (
+          <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', flexDirection: 'column' }}>
+            <button 
+              type="button"
+              onClick={handleResendVerification}
+              style={{ background: 'var(--danger)', color: 'white', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Reenviar correo de verificación
+            </button>
           </div>
         )}
 
@@ -203,7 +191,7 @@ const WelcomeScreen = ({ onBack }) => {
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
           {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
           <button 
-            onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess(''); setNeedsVerification(false); }} 
+            onClick={() => { setIsLogin(!isLogin); setNeedsVerification(false); }} 
             style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 'bold' }}
           >
             {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}

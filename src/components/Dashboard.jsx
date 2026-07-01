@@ -27,7 +27,14 @@ const Dashboard = ({ balance, income, expense, transactions, expensesByCategory,
     value: expensesByCategory[key]
   }));
 
-  const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#a855f7', '#ec4899'];
+  const CATEGORY_COLORS = {
+    Comida: '#f43f5e',      // Rojo (Rose)
+    Compras: '#6366f1',     // Azul (Indigo)
+    Hogar: '#10b981',       // Verde (Emerald)
+    Transporte: '#f59e0b',  // Naranja (Amber)
+    Servicios: '#a855f7',   // Morado (Purple)
+    Otros: '#64748b'        // Gris (Slate)
+  };
 
   // Calculate budget alerts
   const budgetAlerts = [];
@@ -119,7 +126,7 @@ const Dashboard = ({ balance, income, expense, transactions, expensesByCategory,
                   cornerRadius={8}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[entry.name] || '#ec4899'} />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />

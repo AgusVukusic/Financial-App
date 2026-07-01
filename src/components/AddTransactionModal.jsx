@@ -4,11 +4,13 @@ import Card from './ui/Card';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
+import { useToast } from './ui/ToastContext';
 import './AddTransactionModal.css';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
 const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) => {
+  const { showToast } = useToast();
   const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -58,8 +60,10 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
 
     if (initialData && initialData.id && onEdit) {
       onEdit(initialData.id, data);
+      showToast('Movimiento editado correctamente', 'success');
     } else {
       onAdd(data);
+      showToast('Movimiento añadido exitosamente', 'success');
     }
 
     // Reset and close

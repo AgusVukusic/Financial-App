@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Coffee, ShoppingBag, Home, Car, Zap, DollarSign, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2 } from 'lucide-react';
 
 import Button from './ui/Button';
+import ConfirmDialog from './ui/ConfirmDialog';
 import './TransactionList.css';
 
 const categoryIcons = {
@@ -17,6 +18,8 @@ const categoryIcons = {
 };
 
 const TransactionList = ({ transactions, onDelete, onEdit }) => {
+  const [itemToDelete, setItemToDelete] = useState(null);
+
   if (transactions.length === 0) {
     return (
       <div className="empty-state animate-fade-in">
@@ -73,7 +76,7 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
                           variant="ghost"
                           size="sm"
                           isIcon
-                          onClick={() => onDelete(transaction.id)}
+                          onClick={() => setItemToDelete(transaction.id)}
                           aria-label="Eliminar transacción"
                         >
                           <Trash2 size={16} color="var(--danger)" />
@@ -87,6 +90,19 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
           ))}
         </AnimatePresence>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!itemToDelete}
+        title="Eliminar movimiento"
+        message="¿Estás seguro de que deseas eliminar este movimiento? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={() => {
+          onDelete(itemToDelete);
+          setItemToDelete(null);
+        }}
+        onCancel={() => setItemToDelete(null)}
+      />
     </div>
   );
 };
