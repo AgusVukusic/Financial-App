@@ -1,6 +1,6 @@
 .toast-container {
   position: fixed;
-  bottom: 90px;
+  top: env(safe-area-inset-top, 24px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
