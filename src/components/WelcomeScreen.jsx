@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
 const WelcomeScreen = ({ onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); // Usado como Display Name en registro
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,62 +20,35 @@ const WelcomeScreen = ({ onBack }) => {
     setLoading(true);
 
     try {
-      const lowerUsername = username.toLowerCase().replace(/\s+/g, '');
-
       if (isLogin) {
-        // 1. Fetch real email associated with this username
-        const userDocRef = doc(db, 'users', lowerUsername);
-        const userDoc = await getDoc(userDocRef);
-        
-        let loginEmail = '';
-        if (userDoc.exists()) {
-          loginEmail = userDoc.data().email;
-        } else {
-          // Fallback for old users registered with fake email
-          loginEmail = `${lowerUsername}@financialapp.local`;
-        }
+        // Sign in directly with email
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-        // 2. Sign in with the fetched email
-        const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password);
-
-        // 3. Verify if email is verified (only for real emails)
-        if (!loginEmail.endsWith('@financialapp.local') && !userCredential.user.emailVerified) {
+        // Verify if email is verified
+        if (!userCredential.user.emailVerified) {
           await signOut(auth);
-          setError('Por favor, verifica tu correo electrónico antes de ingresar.');
+          setError('Por favor, verifica tu correo electrónico antes de ingresar. Revisa tu bandeja de entrada o SPAM.');
           setLoading(false);
           return;
         }
         
       } else {
         // Register flow
-        // 1. Check if username is taken
-        const userDocRef = doc(db, 'users', lowerUsername);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setError('El nombre de usuario ya está en uso.');
-          setLoading(false);
-          return;
-        }
-
-        // 2. Create user in Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: username });
 
-        // 3. Save mapping in Firestore
-        await setDoc(userDocRef, { email: email.toLowerCase() });
-
-        // 4. Send verification email
+        // Send verification email
         await sendEmailVerification(userCredential.user);
         await signOut(auth); // Sign them out until they verify
 
-        setSuccess('¡Registro exitoso! Revisa tu bandeja de entrada para verificar tu cuenta.');
+        setSuccess('¡Registro exitoso! Revisa tu bandeja de entrada (o SPAM) para verificar tu cuenta antes de iniciar sesión.');
         setIsLogin(true); // Switch to login view
         setPassword('');
       }
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Usuario o contraseña incorrectos.');
+        setError('Correo o contraseña incorrectos.');
       } else if (err.code === 'auth/email-already-in-use') {
         setError('El correo electrónico ya está registrado.');
       } else if (err.code === 'auth/weak-password') {
@@ -148,10 +120,10 @@ const WelcomeScreen = ({ onBack }) => {
                 exit={{ opacity: 0, height: 0 }}
                 style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', overflow: 'hidden' }}
               >
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Correo Electrónico</label>
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Usuario (Tu alias)</label>
                 <input 
-                  type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
-                  placeholder="juan@ejemplo.com" required={!isLogin}
+                  type="text" value={username} onChange={(e) => setUsername(e.target.value)} 
+                  placeholder="juan123" required={!isLogin} maxLength={20}
                   style={{
                     padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
                     background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
@@ -161,11 +133,11 @@ const WelcomeScreen = ({ onBack }) => {
             )}
           </AnimatePresence>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Usuario</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', marginTop: !isLogin ? '8px' : '0' }}>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Correo Electrónico</label>
             <input 
-              type="text" value={username} onChange={(e) => setUsername(e.target.value)} 
-              placeholder="juan123" required
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
+              placeholder="juan@ejemplo.com" required
               style={{
                 padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
                 background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
