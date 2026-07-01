@@ -12,11 +12,13 @@ const WelcomeScreen = ({ onBack }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setNeedsVerification(false);
     setLoading(true);
 
     try {
@@ -26,9 +28,10 @@ const WelcomeScreen = ({ onBack }) => {
 
         // Verify if email is verified
         if (!userCredential.user.emailVerified) {
-          await signOut(auth);
-          setError('Por favor, verifica tu correo electrónico antes de ingresar. Revisa tu bandeja de entrada o SPAM.');
+          setNeedsVerification(true);
+          setError('Tu correo electrónico no está verificado.');
           setLoading(false);
+          // No cerramos sesión aquí para poder reenviar el correo
           return;
         }
         
@@ -58,6 +61,27 @@ const WelcomeScreen = ({ onBack }) => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (auth.currentUser && !auth.currentUser.emailVerified) {
+      try {
+        setLoading(true);
+        await sendEmailVerification(auth.currentUser);
+        setSuccess('Se ha enviado un nuevo enlace de verificación a tu correo.');
+        setError('');
+        setNeedsVerification(false);
+        await signOut(auth);
+      } catch (err) {
+        if (err.code === 'auth/too-many-requests') {
+          setError('Has pedido demasiados correos. Espera un momento.');
+        } else {
+          setError('Error al enviar el correo: ' + err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -100,8 +124,17 @@ const WelcomeScreen = ({ onBack }) => {
         </div>
 
         {error && (
-          <div style={{ padding: '10px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)', borderRadius: '8px', fontSize: '0.9rem' }}>
+          <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)', borderRadius: '8px', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {error}
+            {needsVerification && (
+              <button 
+                type="button"
+                onClick={handleResendVerification}
+                style={{ background: 'var(--danger)', color: 'white', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Reenviar correo de verificación
+              </button>
+            )}
           </div>
         )}
         
@@ -170,7 +203,7 @@ const WelcomeScreen = ({ onBack }) => {
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
           {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
           <button 
-            onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess(''); }} 
+            onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess(''); setNeedsVerification(false); }} 
             style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 'bold' }}
           >
             {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
