@@ -17,6 +17,8 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
 
   React.useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden'; // Evita que el fondo haga scroll
+      
       if (initialData) {
         setType(initialData.type || 'expense');
         setAmount(initialData.amount || '');
@@ -30,7 +32,14 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
         setDescription('');
         setDate(new Date().toISOString().split('T')[0]);
       }
+    } else {
+      document.body.style.overflow = 'auto'; // Restaura el scroll
     }
+
+    // Cleanup para cuando el componente se desmonte
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;
@@ -99,7 +108,6 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
               required
               min="0.01"
               step="0.01"
-              autoFocus
             />
           </div>
 
