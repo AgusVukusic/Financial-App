@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './Button';
 import Card from './Card';
@@ -18,7 +19,7 @@ const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel, confirmTex
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div className="confirm-overlay">
         <motion.div
@@ -43,7 +44,8 @@ const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel, confirmTex
           </Card>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
