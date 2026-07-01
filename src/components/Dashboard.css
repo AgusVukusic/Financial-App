@@ -8,7 +8,7 @@
 .balance-card {
   position: relative;
   overflow: hidden;
-  padding: var(--spacing-lg) !important;
+  padding: var(--spacing-md) !important;
   background: linear-gradient(145deg, rgba(30, 30, 40, 0.7) 0%, rgba(15, 15, 20, 0.8) 100%);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -55,7 +55,7 @@ body.light-theme .balance-card {
 }
 
 .balance-amount {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 800;
   margin-bottom: var(--spacing-lg);
   color: var(--text-primary);
@@ -85,8 +85,8 @@ body.light-theme .balance-card {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px 10px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -119,9 +119,18 @@ body.light-theme .stat-item:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 480px) {
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
 }
 
 .bg-success {
@@ -151,11 +160,17 @@ body.light-theme .stat-item:hover {
 }
 
 .stat-value {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (min-width: 480px) {
+  .stat-value {
+    font-size: 1.1rem;
+  }
 }
 
 /* Charts */
