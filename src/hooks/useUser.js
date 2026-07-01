@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
@@ -18,13 +18,13 @@ export const useUser = () => {
     return () => unsubscribe();
   }, []);
 
-  const clearUser = async () => {
+  const clearUser = useCallback(async () => {
     try {
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out', error);
     }
-  };
+  }, []);
 
   return { user, loading, clearUser, userName: user?.displayName || user?.email?.split('@')[0] || '' };
 };

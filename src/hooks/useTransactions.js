@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, orderBy, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { calculateTotalsAndCategories } from '../utils/calculations';
 
 export const useTransactions = (selectedMonth, selectedYear, uid) => {
   const [transactions, setTransactions] = useState([]);
@@ -38,59 +39,14 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
   }, [transactions, selectedMonth, selectedYear]);
 
   // Calculate totals and category budgets for the filtered period
+  // Calculate totals and category budgets for the filtered period
   const { totalIncome, totalExpense, expensesByCategory } = useMemo(() => {
-    let income = 0;
-    let expense = 0;
-    const byCategory = {};
-
-    filteredTransactions.forEach(t => {
-      if (t.type === 'expense') {
-        if (t.category !== 'Saldo de deuda' && !t.categoryAdjustments) {
-          // Normal expense
-          expense += t.amount;
-          byCategory[t.category] = (byCategory[t.category] || 0) + t.amount;
-        } else if (t.category === 'Saldo de deuda' || t.categoryAdjustments) {
-          // Settlement expense (you paid someone back)
-          if (t.categoryAdjustments) {
-            Object.entries(t.categoryAdjustments).forEach(([cat, amount]) => {
-              expense += amount;
-              byCategory[cat] = (byCategory[cat] || 0) + amount;
-            });
-          } else {
-            // Fallback for old settlements
-            expense += t.amount;
-            byCategory[t.category] = (byCategory[t.category] || 0) + t.amount;
-          }
-        } else {
-          expense += t.amount;
-          byCategory[t.category] = (byCategory[t.category] || 0) + t.amount;
-        }
-      } else if (t.type === 'income') {
-        if (t.category !== 'Saldo de deuda') {
-          // Normal income
-          income += t.amount;
-        } else {
-          // Settlement income (someone paid you back)
-          if (t.categoryAdjustments) {
-            Object.entries(t.categoryAdjustments).forEach(([cat, amount]) => {
-              // amount is negative for receiver (e.g. Comida: -750)
-              expense += amount;
-              byCategory[cat] = (byCategory[cat] || 0) + amount;
-            });
-          } else {
-            // Fallback for old settlements: just subtract from global expense
-            expense -= t.amount;
-          }
-        }
-      }
-    });
-
-    return { totalIncome: income, totalExpense: expense, expensesByCategory: byCategory };
+    return calculateTotalsAndCategories(filteredTransactions);
   }, [filteredTransactions]);
 
   const balance = totalIncome - totalExpense;
 
-  const addTransaction = async (transaction) => {
+  const addTransaction = useCallback(async (transaction) => {
     if (!uid) return;
     try {
       await addDoc(collection(db, 'transactions'), {
@@ -103,9 +59,9 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       console.error("Error adding transaction: ", error);
       throw error;
     }
-  };
+  }, [uid]);
 
-  const updateTransaction = async (id, updatedData) => {
+  const updateTransaction = useCallback(async (id, updatedData) => {
     if (!uid) return;
     try {
       const dataToUpdate = { ...updatedData };
@@ -117,9 +73,9 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       console.error("Error updating transaction: ", error);
       throw error;
     }
-  };
+  }, [uid]);
 
-  const deleteTransaction = async (id) => {
+  const deleteTransaction = useCallback(async (id) => {
     if (!uid) return;
     try {
       await deleteDoc(doc(db, 'transactions', id));
@@ -127,7 +83,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       console.error("Error deleting transaction: ", error);
       throw error;
     }
-  };
+  }, [uid]);
 
   return {
     transactions: filteredTransactions,
