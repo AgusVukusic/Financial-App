@@ -1,6 +1,6 @@
 .layout-container {
   min-height: 100vh;
-  padding-bottom: 90px; /* Space for the floating nav bar */
+  padding-bottom: 120px; /* Space for the floating nav bar */
   position: relative;
   overflow-x: hidden;
 }
