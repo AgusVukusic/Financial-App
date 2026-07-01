@@ -9,13 +9,20 @@ import './AddTransactionModal.css';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
+const getLocalDateString = (d = new Date()) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) => {
   const { showToast } = useToast();
   const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => getLocalDateString());
 
   React.useEffect(() => {
     if (isOpen) {
@@ -26,13 +33,13 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
         setAmount(initialData.amount || '');
         setCategory(initialData.category || CATEGORIES[0]);
         setDescription(initialData.description || '');
-        setDate(initialData.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
+        setDate(initialData.date ? initialData.date.split('T')[0] : getLocalDateString());
       } else {
         setType('expense');
         setAmount('');
         setCategory(CATEGORIES[0]);
         setDescription('');
-        setDate(new Date().toISOString().split('T')[0]);
+        setDate(getLocalDateString());
       }
     } else {
       document.body.style.overflow = 'auto'; // Restaura el scroll
