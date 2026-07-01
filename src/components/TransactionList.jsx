@@ -3,6 +3,7 @@ import { Coffee, ShoppingBag, Home, Car, Zap, DollarSign, Trash2 } from 'lucide-
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2 } from 'lucide-react';
+import { useToast } from './ui/ToastContext';
 
 import Button from './ui/Button';
 import ConfirmDialog from './ui/ConfirmDialog';
@@ -18,6 +19,7 @@ const categoryIcons = {
 };
 
 const TransactionList = ({ transactions, onDelete, onEdit }) => {
+  const { showToast } = useToast();
   const [itemToDelete, setItemToDelete] = useState(null);
 
   if (transactions.length === 0) {
@@ -97,8 +99,13 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
         message="¿Estás seguro de que deseas eliminar este movimiento? Esta acción no se puede deshacer."
         confirmText="Eliminar"
         cancelText="Cancelar"
-        onConfirm={() => {
-          onDelete(itemToDelete);
+        onConfirm={async () => {
+          try {
+            await onDelete(itemToDelete);
+            showToast('Movimiento eliminado correctamente', 'success');
+          } catch (error) {
+            showToast('Error al eliminar: ' + error.message, 'error');
+          }
           setItemToDelete(null);
         }}
         onCancel={() => setItemToDelete(null)}

@@ -101,6 +101,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       });
     } catch (error) {
       console.error("Error adding transaction: ", error);
+      throw error;
     }
   };
 
@@ -114,6 +115,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       await updateDoc(doc(db, 'transactions', id), dataToUpdate);
     } catch (error) {
       console.error("Error updating transaction: ", error);
+      throw error;
     }
   };
 
@@ -123,6 +125,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       await deleteDoc(doc(db, 'transactions', id));
     } catch (error) {
       console.error("Error deleting transaction: ", error);
+      throw error;
     }
   };
 

@@ -46,7 +46,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount || isNaN(amount)) return;
 
@@ -58,18 +58,22 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData }) =>
       date
     };
 
-    if (initialData && initialData.id && onEdit) {
-      onEdit(initialData.id, data);
-      showToast('Movimiento editado correctamente', 'success');
-    } else {
-      onAdd(data);
-      showToast('Movimiento añadido exitosamente', 'success');
-    }
+    try {
+      if (initialData && initialData.id && onEdit) {
+        await onEdit(initialData.id, data);
+        showToast('Movimiento editado correctamente', 'success');
+      } else {
+        await onAdd(data);
+        showToast('Movimiento añadido exitosamente', 'success');
+      }
 
-    // Reset and close
-    setAmount('');
-    setDescription('');
-    onClose();
+      // Reset and close
+      setAmount('');
+      setDescription('');
+      onClose();
+    } catch (error) {
+      showToast('Error al guardar el movimiento: ' + error.message, 'error');
+    }
   };
 
   return (
