@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined || isNaN(amount)) amount = 0;
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
@@ -11,7 +12,9 @@ export const formatCurrency = (amount) => {
 };
 
 export const formatDate = (dateString) => {
+  if (!dateString) return '';
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
   return new Intl.DateTimeFormat('es-AR', {
     day: '2-digit',
     month: 'short',
