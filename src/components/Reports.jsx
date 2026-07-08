@@ -20,6 +20,11 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+  const getCategoryColor = (categoryName) => {
+    const index = CATEGORIES.indexOf(categoryName);
+    return COLORS[index !== -1 ? (index % COLORS.length) : (COLORS.length - 1)];
+  };
+
   const handleSaveBudget = (category) => {
     updateBudget(category, budgetInput);
     setEditingBudget(null);
@@ -98,7 +103,7 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
                   stroke="none"
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
                   ))}
                 </Pie>
                 <Tooltip 
@@ -130,7 +135,7 @@ const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budge
                 <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                      <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: COLORS[index % COLORS.length] }}></div>
+                      <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: getCategoryColor(category) }}></div>
                       <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{category}</span>
                     </div>
                     
