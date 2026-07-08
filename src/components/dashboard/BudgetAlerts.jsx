@@ -26,22 +26,20 @@ const BudgetAlerts = ({ budgets = {}, expensesByCategory = {} }) => {
           key={idx}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{
-            padding: '12px 16px',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            backgroundColor: alert.type === 'danger' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-            border: `1px solid ${alert.type === 'danger' ? 'var(--danger)' : '#f59e0b'}`,
-            color: alert.type === 'danger' ? '#fca5a5' : '#fcd34d',
-            fontSize: '0.9rem',
-            fontWeight: '500'
-          }}
-        >
-          {alert.type === 'danger' ? <AlertTriangle size={18} /> : <Info size={18} />}
-          {alert.message}
-        </motion.div>
+            className={`budget-alert ${alert.type === 'danger' ? 'alert-danger' : 'alert-warning'}`}
+            style={{
+              padding: '12px 16px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              fontSize: '0.9rem',
+              fontWeight: '500'
+            }}
+          >
+            {alert.type === 'danger' ? <AlertTriangle size={18} /> : <Info size={18} />}
+            {alert.message}
+          </motion.div>
       ))}
     </div>
   );

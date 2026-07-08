@@ -189,3 +189,28 @@ h2 {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
+
+/* Budget Alerts Styling */
+.budget-alert.alert-danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--danger);
+  color: #fca5a5;
+}
+
+.budget-alert.alert-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid #f59e0b;
+  color: #fcd34d;
+}
+
+body.light-theme .budget-alert.alert-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #b91c1c; /* Red-700 for high contrast */
+}
+
+body.light-theme .budget-alert.alert-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #b45309; /* Amber-700 for high contrast */
+}
