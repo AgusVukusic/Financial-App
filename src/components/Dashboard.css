@@ -160,11 +160,9 @@ body.light-theme .stat-item:hover {
 }
 
 .stat-value {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 @media (min-width: 480px) {
