@@ -1,17 +1,14 @@
 import React from 'react';
 import { User, Shield, FileText } from 'lucide-react';
-import { useSubscriptions } from '../hooks/useSubscriptions';
 import { exportToPDF, exportToCSV } from '../utils/formatters';
 import { motion } from 'framer-motion';
 import { useDialog } from '../contexts/DialogContext';
 import Card from './ui/Card';
 import Button from './ui/Button';
-import SubscriptionsCard from './profile/SubscriptionsCard';
 import { useAllTransactions } from '../hooks/useAllTransactions';
 import MigrationButton from './MigrationButton';
 
-const Profile = ({ userName, uid, onClearData, onPaySubscription, onAddTransaction, accounts }) => {
-  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(uid);
+const Profile = ({ userName, uid, onClearData, accounts }) => {
   const { confirm } = useDialog();
   const allTransactions = useAllTransactions(uid);
 
@@ -43,15 +40,6 @@ const Profile = ({ userName, uid, onClearData, onPaySubscription, onAddTransacti
       </Card>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-        <SubscriptionsCard
-          subscriptions={subscriptions}
-          addSubscription={addSubscription}
-          deleteSubscription={deleteSubscription}
-          editSubscription={editSubscription}
-          onPaySubscription={onPaySubscription}
-          onAddTransaction={onAddTransaction}
-        />
-
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
           <Card style={{ flex: 1, padding: 0 }}>
             <Button variant="ghost" onClick={() => exportToPDF(allTransactions || [])} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>

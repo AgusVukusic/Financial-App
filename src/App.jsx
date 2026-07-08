@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTransactions } from './hooks/useTransactions';
+import { useSubscriptions } from './hooks/useSubscriptions';
 import { useBudgets } from './hooks/useBudgets';
 import { useAccounts } from './hooks/useAccounts';
 import { useTheme } from './hooks/useTheme';
@@ -12,6 +13,7 @@ import AddAccountModal from './components/Accounts/AddAccountModal';
 import Reports from './components/Reports';
 import Profile from './components/Profile';
 import Groups from './components/Groups';
+import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
 import { exportToCSV } from './utils/formatters';
@@ -29,6 +31,7 @@ function App() {
   const { theme, toggleTheme } = useTheme();
   const { user, loading, userName, clearUser } = useUser();
   const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
+  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(user?.uid);
   const { budgets, updateBudget } = useBudgets(user?.uid);
   const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(user?.uid);
   
@@ -63,12 +66,6 @@ function App() {
     window.localStorage.removeItem('financial_app_subscriptions');
     clearUser();
     window.location.reload();
-  };
-
-
-  const handlePaySubscription = (sub) => {
-    setModalInitialData(sub);
-    setIsModalOpen(true);
   };
 
   const handleOpenModal = () => {
@@ -157,6 +154,8 @@ function App() {
             budgets={budgets}
             accounts={accounts}
             accountBalances={accountBalances}
+            subscriptions={subscriptions}
+            onNavigateToSubscriptions={() => setActiveTab('subscriptions')}
             onAddAccountClick={() => handleOpenAccountModal()}
             onEditAccountClick={(acc) => handleOpenAccountModal(acc)}
           />
@@ -183,14 +182,23 @@ function App() {
           userName={userName}
           uid={user?.uid}
           onClearData={handleClearData} 
-          onPaySubscription={handlePaySubscription}
-          onAddTransaction={addTransaction}
           accounts={accounts}
         />
       )}
 
       {activeTab === 'groups' && (
         <Groups uid={user?.uid} userName={userName} accountBalances={accountBalances} />
+      )}
+
+      {activeTab === 'subscriptions' && (
+        <SubscriptionsManager 
+          subscriptions={subscriptions}
+          addSubscription={addSubscription}
+          deleteSubscription={deleteSubscription}
+          editSubscription={editSubscription}
+          onAddTransaction={addTransaction}
+          accounts={accounts}
+        />
       )}
 
       <AddTransactionModal 
