@@ -59,7 +59,7 @@ A modern, full-featured personal and group finance tracking application built wi
 2. **Instant "Cash" Settlement Processing**: Settlements using cash accounts bypass the "Confirm Receive" pending state. Because cash is physical and immediate, it auto-completes on the sender's side and assigns the receiver's cash account instantly to minimize unnecessary UI blockers.
 3. **Robust Account Type Fallbacks**: In cases where legacy accounts don't have a `type` defined in Firestore, the application uses a dynamic `isCashAccount` helper that checks both the `type` field and if the account name `.toLowerCase().includes('efectivo')`.
 
-## ⚠️ Supuestos y Limitaciones
+## ⚠️ Assumptions and limitations
 
 * **Firestore Security Rules**: The app assumes the user has properly configured Firestore rules allowing `userId` filtering.
 * **Authentication Requirement**: All components assume an authenticated state after `WelcomeScreen` and rely heavily on `user.uid` for querying.
