@@ -4,7 +4,7 @@ import { Users, Plus, UserPlus, ArrowLeft } from 'lucide-react';
 import GroupDetails from './GroupDetails';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Groups = ({ uid, userName }) => {
+const Groups = ({ uid, userName, accountBalances }) => {
   const { groups, createGroup, joinGroup } = useGroups(uid, userName);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -14,7 +14,7 @@ const Groups = ({ uid, userName }) => {
   const [error, setError] = useState('');
 
   if (selectedGroupId) {
-    return <GroupDetails groupId={selectedGroupId} onBack={() => setSelectedGroupId(null)} uid={uid} userName={userName} />;
+    return <GroupDetails groupId={selectedGroupId} onBack={() => setSelectedGroupId(null)} uid={uid} userName={userName} accountBalances={accountBalances} />;
   }
 
   const handleCreate = async (e) => {

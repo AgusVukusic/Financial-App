@@ -19,8 +19,16 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
         id: doc.id,
         ...doc.data()
       }));
-      // Sort locally to avoid needing a composite index in Firestore
-      data.sort((a, b) => new Date(b.date) - new Date(a.date));
+      // Sort locally by date, and fallback to createdAt for transactions on the same day
+      data.sort((a, b) => {
+        const dateDiff = new Date(b.date) - new Date(a.date);
+        if (dateDiff === 0) {
+           const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+           const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+           return timeB - timeA;
+        }
+        return dateDiff;
+      });
       setTransactions(data);
     }, (error) => {
       console.error("Error fetching transactions: ", error);

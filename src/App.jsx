@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTransactions } from './hooks/useTransactions';
 import { useBudgets } from './hooks/useBudgets';
+import { useAccounts } from './hooks/useAccounts';
 import { useTheme } from './hooks/useTheme';
 import { useUser } from './hooks/useUser';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
+import AddAccountModal from './components/Accounts/AddAccountModal';
 import Reports from './components/Reports';
 import Profile from './components/Profile';
 import Groups from './components/Groups';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
 import { exportToCSV } from './utils/formatters';
+import { calculateAccountBalances } from './utils/calculations';
 import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from './components/ui/Card';
 import Button from './components/ui/Button';
@@ -27,11 +30,26 @@ function App() {
   const { user, loading, userName, clearUser } = useUser();
   const { transactions, allTransactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
   const { budgets, updateBudget } = useBudgets(user?.uid);
+  const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(user?.uid);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [accountModalData, setAccountModalData] = useState(null);
+
   const [activeTab, setActiveTab] = useState('home');
   const [showLogin, setShowLogin] = useState(false);
+
+  // Auto-create default account for existing users who have transactions but no accounts
+  useEffect(() => {
+    if (user?.uid && !loadingAccounts && accounts.length === 0 && allTransactions.length > 0) {
+      addAccount({ name: 'General', type: 'cash', initialBalance: 0 });
+    }
+  }, [user?.uid, loadingAccounts, accounts.length, allTransactions.length, addAccount]);
+
+  const { balances: accountBalances, totalNetWorth } = useMemo(() => {
+    return calculateAccountBalances(accounts, allTransactions);
+  }, [accounts, allTransactions]);
 
   const handleClearData = () => {
     window.localStorage.removeItem('financial_app_transactions');
@@ -55,6 +73,11 @@ function App() {
     setIsModalOpen(true);
   };
 
+  const handleOpenAccountModal = (acc = null) => {
+    setAccountModalData(acc);
+    setIsAccountModalOpen(true);
+  };
+
   const handleMonthChange = (offset) => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
@@ -65,7 +88,7 @@ function App() {
 
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-  if (loading) {
+  if (loading || (user && loadingAccounts)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-base)' }}>
         <p style={{ color: 'var(--text-primary)' }}>Cargando...</p>
@@ -113,11 +136,16 @@ function App() {
         <>
           <Dashboard 
             balance={balance} 
+            netWorth={totalNetWorth}
             income={totalIncome} 
             expense={totalExpense} 
             transactions={transactions} 
             expensesByCategory={expensesByCategory}
             budgets={budgets}
+            accounts={accounts}
+            accountBalances={accountBalances}
+            onAddAccountClick={() => handleOpenAccountModal()}
+            onEditAccountClick={(acc) => handleOpenAccountModal(acc)}
           />
           <TransactionList 
             transactions={transactions} 
@@ -151,15 +179,26 @@ function App() {
       )}
 
       {activeTab === 'groups' && (
-        <Groups uid={user?.uid} userName={userName} />
+        <Groups uid={user?.uid} userName={userName} accountBalances={accountBalances} />
       )}
 
       <AddTransactionModal 
         isOpen={isModalOpen} 
         initialData={modalInitialData}
+        accounts={accounts}
         onClose={() => setIsModalOpen(false)} 
         onAdd={addTransaction} 
         onEdit={updateTransaction}
+      />
+
+      <AddAccountModal
+        isOpen={isAccountModalOpen}
+        initialData={accountModalData}
+        allTransactions={allTransactions}
+        onClose={() => setIsAccountModalOpen(false)}
+        onAdd={addAccount}
+        onEdit={updateAccount}
+        onDelete={deleteAccount}
       />
     </Layout>
   );

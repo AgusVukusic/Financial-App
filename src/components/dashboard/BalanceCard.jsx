@@ -3,14 +3,14 @@ import { ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import Card from '../ui/Card';
 
-const BalanceCard = ({ balance, income, expense }) => {
+const BalanceCard = ({ netWorth, balance, income, expense }) => {
   return (
     <Card className="balance-card">
       <div className="balance-header">
-        <span className="text-secondary">Balance Total</span>
+        <span className="text-secondary">Patrimonio Total</span>
         <Wallet size={20} className="text-secondary" />
       </div>
-      <h1 className="balance-amount">{formatCurrency(balance)}</h1>
+      <h1 className="balance-amount">{formatCurrency(netWorth !== undefined ? netWorth : balance)}</h1>
       
       <div className="balance-stats">
         <div className="stat-item income">

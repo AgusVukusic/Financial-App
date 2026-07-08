@@ -128,6 +128,7 @@ export const useGroupDetails = (groupId) => {
           description: expenseData.expenseDescription || expenseData.description,
           category: 'Saldo de deuda',
           userId: expenseData.paidBy,
+          accountId: expenseData.payerAccountId || null, // NEW
           groupExpenseId: docRef.id,
           groupId: groupId,
           date: new Date().toISOString(),
@@ -136,22 +137,42 @@ export const useGroupDetails = (groupId) => {
         });
         transactionIds.push(tx1.id);
 
-        // Create Income for receiver
-        const receiverUid = expenseData.isSettlement ? expenseData.receiverUid : null;
-        if (receiverUid) {
-          const tx2 = await addDoc(collection(db, 'transactions'), {
-            type: 'income',
-            amount: expenseData.amount,
-            description: expenseData.incomeDescription || 'Ingreso por saldo de deuda',
-            category: 'Saldo de deuda',
-            groupId: groupId,
-            groupExpenseId: docRef.id,
-            userId: receiverUid,
-            date: new Date().toISOString(),
-            categoryAdjustments: expenseData.categoryAdjustmentsReceiver || null,
-            createdAt: serverTimestamp()
-          });
-          transactionIds.push(tx2.id);
+        let finalStatus = expenseData.status;
+
+        // If not pending (backward compatibility or immediate settlement) OR isCashPayment
+        if (expenseData.status !== 'pending' || expenseData.isCashPayment) {
+          const receiverUid = expenseData.receiverUid;
+          if (receiverUid) {
+            let receiverAccountId = null;
+            if (expenseData.isCashPayment) {
+              const accQ = query(collection(db, 'accounts'), where('userId', '==', receiverUid));
+              const accSnap = await getDocs(accQ);
+              const cashAcc = accSnap.docs.find(doc => doc.data().type === 'cash' || doc.data().name?.toLowerCase().includes('efectivo'));
+              if (cashAcc) {
+                receiverAccountId = cashAcc.id;
+              }
+              finalStatus = 'completed'; // auto-complete if cash payment
+            }
+
+            const tx2 = await addDoc(collection(db, 'transactions'), {
+              type: 'income',
+              amount: expenseData.amount,
+              description: expenseData.incomeDescription || 'Ingreso por saldo de deuda',
+              category: 'Saldo de deuda',
+              groupId: groupId,
+              groupExpenseId: docRef.id,
+              userId: receiverUid,
+              accountId: receiverAccountId,
+              date: new Date().toISOString(),
+              categoryAdjustments: expenseData.categoryAdjustmentsReceiver || null,
+              createdAt: serverTimestamp()
+            });
+            transactionIds.push(tx2.id);
+          }
+        }
+
+        if (finalStatus !== expenseData.status) {
+           await updateDoc(doc(db, `groups/${groupId}/expenses`, docRef.id), { status: finalStatus });
         }
       } else {
         // Normal group expense
@@ -161,6 +182,7 @@ export const useGroupDetails = (groupId) => {
           description: `Gasto de grupo: ${expenseData.description}`,
           category: expenseData.category || 'Comida',
           userId: expenseData.paidBy,
+          accountId: expenseData.accountId || null, // NEW
           groupExpenseId: docRef.id,
           groupId: groupId,
           date: new Date().toISOString(),
@@ -176,6 +198,42 @@ export const useGroupDetails = (groupId) => {
       }
     } catch (error) {
       console.error("Error adding shared expense: ", error);
+    }
+  };
+
+  const confirmSettlement = async (expenseId, receiverUid, receiverAccountId, incomeDescription, categoryAdjustmentsReceiver) => {
+    if (!groupId) return;
+    try {
+      const expenseDocRef = doc(db, `groups/${groupId}/expenses`, expenseId);
+      const expenseDoc = await getDoc(expenseDocRef);
+      
+      if (!expenseDoc.exists()) return;
+      const data = expenseDoc.data();
+
+      // Create Income for receiver
+      const tx = await addDoc(collection(db, 'transactions'), {
+        type: 'income',
+        amount: data.amount,
+        description: incomeDescription || 'Ingreso por saldo de deuda',
+        category: 'Saldo de deuda',
+        groupId: groupId,
+        groupExpenseId: expenseId,
+        userId: receiverUid,
+        accountId: receiverAccountId || null,
+        date: new Date().toISOString(),
+        categoryAdjustments: categoryAdjustmentsReceiver || null,
+        createdAt: serverTimestamp()
+      });
+
+      const newTransactionIds = [...(data.transactionIds || []), tx.id];
+
+      await updateDoc(expenseDocRef, {
+        status: 'completed',
+        transactionIds: newTransactionIds
+      });
+
+    } catch (error) {
+      console.error("Error confirming settlement: ", error);
     }
   };
 
@@ -255,7 +313,8 @@ export const useGroupDetails = (groupId) => {
                 amount: updatedData.amount,
                 description: updatedData.description ? `Gasto de grupo: ${updatedData.description}` : txData.description,
                 category: updatedData.category || txData.category,
-                userId: updatedData.paidBy || txData.userId
+                userId: updatedData.paidBy || txData.userId,
+                // optionally update accountId here if needed, but omitted for simplicity
               });
             }
           }
@@ -286,5 +345,5 @@ export const useGroupDetails = (groupId) => {
     }
   };
 
-  return { group, expenses, addSharedExpense, updateSharedExpense, deleteSharedExpense, deleteGroup };
+  return { group, expenses, addSharedExpense, confirmSettlement, updateSharedExpense, deleteSharedExpense, deleteGroup };
 };

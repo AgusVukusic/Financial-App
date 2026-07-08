@@ -54,8 +54,11 @@ const TransactionList = ({ transactions, onDelete, onEdit }) => {
               <div className="transaction-details">
                 <div className="transaction-header">
                   <span className="transaction-title">{transaction.description || transaction.category}</span>
-                  <span className={`transaction-amount ${transaction.type === 'income' ? 'text-success' : ''}`}>
-                    {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                  <span className={`transaction-amount ${
+                    transaction.type === 'income' ? 'text-success' : 
+                    transaction.type === 'expense' ? 'text-danger' : ''
+                  }`}>
+                    {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}{formatCurrency(transaction.amount)}
                   </span>
                 </div>
                 <div className="transaction-footer">

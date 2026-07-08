@@ -43,7 +43,45 @@ export const calculateTotalsAndCategories = (filteredTransactions) => {
         }
       }
     }
+    // Note: type === 'transfer' is ignored for global income/expense
   });
 
   return { totalIncome: income, totalExpense: expense, expensesByCategory: byCategory };
+};
+
+export const calculateAccountBalances = (accounts, allTransactions) => {
+  const balances = {};
+  let totalNetWorth = 0;
+
+  // Initialize with initial balances
+  accounts.forEach(acc => {
+    balances[acc.id] = acc.initialBalance || 0;
+  });
+
+  // Apply transactions
+  allTransactions.forEach(t => {
+    if (t.type === 'income') {
+      if (t.accountId && balances[t.accountId] !== undefined) {
+        balances[t.accountId] += t.amount;
+      }
+    } else if (t.type === 'expense') {
+      if (t.accountId && balances[t.accountId] !== undefined) {
+        balances[t.accountId] -= t.amount;
+      }
+    } else if (t.type === 'transfer') {
+      if (t.accountId && balances[t.accountId] !== undefined) {
+        balances[t.accountId] -= t.amount;
+      }
+      if (t.transferToAccountId && balances[t.transferToAccountId] !== undefined) {
+        balances[t.transferToAccountId] += t.amount;
+      }
+    }
+  });
+
+  // Calculate total net worth
+  Object.values(balances).forEach(bal => {
+    totalNetWorth += bal;
+  });
+
+  return { balances, totalNetWorth };
 };
