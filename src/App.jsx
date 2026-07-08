@@ -93,7 +93,8 @@ function App() {
       home: 'Dashboard - Financial App',
       reports: 'Reportes - Financial App',
       profile: 'Perfil - Financial App',
-      groups: 'Grupos - Financial App'
+      groups: 'Grupos - Financial App',
+      subscriptions: 'Gastos Fijos - Financial App'
     };
     document.title = titles[activeTab] || 'Financial App';
   }, [activeTab]);

@@ -106,7 +106,7 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="subscriptions-manager">
       <header className="subscriptions-header">
         <div>
-          <h2>Suscripciones</h2>
+          <h2>Gastos Fijos</h2>
           <p className="text-secondary">Tus cobros recurrentes y fijos</p>
         </div>
         <Button variant="primary" onClick={() => { setIsAddingSub(!isAddingSub); setEditingSubId(null); resetForm(); }}>
@@ -134,7 +134,7 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
             onSubmit={handleAddOrEditSub} 
             className="subscription-form glass-panel"
           >
-            <h3>{editingSubId ? 'Editar Suscripción' : 'Nueva Suscripción'}</h3>
+            <h3>{editingSubId ? 'Editar Gasto Fijo' : 'Nuevo Gasto Fijo'}</h3>
             <div className="form-grid">
               <div className="form-group">
                 <label>Descripción</label>
@@ -183,8 +183,8 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
         {subscriptions.length === 0 && !isAddingSub ? (
           <div className="empty-state">
             <Calendar size={48} color="var(--text-muted)" />
-            <p>No tienes suscripciones registradas.</p>
-            <Button variant="ghost" onClick={() => setIsAddingSub(true)}>Añadir mi primera suscripción</Button>
+            <p>No tienes gastos fijos registrados.</p>
+            <Button variant="ghost" onClick={() => setIsAddingSub(true)}>Añadir mi primer gasto fijo</Button>
           </div>
         ) : (
           // Sort by due date

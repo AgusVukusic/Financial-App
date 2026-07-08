@@ -19,7 +19,7 @@ const UpcomingSubscriptions = ({ subscriptions, onNavigate }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: upcoming.length > 0 ? 'var(--spacing-md)' : '0' }}>
         <h3 style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
           <Bell size={18} color={upcoming.length > 0 ? "var(--warning)" : "var(--text-secondary)"} />
-          Suscripciones
+          Gastos Fijos
         </h3>
         <Button variant="ghost" onClick={onNavigate} style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
           Gestionar <ChevronRight size={16} />

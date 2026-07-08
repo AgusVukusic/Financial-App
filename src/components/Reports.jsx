@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import Card from './ui/Card';
 import Input from './ui/Input';
 import Button from './ui/Button';
+import BudgetAlerts from './dashboard/BudgetAlerts';
 import { useAllTransactions } from '../hooks/useAllTransactions';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
@@ -61,6 +62,7 @@ const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBu
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="reports-container" style={{ padding: 'var(--spacing-md) 0' }}>
+      <BudgetAlerts budgets={budgets} expensesByCategory={expensesByCategory} />
       <h2 style={{ marginBottom: 'var(--spacing-md)' }}>Reportes Detallados</h2>
       
       {/* Temporal Evolution Chart */}

@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 
 const AccountList = ({ accounts, balances, onAddClick, onEditClick }) => {
   return (
-    <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+    <div style={{ marginBottom: 'var(--spacing-md)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
         <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>Mis Cuentas</h3>
         <Button variant="ghost" onClick={onAddClick} style={{ padding: '4px 8px', fontSize: '14px' }}>
