@@ -53,6 +53,19 @@ A modern, full-featured personal and group finance tracking application built wi
 * **Smart Account Handling**: Settlements or transfers made with "Cash" are processed immediately without requiring confirmation from the receiver, streamlining the user experience for physical money exchanges.
 * **Component-Driven UI**: The UI is broken down into modular components (e.g., `TransactionList`, `BalanceCard`, `GroupDetails`) with a central design system for buttons, inputs, and modals (`ui/Button`, `ui/Select`, etc.), ensuring consistency and easy maintainability.
 
+## 📝 Architectural Decision Records (ADRs)
+
+1. **Local Sorting for Same-Day Transactions**: To avoid needing complex composite indexes in Firestore for sorting by date and creation time, we retrieve transactions and sort them locally in `useTransactions.js`. We fallback to `createdAt.toMillis()` when the ISO date strings are identical.
+2. **Instant "Cash" Settlement Processing**: Settlements using cash accounts bypass the "Confirm Receive" pending state. Because cash is physical and immediate, it auto-completes on the sender's side and assigns the receiver's cash account instantly to minimize unnecessary UI blockers.
+3. **Robust Account Type Fallbacks**: In cases where legacy accounts don't have a `type` defined in Firestore, the application uses a dynamic `isCashAccount` helper that checks both the `type` field and if the account name `.toLowerCase().includes('efectivo')`.
+
+## ⚠️ Supuestos y Limitaciones
+
+* **Firestore Security Rules**: The app assumes the user has properly configured Firestore rules allowing `userId` filtering.
+* **Authentication Requirement**: All components assume an authenticated state after `WelcomeScreen` and rely heavily on `user.uid` for querying.
+* **No Multi-Currency Support**: All formatting defaults to the standard locale currency without dynamic currency conversion logic.
+* **Date Handling**: Transactions default to 12:00:00 PM (midday) of their local ISO string to avoid unexpected day shifts due to timezone offsets when rendering.
+
 ---
 
 *Desarrollado con ❤️ y la asistencia de agentes autónomos especializados.*
