@@ -1,16 +1,20 @@
 import React from 'react';
 import { User, Shield, FileText } from 'lucide-react';
 import { useSubscriptions } from '../hooks/useSubscriptions';
-import { exportToPDF } from '../utils/formatters';
+import { exportToPDF, exportToCSV } from '../utils/formatters';
 import { motion } from 'framer-motion';
 import { useDialog } from '../contexts/DialogContext';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import SubscriptionsCard from './profile/SubscriptionsCard';
+import { useAllTransactions } from '../hooks/useAllTransactions';
+import MigrationButton from './MigrationButton';
 
-const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, onAddTransaction, allTransactions }) => {
+const Profile = ({ userName, uid, onClearData, onPaySubscription, onAddTransaction, accounts }) => {
   const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(uid);
-  const { confirm, alert } = useDialog();
+  const { confirm } = useDialog();
+  const allTransactions = useAllTransactions(uid);
+
   const handleClearData = async () => {
     const isConfirmed = await confirm("¿Estás seguro de que deseas cerrar sesión? (Tus datos en la nube no se borrarán)");
     if (isConfirmed) {
@@ -18,8 +22,14 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
     }
   };
 
+  const handleExportData = () => {
+    exportToCSV(allTransactions);
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="profile-container" style={{ padding: 'var(--spacing-md) 0' }}>
+      <MigrationButton uid={uid} accounts={accounts || []} />
+      
       <h2 style={{ marginBottom: 'var(--spacing-lg)' }}>Mi Perfil</h2>
       
       <Card className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
@@ -50,7 +60,7 @@ const Profile = ({ userName, uid, onClearData, onExportData, onPaySubscription, 
             </Button>
           </Card>
           <Card style={{ flex: 1, padding: 0 }}>
-            <Button variant="ghost" onClick={onExportData} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+            <Button variant="ghost" onClick={handleExportData} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>
               <Shield size={20} className="text-secondary" />
               <span>CSV</span>
             </Button>

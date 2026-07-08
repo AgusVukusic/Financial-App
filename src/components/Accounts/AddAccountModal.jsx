@@ -6,6 +6,8 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import { useToast } from '../ui/ToastContext';
 import { useDialog } from '../../contexts/DialogContext';
+import { db } from '../../firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export const ACCOUNT_TYPES = [
   { id: 'bank', label: 'Banco', icon: Landmark },
@@ -14,7 +16,7 @@ export const ACCOUNT_TYPES = [
   { id: 'credit', label: 'Tarjeta de Crédito', icon: CreditCard }
 ];
 
-const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData, allTransactions = [] }) => {
+const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData }) => {
   const { showToast } = useToast();
   const { confirm } = useDialog();
   const [name, setName] = useState('');
@@ -68,12 +70,13 @@ const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData
   const handleDelete = async () => {
     if (!initialData || !initialData.id) return;
     
-    // Check if account has transactions
-    const hasTransactions = allTransactions.some(t => 
-      t.accountId === initialData.id || t.transferToAccountId === initialData.id
-    );
+    const q1 = query(collection(db, 'transactions'), where('accountId', '==', initialData.id));
+    const q2 = query(collection(db, 'transactions'), where('transferToAccountId', '==', initialData.id));
+    
+    const snap1 = await getDocs(q1);
+    const snap2 = await getDocs(q2);
 
-    if (hasTransactions) {
+    if (!snap1.empty || !snap2.empty) {
       showToast('No puedes eliminar una cuenta que tiene movimientos asociados.', 'error');
       return;
     }

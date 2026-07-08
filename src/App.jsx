@@ -15,7 +15,7 @@ import Groups from './components/Groups';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
 import { exportToCSV } from './utils/formatters';
-import { calculateAccountBalances } from './utils/calculations';
+
 import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from './components/ui/Card';
 import Button from './components/ui/Button';
@@ -28,7 +28,7 @@ function App() {
 
   const { theme, toggleTheme } = useTheme();
   const { user, loading, userName, clearUser } = useUser();
-  const { transactions, allTransactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
+  const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
   const { budgets, updateBudget } = useBudgets(user?.uid);
   const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(user?.uid);
   
@@ -40,16 +40,22 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showLogin, setShowLogin] = useState(false);
 
-  // Auto-create default account for existing users who have transactions but no accounts
   useEffect(() => {
-    if (user?.uid && !loadingAccounts && accounts.length === 0 && allTransactions.length > 0) {
+    if (user?.uid && !loadingAccounts && accounts.length === 0 && transactions.length > 0) {
       addAccount({ name: 'General', type: 'cash', initialBalance: 0 });
     }
-  }, [user?.uid, loadingAccounts, accounts.length, allTransactions.length, addAccount]);
+  }, [user?.uid, loadingAccounts, accounts.length, transactions.length, addAccount]);
 
   const { balances: accountBalances, totalNetWorth } = useMemo(() => {
-    return calculateAccountBalances(accounts, allTransactions);
-  }, [accounts, allTransactions]);
+    const balances = {};
+    let totalNetWorth = 0;
+    accounts.forEach(acc => {
+      const bal = acc.currentBalance !== undefined ? acc.currentBalance : (acc.initialBalance || 0);
+      balances[acc.id] = bal;
+      totalNetWorth += bal;
+    });
+    return { balances, totalNetWorth };
+  }, [accounts]);
 
   const handleClearData = () => {
     window.localStorage.removeItem('financial_app_transactions');
@@ -59,9 +65,6 @@ function App() {
     window.location.reload();
   };
 
-  const handleExportData = () => {
-    exportToCSV(allTransactions);
-  };
 
   const handlePaySubscription = (sub) => {
     setModalInitialData(sub);
@@ -168,7 +171,6 @@ function App() {
       {activeTab === 'reports' && (
         <Reports 
           transactions={transactions} 
-          allTransactions={allTransactions} 
           uid={user?.uid} 
           expensesByCategory={expensesByCategory}
           budgets={budgets} 
@@ -181,10 +183,9 @@ function App() {
           userName={userName}
           uid={user?.uid}
           onClearData={handleClearData} 
-          onExportData={handleExportData} 
           onPaySubscription={handlePaySubscription}
           onAddTransaction={addTransaction}
-          allTransactions={allTransactions}
+          accounts={accounts}
         />
       )}
 
@@ -204,7 +205,6 @@ function App() {
       <AddAccountModal
         isOpen={isAccountModalOpen}
         initialData={accountModalData}
-        allTransactions={allTransactions}
         onClose={() => setIsAccountModalOpen(false)}
         onAdd={addAccount}
         onEdit={updateAccount}

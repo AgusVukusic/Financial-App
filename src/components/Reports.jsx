@@ -6,12 +6,14 @@ import { motion } from 'framer-motion';
 import Card from './ui/Card';
 import Input from './ui/Input';
 import Button from './ui/Button';
+import { useAllTransactions } from '../hooks/useAllTransactions';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const Reports = ({ transactions, allTransactions, uid, expensesByCategory, budgets = {}, updateBudget }) => {
+const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBudget }) => {
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
+  const allTransactions = useAllTransactions(uid);
 
   const chartData = Object.keys(expensesByCategory).map(key => ({
     name: key,
