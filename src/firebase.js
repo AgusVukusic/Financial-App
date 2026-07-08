@@ -8,12 +8,12 @@ import { getFirestore } from "firebase/firestore";
 // 3. Añade una aplicación web (</>)
 // 4. Copia el objeto firebaseConfig y reemplázalo aquí
 const firebaseConfig = {
-  apiKey: "AIzaSyAgrUpH1GXOIB4oqsw5uq9FJ7M3RfKlY3Q",
-  authDomain: "financial-app-b7fbb.firebaseapp.com",
-  projectId: "financial-app-b7fbb",
-  storageBucket: "financial-app-b7fbb.firebasestorage.app",
-  messagingSenderId: "351602158123",
-  appId: "1:351602158123:web:560c87f9032a6d2be2d86e"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

@@ -88,6 +88,16 @@ function App() {
 
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+  useEffect(() => {
+    const titles = {
+      home: 'Dashboard - Financial App',
+      reports: 'Reportes - Financial App',
+      profile: 'Perfil - Financial App',
+      groups: 'Grupos - Financial App'
+    };
+    document.title = titles[activeTab] || 'Financial App';
+  }, [activeTab]);
+
   if (loading || (user && loadingAccounts)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-base)' }}>

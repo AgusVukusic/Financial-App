@@ -2,9 +2,11 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { calculateTotalsAndCategories } from '../utils/calculations';
+import { useToast } from '../components/ui/ToastContext';
 
 export const useTransactions = (selectedMonth, selectedYear, uid) => {
   const [transactions, setTransactions] = useState([]);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!uid) return;
@@ -32,6 +34,7 @@ export const useTransactions = (selectedMonth, selectedYear, uid) => {
       setTransactions(data);
     }, (error) => {
       console.error("Error fetching transactions: ", error);
+      showToast("Error de conexión. No se pudieron cargar los datos.", "error", 5000);
     });
 
     return () => unsubscribe();
