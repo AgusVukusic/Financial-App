@@ -98,6 +98,7 @@
 .transaction-amount {
   font-weight: 700;
   font-size: 1rem;
+  white-space: nowrap;
 }
 
 .transaction-footer {
