@@ -330,18 +330,6 @@ export const useGroupDetails = (groupId) => {
   const deleteGroup = async () => {
     if (!groupId) return;
     try {
-      // First, fetch all expenses for this group to delete their transactions and revert balances
-      const expensesSnapshot = await getDocs(collection(db, `groups/${groupId}/expenses`));
-      
-      const deletePromises = [];
-      expensesSnapshot.forEach((docSnap) => {
-        deletePromises.push(deleteSharedExpense(docSnap.id));
-      });
-      
-      // Wait for all expenses (and their transactions) to be deleted
-      await Promise.all(deletePromises);
-
-      // Finally, delete the group document itself
       await deleteDoc(doc(db, 'groups', groupId));
     } catch (error) {
       console.error("Error deleting group: ", error);
