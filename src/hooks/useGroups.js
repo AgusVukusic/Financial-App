@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, arrayUnion, serverTimestamp, getDocs, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, arrayUnion, serverTimestamp, getDocs, getDoc, deleteDoc, runTransaction } from 'firebase/firestore';
+
+const updateAccountBalance = async (accountId, change) => {
+  if (!accountId || change === 0) return;
+  try {
+    await runTransaction(db, async (transactionContext) => {
+      const accRef = doc(db, 'accounts', accountId);
+      const accDoc = await transactionContext.get(accRef);
+      if (accDoc.exists()) {
+        const data = accDoc.data();
+        const currentBal = data.currentBalance !== undefined ? data.currentBalance : (data.initialBalance || 0);
+        transactionContext.update(accRef, { currentBalance: currentBal + change });
+      }
+    });
+  } catch (error) {
+    console.error("Error updating account balance:", error);
+  }
+};
 
 export const useGroups = (uid, userName) => {
   const [groups, setGroups] = useState([]);
@@ -136,6 +153,9 @@ export const useGroupDetails = (groupId) => {
           createdAt: serverTimestamp()
         });
         transactionIds.push(tx1.id);
+        if (expenseData.payerAccountId) {
+          await updateAccountBalance(expenseData.payerAccountId, -expenseData.amount);
+        }
 
         let finalStatus = expenseData.status;
 
@@ -168,6 +188,9 @@ export const useGroupDetails = (groupId) => {
               createdAt: serverTimestamp()
             });
             transactionIds.push(tx2.id);
+            if (receiverAccountId) {
+              await updateAccountBalance(receiverAccountId, expenseData.amount);
+            }
           }
         }
 
@@ -189,6 +212,9 @@ export const useGroupDetails = (groupId) => {
           createdAt: serverTimestamp()
         });
         transactionIds.push(tx.id);
+        if (expenseData.accountId) {
+          await updateAccountBalance(expenseData.accountId, -expenseData.amount);
+        }
       }
 
       if (transactionIds.length > 0) {
@@ -224,6 +250,9 @@ export const useGroupDetails = (groupId) => {
         categoryAdjustments: categoryAdjustmentsReceiver || null,
         createdAt: serverTimestamp()
       });
+      if (receiverAccountId) {
+        await updateAccountBalance(receiverAccountId, data.amount);
+      }
 
       const newTransactionIds = [...(data.transactionIds || []), tx.id];
 
@@ -267,13 +296,28 @@ export const useGroupDetails = (groupId) => {
       await deleteDoc(expenseDocRef);
       
       if (transactionIdsToFallback) {
-        const deletePromises = transactionIdsToFallback.map(id => deleteDoc(doc(db, 'transactions', id)));
+        const deletePromises = transactionIdsToFallback.map(async id => {
+          const txDoc = await getDoc(doc(db, 'transactions', id));
+          if (txDoc.exists()) {
+             const txData = txDoc.data();
+             if (txData.accountId) {
+                const change = txData.type === 'expense' ? txData.amount : -txData.amount;
+                await updateAccountBalance(txData.accountId, change);
+             }
+          }
+          return deleteDoc(doc(db, 'transactions', id));
+        });
         await Promise.all(deletePromises);
       } else {
         const q = query(collection(db, 'transactions'), where('groupExpenseId', '==', expenseId));
         const querySnapshot = await getDocs(q);
         const deletePromises = [];
         querySnapshot.forEach((docSnap) => {
+          const txData = docSnap.data();
+          if (txData.accountId) {
+             const change = txData.type === 'expense' ? txData.amount : -txData.amount;
+             deletePromises.push(updateAccountBalance(txData.accountId, change));
+          }
           deletePromises.push(deleteDoc(docSnap.ref));
         });
         await Promise.all(deletePromises);
@@ -305,6 +349,15 @@ export const useGroupDetails = (groupId) => {
         const data = expenseDoc.exists() ? expenseDoc.data() : null;
         
         const processTxDoc = async (txRef, txData) => {
+          let oldAmount = txData.amount;
+          let newAmount = updatedData.amount;
+          let change = newAmount - oldAmount;
+
+          if (txData.accountId && change !== 0) {
+             const balanceChange = txData.type === 'expense' ? -change : change;
+             await updateAccountBalance(txData.accountId, balanceChange);
+          }
+
           if (isSettlement) {
             return updateDoc(txRef, { amount: updatedData.amount });
           } else {
