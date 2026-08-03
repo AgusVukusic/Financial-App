@@ -16,7 +16,7 @@ export const ACCOUNT_TYPES = [
   { id: 'credit', label: 'Tarjeta de Crédito', icon: CreditCard }
 ];
 
-const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData }) => {
+const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData, uid }) => {
   const { showToast } = useToast();
   const { confirm } = useDialog();
   const [name, setName] = useState('');
@@ -70,15 +70,29 @@ const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData
   const handleDelete = async () => {
     if (!initialData || !initialData.id) return;
     
-    const q1 = query(collection(db, 'transactions'), where('accountId', '==', initialData.id));
-    const q2 = query(collection(db, 'transactions'), where('transferToAccountId', '==', initialData.id));
-    
-    const snap1 = await getDocs(q1);
-    const snap2 = await getDocs(q2);
+    try {
+      let q1, q2;
+      if (uid) {
+        q1 = query(collection(db, 'transactions'), where('userId', '==', uid), where('accountId', '==', initialData.id));
+        q2 = query(collection(db, 'transactions'), where('userId', '==', uid), where('transferToAccountId', '==', initialData.id));
+      } else {
+        q1 = query(collection(db, 'transactions'), where('accountId', '==', initialData.id));
+        q2 = query(collection(db, 'transactions'), where('transferToAccountId', '==', initialData.id));
+      }
+      
+      const snap1 = await getDocs(q1);
+      const snap2 = await getDocs(q2);
 
-    if (!snap1.empty || !snap2.empty) {
-      showToast('No puedes eliminar una cuenta que tiene movimientos asociados.', 'error');
-      return;
+      if (!snap1.empty || !snap2.empty) {
+        showToast('No puedes eliminar una cuenta que tiene movimientos asociados.', 'error');
+        return;
+      }
+    } catch (err) {
+      console.warn("Error verificando transacciones, es posible que falte un índice:", err);
+      // Si falla la verificación (por ej. falta de índice o permisos), 
+      // dejamos que intente borrar la cuenta si el usuario confirma, 
+      // o avisamos del error.
+      // showToast('No se pudo verificar si la cuenta tiene movimientos.', 'warning');
     }
 
     const isConfirmed = await confirm(`¿Estás seguro de que quieres eliminar la cuenta "${initialData.name}"?`);

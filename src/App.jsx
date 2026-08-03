@@ -214,6 +214,7 @@ function App() {
       <AddAccountModal
         isOpen={isAccountModalOpen}
         initialData={accountModalData}
+        uid={user?.uid}
         onClose={() => setIsAccountModalOpen(false)}
         onAdd={addAccount}
         onEdit={updateAccount}
