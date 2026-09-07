@@ -8,11 +8,13 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run --exclude test/firestore.rules.test.js",
+    "test:rules": "npx firebase-tools emulators:exec --project beta --only firestore \"vitest run test/firestore.rules.test.js\"",
+    "test:all": "npm run test:unit && npm run test:rules",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "firebase": "^12.14.0",
     "framer-motion": "^12.40.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.14",
@@ -31,6 +34,7 @@
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "firebase": "^12.18.0",
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
     "vite": "^8.0.12",
