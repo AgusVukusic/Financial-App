@@ -10,6 +10,5 @@ setGlobalOptions({
   maxInstances: 10,
 });
 
-// Exportar funciones (skeleton)
-// exports.transactions = require('./transactions');
-// exports.accounts = require('./accounts');
+// Exportar funciones
+exports.activateBetaUser = require('./auth/activateBetaUser').activateBetaUser;

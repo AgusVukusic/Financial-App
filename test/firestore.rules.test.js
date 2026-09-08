@@ -63,5 +63,25 @@ describe('Firestore Security Rules', () => {
       // Bob can read his account
       await assertSucceeds(getDoc(doc(authDbBob, 'accounts/accBob')));
     });
+
+    it('cannot read or write betaInvites', async () => {
+      const authDb = testEnv.authenticatedContext('alice').firestore();
+      await assertFails(getDoc(doc(authDb, 'betaInvites/test@test.com')));
+      await assertFails(setDoc(doc(authDb, 'betaInvites/test@test.com'), { active: true }));
+    });
+
+    it('can read own user profile but cannot write it', async () => {
+      const authDbAlice = testEnv.authenticatedContext('alice').firestore();
+
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const adminDb = context.firestore();
+        await setDoc(doc(adminDb, 'users/alice'), { active: true });
+        await setDoc(doc(adminDb, 'users/bob'), { active: true });
+      });
+
+      await assertSucceeds(getDoc(doc(authDbAlice, 'users/alice')));
+      await assertFails(getDoc(doc(authDbAlice, 'users/bob')));
+      await assertFails(setDoc(doc(authDbAlice, 'users/alice'), { active: false }));
+    });
   });
 });
