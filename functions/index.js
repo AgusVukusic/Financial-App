@@ -21,6 +21,7 @@ exports.deleteAccount = accounts.deleteAccount;
 const transactions = require('./finance/transactions');
 exports.createTransaction = transactions.createTransaction;
 exports.voidTransaction = transactions.voidTransaction;
+exports.replaceTransaction = transactions.replaceTransaction;
 
 const budgets = require('./finance/budgets');
 exports.setBudget = budgets.setBudget;

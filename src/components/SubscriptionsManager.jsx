@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusCircle, Calendar, Edit2, X, Check, Trash2, CreditCard, Clock } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import { useDialog } from '../contexts/DialogContext';
+import { useToast } from './ui/ToastContext';
+import { useRequestId } from '../hooks/useRequestId';
+import { newRequestId } from '../services/api';
 import { getSubscriptionStatus, calculateTotalMonthlySubscriptions } from '../utils/subscriptionUtils';
 import Card from './ui/Card';
 import Button from './ui/Button';
@@ -10,8 +13,12 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import './SubscriptionsManager.css';
 
-const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscription, editSubscription, onPaySubscription, onAddTransaction, accounts }) => {
+const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscription, editSubscription, paySubscription, accounts = [] }) => {
   const { confirm, alert } = useDialog();
+  const { showToast } = useToast();
+  const { getId, reset: resetRequestId } = useRequestId();
+  const payRequestIds = useRef({}); // un requestId por gasto fijo hasta que el pago se confirma
+  const [saving, setSaving] = useState(false);
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [editingSubId, setEditingSubId] = useState(null);
   const [subForm, setSubForm] = useState({ 
@@ -27,10 +34,14 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
 
   const totalMonthly = calculateTotalMonthlySubscriptions(subscriptions);
 
-  const handleAddOrEditSub = (e) => {
+  const handleAddOrEditSub = async (e) => {
     e.preventDefault();
-    if (!subForm.amount || !subForm.description) return;
-    
+    if (!subForm.amount || !subForm.description || saving) return;
+    if (!subForm.accountId) {
+      showToast('Elegí la cuenta desde la que se paga.', 'error');
+      return;
+    }
+
     const subData = {
       description: subForm.description,
       amount: parseFloat(subForm.amount),
@@ -38,22 +49,36 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
       dueDate: parseInt(subForm.dueDate, 10),
       cycle: subForm.cycle,
       accountId: subForm.accountId,
-      type: 'expense'
     };
 
-    if (editingSubId) {
-      editSubscription(editingSubId, subData);
-      setEditingSubId(null);
-    } else {
-      addSubscription(subData);
+    setSaving(true);
+    try {
+      if (editingSubId) {
+        await editSubscription(editingSubId, subData);
+        setEditingSubId(null);
+      } else {
+        await addSubscription({ ...subData, requestId: getId(subData) });
+      }
+      resetRequestId();
+      setIsAddingSub(false);
+      resetForm();
+    } catch (error) {
+      showToast(error.message, 'error');
+    } finally {
+      setSaving(false);
     }
-    
-    setIsAddingSub(false);
-    resetForm();
   };
 
   const resetForm = () => {
-    setSubForm({ description: '', amount: '', category: 'Entretenimiento', dueDate: '1', cycle: 'monthly', accountId: '' });
+    setSubForm({ description: '', amount: '', category: 'Entretenimiento', dueDate: '1', cycle: 'monthly', accountId: accounts[0]?.id || '' });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteSubscription(id);
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
   };
 
   const startEditing = (sub) => {
@@ -70,25 +95,19 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
   };
 
   const handleManualPayment = async (sub) => {
-    const accountName = accounts.find(a => a.id === sub.accountId)?.name || 'General';
+    const accountName = accounts.find(a => a.id === sub.accountId)?.name || 'la cuenta asociada';
     const isConfirmed = await confirm(`¿Registrar pago de ${sub.description} por ${formatCurrency(sub.amount)} desde ${accountName}?`);
-    if (isConfirmed) {
-      // 1. Create transaction
-      onAddTransaction({
-        description: sub.description,
-        amount: sub.amount,
-        category: sub.category,
-        type: 'expense',
-        accountId: sub.accountId,
-        date: new Date().toISOString()
-      });
-      
-      // 2. Update lastPaidDate in subscription
-      editSubscription(sub.id, {
-        lastPaidDate: new Date().toISOString()
-      });
-      
+    if (!isConfirmed) return;
+
+    // El servidor crea el gasto, descuenta la cuenta y marca el pago en una sola operación.
+    // Se reutiliza el requestId si el usuario reintenta tras un error (no cobra dos veces).
+    const requestId = payRequestIds.current[sub.id] ?? (payRequestIds.current[sub.id] = newRequestId());
+    try {
+      await paySubscription(sub.id, requestId);
+      delete payRequestIds.current[sub.id];
       await alert('Pago registrado correctamente.');
+    } catch (error) {
+      showToast(error.message, 'error');
     }
   };
 
@@ -163,16 +182,16 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
               </div>
               <div className="form-group">
                 <label>Cuenta de pago</label>
-                <Select value={subForm.accountId} onChange={e => setSubForm({...subForm, accountId: e.target.value})}>
-                  <option value="">Cuenta General</option>
-                  {accounts?.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+                <Select value={subForm.accountId} required onChange={e => setSubForm({...subForm, accountId: e.target.value})}>
+                  <option value="" disabled>Elegí una cuenta</option>
+                  {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
                 </Select>
               </div>
             </div>
             <div className="form-actions">
               <Button type="button" variant="ghost" onClick={() => setIsAddingSub(false)}>Cancelar</Button>
-              <Button type="submit" variant="primary">
-                {editingSubId ? 'Actualizar' : 'Guardar'}
+              <Button type="submit" variant="primary" disabled={saving}>
+                {saving ? 'Guardando...' : (editingSubId ? 'Actualizar' : 'Guardar')}
               </Button>
             </div>
           </motion.form>
@@ -220,7 +239,7 @@ const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscripti
                   <Button variant="ghost" isIcon onClick={() => startEditing(sub)} title="Editar">
                     <Edit2 size={18} />
                   </Button>
-                  <Button variant="ghost" isIcon onClick={() => deleteSubscription(sub.id)} style={{ color: 'var(--danger)' }} title="Eliminar">
+                  <Button variant="ghost" isIcon onClick={() => handleDelete(sub.id)} style={{ color: 'var(--danger)' }} title="Eliminar">
                     <Trash2 size={18} />
                   </Button>
                 </div>

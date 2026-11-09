@@ -35,7 +35,7 @@ function App() {
   // Los datos solo se cargan con el perfil Beta activo (ADR 002)
   const activeUid = accessStatus === 'active' ? user.uid : undefined;
   const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, activeUid);
-  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(activeUid);
+  const { subscriptions, addSubscription, deleteSubscription, editSubscription, paySubscription } = useSubscriptions(activeUid);
   const { budgets, updateBudget } = useBudgets(activeUid);
   const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(activeUid);
   
@@ -46,12 +46,6 @@ function App() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [showLogin, setShowLogin] = useState(false);
-
-  useEffect(() => {
-    if (activeUid && !loadingAccounts && accounts.length === 0 && transactions.length > 0) {
-      addAccount({ name: 'General', type: 'cash', initialBalance: 0 });
-    }
-  }, [activeUid, loadingAccounts, accounts.length, transactions.length, addAccount]);
 
   const { balances: accountBalances, totalNetWorth } = useMemo(() => {
     const balances = {};
@@ -207,7 +201,7 @@ function App() {
           addSubscription={addSubscription}
           deleteSubscription={deleteSubscription}
           editSubscription={editSubscription}
-          onAddTransaction={addTransaction}
+          paySubscription={paySubscription}
           accounts={accounts}
         />
       )}
@@ -224,7 +218,6 @@ function App() {
       <AddAccountModal
         isOpen={isAccountModalOpen}
         initialData={accountModalData}
-        uid={user?.uid}
         onClose={() => setIsAccountModalOpen(false)}
         onAdd={addAccount}
         onEdit={updateAccount}

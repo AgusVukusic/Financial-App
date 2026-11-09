@@ -8,6 +8,7 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import BudgetAlerts from './dashboard/BudgetAlerts';
 import { useAllTransactions } from '../hooks/useAllTransactions';
+import { useToast } from './ui/ToastContext';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
@@ -15,6 +16,7 @@ const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBu
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
   const allTransactions = useAllTransactions(uid);
+  const { showToast } = useToast();
 
   const chartData = Object.keys(expensesByCategory).map(key => ({
     name: key,
@@ -28,9 +30,13 @@ const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBu
     return COLORS[index !== -1 ? (index % COLORS.length) : (COLORS.length - 1)];
   };
 
-  const handleSaveBudget = (category) => {
-    updateBudget(category, budgetInput);
-    setEditingBudget(null);
+  const handleSaveBudget = async (category) => {
+    try {
+      await updateBudget(category, budgetInput);
+      setEditingBudget(null);
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
   };
 
   // Prepare data for temporal evolution (last 6 months)

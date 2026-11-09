@@ -253,3 +253,76 @@ describe('voidTransaction', () => {
     expect(foreign.error.status).toBe('NOT_FOUND');
   });
 });
+
+describe('replaceTransaction (editar = anular + crear, atómico)', () => {
+  const replace = (token, transactionId, data) =>
+    callFn('replaceTransaction', token, { requestId: rid(), kind: 'expense', amountMinor: 6000, occurredAt: now(), ...data, transactionId });
+
+  it('reemplaza el monto: saldo = solo el nuevo, original intacto, nuevo enlazado', async () => {
+    const acc = await newAccount(alice, { openingBalanceMinor: 100000 });
+    const txId = (await tx(alice, { accountId: acc, amountMinor: 4000 })).result.transactionIds[0];
+    const original = await readDoc(`transactions/${txId}`);
+
+    const res = await replace(alice, txId, { accountId: acc, amountMinor: 6000 });
+    expect(res.error).toBeUndefined();
+    expect(res.result.status).toBe('replaced');
+    expect((await readDoc(`accounts/${acc}`)).balanceMinor).toBe(100000 - 6000);
+    expect(await readDoc(`transactions/${txId}`)).toEqual(original);
+    expect(await readDoc(`transactions/void_${txId}`)).toMatchObject({ kind: 'void', voidsTransactionId: txId });
+    expect(await readDoc(`transactions/${res.result.transactionIds[0]}`)).toMatchObject({
+      amountMinor: 6000, direction: 'OUT', replacesTransactionId: txId,
+    });
+  });
+
+  it('es idempotente con el mismo requestId', async () => {
+    const acc = await newAccount(alice, { openingBalanceMinor: 100000 });
+    const txId = (await tx(alice, { accountId: acc, amountMinor: 4000 })).result.transactionIds[0];
+    const requestId = rid();
+    const r1 = await callFn('replaceTransaction', alice, { requestId, transactionId: txId, kind: 'expense', accountId: acc, amountMinor: 6000, occurredAt: now() });
+    const r2 = await callFn('replaceTransaction', alice, { requestId, transactionId: txId, kind: 'expense', accountId: acc, amountMinor: 6000, occurredAt: now() });
+    expect(r1.result.status).toBe('replaced');
+    expect(r2.result.status).toBe('already_replaced');
+    expect((await readDoc(`accounts/${acc}`)).balanceMinor).toBe(94000);
+  });
+
+  it('cambia de cuenta y de tipo (gasto -> transferencia, transferencia -> gasto)', async () => {
+    const a = await newAccount(alice, { openingBalanceMinor: 100000 });
+    const b = await newAccount(alice, { openingBalanceMinor: 0 });
+    const txId = (await tx(alice, { accountId: a, amountMinor: 4000 })).result.transactionIds[0];
+
+    const toTransfer = await replace(alice, txId, { kind: 'transfer', accountId: a, toAccountId: b, amountMinor: 10000 });
+    expect(toTransfer.error).toBeUndefined();
+    expect((await readDoc(`accounts/${a}`)).balanceMinor).toBe(90000);
+    expect((await readDoc(`accounts/${b}`)).balanceMinor).toBe(10000);
+
+    const back = await replace(alice, toTransfer.result.transactionIds[1], { kind: 'expense', accountId: b, amountMinor: 3000 });
+    expect(back.error).toBeUndefined();
+    expect((await readDoc(`accounts/${a}`)).balanceMinor).toBe(100000);
+    expect((await readDoc(`accounts/${b}`)).balanceMinor).toBe(-3000);
+  });
+
+  it('si la parte "crear" falla no se pierde el original (atomicidad)', async () => {
+    const acc = await newAccount(alice, { openingBalanceMinor: 100000 });
+    const bobAcc = await newAccount(bob);
+    const txId = (await tx(alice, { accountId: acc, amountMinor: 4000 })).result.transactionIds[0];
+
+    const res = await replace(alice, txId, { accountId: bobAcc });
+    expect(res.error.status).toBe('NOT_FOUND');
+    expect(await readDoc(`transactions/void_${txId}`)).toBeUndefined();
+    expect((await readDoc(`accounts/${acc}`)).balanceMinor).toBe(96000);
+
+    const invalid = await replace(alice, txId, { accountId: acc, amountMinor: -1 });
+    expect(invalid.error.status).toBe('INVALID_ARGUMENT');
+    expect(await readDoc(`transactions/void_${txId}`)).toBeUndefined();
+  });
+
+  it('rechaza reemplazar movimientos ajenos o ya anulados', async () => {
+    const acc = await newAccount(alice);
+    const bobAcc = await newAccount(bob);
+    const txId = (await tx(alice, { accountId: acc })).result.transactionIds[0];
+
+    expect((await replace(bob, txId, { accountId: bobAcc })).error.status).toBe('NOT_FOUND');
+    await callFn('voidTransaction', alice, { transactionId: txId });
+    expect((await replace(alice, txId, { accountId: acc })).error.status).toBe('FAILED_PRECONDITION');
+  });
+});

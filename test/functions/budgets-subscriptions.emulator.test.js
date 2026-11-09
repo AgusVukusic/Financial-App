@@ -219,3 +219,44 @@ describe('paySubscription', () => {
     expect((await readDoc(`accounts/${acc}`)).balanceMinor).toBe(999900);
   });
 });
+
+describe('replaceTransaction sobre pagos de gastos fijos', () => {
+  const replacePay = (token, transactionId, data) =>
+    callFn('replaceTransaction', token, { requestId: rid(), kind: 'expense', occurredAt: now(), transactionId, ...data });
+
+  it('conserva subscriptionId y previousLastPaidAt, y mueve lastPaidAt a la nueva fecha', async () => {
+    const acc = await newAccount(alice, 1000000);
+    const id = await newSub(alice, acc, { amountMinor: 450000 });
+    const payId = rid();
+    await callFn('paySubscription', alice, { subscriptionId: id, requestId: payId, occurredAt: '2026-03-05T12:00:00.000Z' });
+
+    const newDate = '2026-03-08T12:00:00.000Z';
+    const res = await replacePay(alice, payId, { accountId: acc, amountMinor: 500000, occurredAt: newDate });
+    expect(res.error).toBeUndefined();
+
+    expect((await readDoc(`accounts/${acc}`)).balanceMinor).toBe(500000);
+    expect(await readDoc(`transactions/${res.result.transactionIds[0]}`)).toMatchObject({
+      subscriptionId: id, previousLastPaidAt: null, amountMinor: 500000, replacesTransactionId: payId,
+    });
+    expect((await readDoc(`subscriptions/${id}`)).lastPaidAt.toDate().toISOString()).toBe(newDate);
+
+    // Anular el pago reemplazante vuelve el gasto fijo a "nunca pagado"
+    await callFn('voidTransaction', alice, { transactionId: res.result.transactionIds[0] });
+    expect((await readDoc(`subscriptions/${id}`)).lastPaidAt).toBeNull();
+    expect((await readDoc(`accounts/${acc}`)).balanceMinor).toBe(1000000);
+  });
+
+  it('un pago de gasto fijo no puede convertirse en transferencia o ingreso', async () => {
+    const acc = await newAccount(alice, 1000000);
+    const other = await newAccount(alice, 0);
+    const id = await newSub(alice, acc);
+    const payId = rid();
+    await callFn('paySubscription', alice, { subscriptionId: id, requestId: payId, occurredAt: now() });
+
+    const toTransfer = await replacePay(alice, payId, { kind: 'transfer', accountId: acc, toAccountId: other, amountMinor: 100 });
+    const toIncome = await replacePay(alice, payId, { kind: 'income', accountId: acc, amountMinor: 100 });
+    expect(toTransfer.error.status).toBe('FAILED_PRECONDITION');
+    expect(toIncome.error.status).toBe('FAILED_PRECONDITION');
+    expect(await readDoc(`transactions/void_${payId}`)).toBeUndefined();
+  });
+});
