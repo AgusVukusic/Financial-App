@@ -14,7 +14,6 @@ import AddTransactionModal from './components/AddTransactionModal';
 import AddAccountModal from './components/Accounts/AddAccountModal';
 import Reports from './components/Reports';
 import Profile from './components/Profile';
-import Groups from './components/Groups';
 import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
@@ -98,7 +97,6 @@ function App() {
       home: 'Dashboard - Financial App',
       reports: 'Reportes - Financial App',
       profile: 'Perfil - Financial App',
-      groups: 'Grupos - Financial App',
       subscriptions: 'Gastos Fijos - Financial App'
     };
     document.title = titles[activeTab] || 'Financial App';
@@ -200,12 +198,7 @@ function App() {
           userName={userName}
           uid={user?.uid}
           onClearData={handleClearData} 
-          accounts={accounts}
         />
-      )}
-
-      {activeTab === 'groups' && (
-        <Groups uid={user?.uid} userName={userName} accountBalances={accountBalances} />
       )}
 
       {activeTab === 'subscriptions' && (

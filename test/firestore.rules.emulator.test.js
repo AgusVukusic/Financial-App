@@ -1,5 +1,5 @@
 const { assertFails, assertSucceeds, initializeTestEnvironment } = require('@firebase/rules-unit-testing');
-const { doc, setDoc, getDoc } = require('firebase/firestore');
+const { doc, setDoc, getDoc, getDocs, collection, query, where } = require('firebase/firestore');
 const fs = require('fs');
 
 let testEnv;
@@ -62,6 +62,35 @@ describe('Firestore Security Rules', () => {
       await assertFails(getDoc(doc(authDbAlice, 'accounts/accBob')));
       // Bob can read his account
       await assertSucceeds(getDoc(doc(authDbBob, 'accounts/accBob')));
+    });
+
+    it('can read only their own budgets doc (doc ID = uid) and never write it', async () => {
+      const authDbAlice = testEnv.authenticatedContext('alice').firestore();
+
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const adminDb = context.firestore();
+        await setDoc(doc(adminDb, 'budgets/alice'), { Comida: 10000 });
+        await setDoc(doc(adminDb, 'budgets/bob'), { Comida: 20000 });
+      });
+
+      await assertSucceeds(getDoc(doc(authDbAlice, 'budgets/alice')));
+      await assertFails(getDoc(doc(authDbAlice, 'budgets/bob')));
+      await assertFails(setDoc(doc(authDbAlice, 'budgets/alice'), { Comida: 1 }));
+    });
+
+    it('can query their own transactions by userId but not other users', async () => {
+      const authDbAlice = testEnv.authenticatedContext('alice').firestore();
+
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const adminDb = context.firestore();
+        await setDoc(doc(adminDb, 'transactions/t1'), { userId: 'alice', amountMinor: 100 });
+        await setDoc(doc(adminDb, 'transactions/t2'), { userId: 'bob', amountMinor: 200 });
+      });
+
+      const txs = collection(authDbAlice, 'transactions');
+      await assertSucceeds(getDocs(query(txs, where('userId', '==', 'alice'))));
+      await assertFails(getDocs(query(txs, where('userId', '==', 'bob'))));
+      await assertFails(getDocs(txs)); // sin filtro: las reglas no pueden garantizar propiedad
     });
 
     it('cannot read or write betaInvites', async () => {

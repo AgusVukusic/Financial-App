@@ -45,7 +45,8 @@ service cloud.firestore {
     }
 
     match /budgets/{budgetId} {
-      allow read: if isOwner(resource.data.userId);
+      // El ID del documento es el uid del dueño (un doc de presupuestos por usuario)
+      allow read: if isOwner(budgetId);
       allow write: if false;
     }
 

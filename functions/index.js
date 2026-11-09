@@ -12,3 +12,12 @@ setGlobalOptions({
 
 // Exportar funciones
 exports.activateBetaUser = require('./auth/activateBetaUser').activateBetaUser;
+
+const accounts = require('./finance/accounts');
+exports.createAccount = accounts.createAccount;
+exports.updateAccount = accounts.updateAccount;
+exports.deleteAccount = accounts.deleteAccount;
+
+const transactions = require('./finance/transactions');
+exports.createTransaction = transactions.createTransaction;
+exports.voidTransaction = transactions.voidTransaction;
