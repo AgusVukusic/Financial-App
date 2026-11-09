@@ -83,6 +83,12 @@ exports.deleteAccount = onCall(async (request) => {
     if (!used.empty) {
       throw new HttpsError('failed-precondition', 'La cuenta tiene movimientos y no se puede eliminar.');
     }
+    const linked = await t.get(
+      db.collection('subscriptions').where('userId', '==', uid).where('accountId', '==', accountId).limit(1)
+    );
+    if (!linked.empty) {
+      throw new HttpsError('failed-precondition', 'La cuenta está asociada a un gasto fijo y no se puede eliminar.');
+    }
     t.delete(ref);
     return { accountId, status: 'deleted' };
   });

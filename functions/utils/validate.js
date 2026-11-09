@@ -2,6 +2,7 @@ const { HttpsError } = require('firebase-functions/v2/https');
 
 const ACCOUNT_TYPES = ['bank', 'wallet', 'cash', 'credit'];
 const DIRECTIONS = ['IN', 'OUT'];
+const CYCLES = ['monthly', 'yearly'];
 // requestId sin '_' : el servidor deriva IDs con '_' (void_<id>, <id>_out, <id>_in) y no deben poder colisionar.
 const REQUEST_ID_RE = /^[A-Za-z0-9-]{8,64}$/;
 // docId valida referencias a documentos ya creados por el servidor, que sí pueden contener '_'.
@@ -55,6 +56,18 @@ function oneOf(value, allowed, label) {
   return value;
 }
 
+/** Entero dentro de [min, max]. */
+function intInRange(value, min, max, label) {
+  if (!Number.isInteger(value) || value < min || value > max) throw bad(`${label} debe ser un entero entre ${min} y ${max}.`);
+  return value;
+}
+
+/** Clave de categoría usable como campo de mapa en Firestore (sin . / * ~ [ ]). */
+function categoryKey(value) {
+  if (typeof value !== 'string' || !/^[\p{L}\p{N} ]{1,40}$/u.test(value.trim())) throw bad('Categoría inválida.');
+  return value.trim();
+}
+
 /** ISO 8601 → Date. Rechaza fechas inválidas. */
 function isoDate(value, label) {
   if (typeof value !== 'string') throw bad(`${label} debe ser una fecha ISO.`);
@@ -64,6 +77,6 @@ function isoDate(value, label) {
 }
 
 module.exports = {
-  ACCOUNT_TYPES, DIRECTIONS,
-  asObject, requestId, docId, amountMinor, signedMinor, text, oneOf, isoDate,
+  ACCOUNT_TYPES, DIRECTIONS, CYCLES,
+  asObject, requestId, docId, amountMinor, signedMinor, text, oneOf, isoDate, intInRange, categoryKey,
 };

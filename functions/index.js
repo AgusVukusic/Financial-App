@@ -21,3 +21,12 @@ exports.deleteAccount = accounts.deleteAccount;
 const transactions = require('./finance/transactions');
 exports.createTransaction = transactions.createTransaction;
 exports.voidTransaction = transactions.voidTransaction;
+
+const budgets = require('./finance/budgets');
+exports.setBudget = budgets.setBudget;
+
+const subscriptions = require('./finance/subscriptions');
+exports.createSubscription = subscriptions.createSubscription;
+exports.updateSubscription = subscriptions.updateSubscription;
+exports.deleteSubscription = subscriptions.deleteSubscription;
+exports.paySubscription = subscriptions.paySubscription;

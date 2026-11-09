@@ -3,16 +3,9 @@ const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestor
 const { requireAuth, requireActiveUser, requireOwned } = require('../utils/guards');
 const v = require('../utils/validate');
 
-const CURRENCY = 'ARS';
+const { CURRENCY, signed, nextBalance } = require('./ledger');
+
 const KINDS = ['income', 'expense', 'transfer'];
-
-const signed = (direction, amountMinor) => (direction === 'IN' ? amountMinor : -amountMinor);
-
-function nextBalance(current, delta) {
-  const next = current + delta;
-  if (!Number.isSafeInteger(next)) throw new HttpsError('out-of-range', 'El saldo excede el máximo permitido.');
-  return next;
-}
 
 /**
  * Crea un movimiento (ingreso, gasto o transferencia) y actualiza saldos atómicamente.
@@ -142,6 +135,15 @@ exports.voidTransaction = onCall(async (request) => {
     const balances = {};
     accountSnaps.forEach((s, i) => { balances[accountIds[i]] = requireOwned(s, uid, 'Cuenta').balanceMinor; });
 
+    // Si era el pago de un gasto fijo, lo leemos ahora (todas las lecturas antes de escribir).
+    let subRef = null;
+    let sub = null;
+    if (orig.subscriptionId) {
+      subRef = db.collection('subscriptions').doc(orig.subscriptionId);
+      const subSnap = await t.get(subRef);
+      if (subSnap.exists && subSnap.data().userId === uid) sub = subSnap.data();
+    }
+
     legs.forEach((leg, i) => {
       const reverse = leg.direction === 'IN' ? 'OUT' : 'IN';
       t.create(voidRefs[i], {
@@ -164,6 +166,11 @@ exports.voidTransaction = onCall(async (request) => {
     accountIds.forEach((x, i) => {
       t.update(accountRefs[i], { balanceMinor: balances[x], updatedAt: FieldValue.serverTimestamp() });
     });
+
+    // Anular un pago deja el gasto fijo como estaba antes de ese pago (si ese pago era el último).
+    if (sub && sub.lastPaidAt && orig.occurredAt && sub.lastPaidAt.toMillis() === orig.occurredAt.toMillis()) {
+      t.update(subRef, { lastPaidAt: orig.previousLastPaidAt ?? null, updatedAt: FieldValue.serverTimestamp() });
+    }
 
     return { voidIds: voidRefs.map((r) => r.id), status: 'voided' };
   });
