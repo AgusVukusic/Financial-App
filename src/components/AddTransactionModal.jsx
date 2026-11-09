@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ArrowRightLeft } from 'lucide-react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
 import { useToast } from './ui/ToastContext';
+import { useRequestId } from '../hooks/useRequestId';
 import './AddTransactionModal.css';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
@@ -25,6 +26,8 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData, acco
   const [transferToAccountId, setTransferToAccountId] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(() => getLocalDateString());
+  const [saving, setSaving] = useState(false);
+  const { getId, reset: resetRequestId } = useRequestId();
 
   useEffect(() => {
     if (isOpen) {
@@ -57,6 +60,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData, acco
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
     if (!amount || isNaN(amount)) return;
     if (accounts.length === 0) {
       showToast('Debes crear una cuenta primero', 'error');
@@ -85,6 +89,10 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData, acco
       data.category = 'Transferencia';
     }
 
+    // Mismo requestId mientras el contenido no cambie: un reintento tras un error de red no duplica el movimiento.
+    data.requestId = getId({ ...data, editing: initialData?.id || null });
+
+    setSaving(true);
     try {
       if (initialData && initialData.id && onEdit) {
         await onEdit(initialData.id, data);
@@ -93,11 +101,14 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData, acco
         await onAdd(data);
         showToast('Movimiento añadido', 'success');
       }
+      resetRequestId();
       setAmount('');
       setDescription('');
       onClose();
     } catch (error) {
       showToast('Error al guardar el movimiento: ' + error.message, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -187,8 +198,8 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData, acco
               <Input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej. Cena con amigos" maxLength={30} />
             </div>
 
-            <Button type="submit" variant="primary" style={{ width: '100%', padding: '16px' }}>
-              Guardar {type === 'expense' ? 'Gasto' : type === 'income' ? 'Ingreso' : 'Transferencia'}
+            <Button type="submit" variant="primary" disabled={saving} style={{ width: '100%', padding: '16px' }}>
+              {saving ? 'Guardando...' : 'Guardar'} {type === 'expense' ? 'Gasto' : type === 'income' ? 'Ingreso' : 'Transferencia'}
             </Button>
           </form>
         )}

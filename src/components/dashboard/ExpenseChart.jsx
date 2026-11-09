@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatCurrency } from '../../utils/formatters';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Card from '../ui/Card';

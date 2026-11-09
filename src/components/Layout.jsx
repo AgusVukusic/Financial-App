@@ -1,5 +1,4 @@
-import React from 'react';
-import { Home, PlusCircle, PieChart, User, Users } from 'lucide-react';
+import { Home, PlusCircle, PieChart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './Layout.css';
 
@@ -37,14 +36,6 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
           </motion.button>
         </div>
 
-        <button 
-          className={`nav-item ${activeTab === 'groups' ? 'active' : ''}`}
-          onClick={() => onTabChange('groups')}
-        >
-          <Users size={24} />
-          <span>Grupos</span>
-        </button>
-        
         <button 
           className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => onTabChange('profile')}

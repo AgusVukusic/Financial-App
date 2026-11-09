@@ -1,12 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
-// TODO: Reemplazar con la configuración de tu proyecto de Firebase
-// 1. Ve a https://console.firebase.google.com/
-// 2. Crea un proyecto
-// 3. Añade una aplicación web (</>)
-// 4. Copia el objeto firebaseConfig y reemplázalo aquí
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -19,3 +15,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const functions = getFunctions(
+  app,
+  import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'southamerica-east1'
+);
+
+// Puertos definidos en firebase.json → emulators
+if (import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+}

@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTransactions } from './hooks/useTransactions';
 import { useSubscriptions } from './hooks/useSubscriptions';
 import { useBudgets } from './hooks/useBudgets';
 import { useAccounts } from './hooks/useAccounts';
 import { useTheme } from './hooks/useTheme';
 import { useUser } from './hooks/useUser';
+import { useBetaAccess } from './hooks/useBetaAccess';
+import ActivationScreen from './components/ActivationScreen';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
@@ -12,11 +14,9 @@ import AddTransactionModal from './components/AddTransactionModal';
 import AddAccountModal from './components/Accounts/AddAccountModal';
 import Reports from './components/Reports';
 import Profile from './components/Profile';
-import Groups from './components/Groups';
 import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
-import { exportToCSV } from './utils/formatters';
 
 import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from './components/ui/Card';
@@ -30,10 +30,13 @@ function App() {
 
   const { theme, toggleTheme } = useTheme();
   const { user, loading, userName, clearUser } = useUser();
-  const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
-  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(user?.uid);
-  const { budgets, updateBudget } = useBudgets(user?.uid);
-  const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(user?.uid);
+  const { status: accessStatus, activate } = useBetaAccess(user?.uid);
+  // Los datos solo se cargan con el perfil Beta activo (ADR 002)
+  const activeUid = accessStatus === 'active' ? user.uid : undefined;
+  const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, activeUid);
+  const { subscriptions, addSubscription, deleteSubscription, editSubscription, paySubscription } = useSubscriptions(activeUid);
+  const { budgets, updateBudget } = useBudgets(activeUid);
+  const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(activeUid);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
@@ -42,12 +45,6 @@ function App() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [showLogin, setShowLogin] = useState(false);
-
-  useEffect(() => {
-    if (user?.uid && !loadingAccounts && accounts.length === 0 && transactions.length > 0) {
-      addAccount({ name: 'General', type: 'cash', initialBalance: 0 });
-    }
-  }, [user?.uid, loadingAccounts, accounts.length, transactions.length, addAccount]);
 
   const { balances: accountBalances, totalNetWorth } = useMemo(() => {
     const balances = {};
@@ -93,13 +90,12 @@ function App() {
       home: 'Dashboard - Financial App',
       reports: 'Reportes - Financial App',
       profile: 'Perfil - Financial App',
-      groups: 'Grupos - Financial App',
       subscriptions: 'Gastos Fijos - Financial App'
     };
     document.title = titles[activeTab] || 'Financial App';
   }, [activeTab]);
 
-  if (loading || (user && loadingAccounts)) {
+  if (loading || (user && accessStatus === 'checking') || (activeUid && loadingAccounts)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-base)' }}>
         <p style={{ color: 'var(--text-primary)' }}>Cargando...</p>
@@ -112,6 +108,18 @@ function App() {
       return <WelcomeScreen onBack={() => setShowLogin(false)} />;
     }
     return <LandingPage onLoginClick={() => setShowLogin(true)} />;
+  }
+
+  if (accessStatus !== 'active') {
+    return (
+      <ActivationScreen
+        key={user.uid}
+        email={user.email}
+        onActivate={activate}
+        onSignOut={clearUser}
+        connectionError={accessStatus === 'error'}
+      />
+    );
   }
 
   return (
@@ -170,7 +178,6 @@ function App() {
 
       {activeTab === 'reports' && (
         <Reports 
-          transactions={transactions} 
           uid={user?.uid} 
           expensesByCategory={expensesByCategory}
           budgets={budgets} 
@@ -183,12 +190,7 @@ function App() {
           userName={userName}
           uid={user?.uid}
           onClearData={handleClearData} 
-          accounts={accounts}
         />
-      )}
-
-      {activeTab === 'groups' && (
-        <Groups uid={user?.uid} userName={userName} accountBalances={accountBalances} />
       )}
 
       {activeTab === 'subscriptions' && (
@@ -197,7 +199,7 @@ function App() {
           addSubscription={addSubscription}
           deleteSubscription={deleteSubscription}
           editSubscription={editSubscription}
-          onAddTransaction={addTransaction}
+          paySubscription={paySubscription}
           accounts={accounts}
         />
       )}
@@ -214,7 +216,6 @@ function App() {
       <AddAccountModal
         isOpen={isAccountModalOpen}
         initialData={accountModalData}
-        uid={user?.uid}
         onClose={() => setIsAccountModalOpen(false)}
         onAdd={addAccount}
         onEdit={updateAccount}

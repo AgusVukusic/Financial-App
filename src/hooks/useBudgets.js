@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { callFn } from '../services/api';
+import { mapBudgetDoc } from '../utils/mappers';
+import { toMinor } from '../utils/money';
 
+/** Límites mensuales por categoría ({ categoría: pesos }). Escritura vía `setBudget`. */
 export const useBudgets = (uid) => {
   const [budgets, setBudgets] = useState({});
 
@@ -9,29 +13,19 @@ export const useBudgets = (uid) => {
     if (!uid) return;
 
     const unsubscribe = onSnapshot(doc(db, 'budgets', uid), (docSnap) => {
-      if (docSnap.exists()) {
-        setBudgets(docSnap.data());
-      } else {
-        setBudgets({});
-      }
+      setBudgets(docSnap.exists() ? mapBudgetDoc(docSnap.data()) : {});
+    }, (error) => {
+      console.error('Error fetching budgets: ', error);
     });
 
     return () => unsubscribe();
   }, [uid]);
 
-  const updateBudget = async (category, amount) => {
+  /** Lanza un Error con mensaje apto para mostrar si el servidor rechaza el valor. */
+  const updateBudget = useCallback(async (category, amount) => {
     if (!uid) return;
-    try {
-      const newBudgets = {
-        ...budgets,
-        [category]: parseFloat(amount) || 0,
-        userId: uid
-      };
-      await setDoc(doc(db, 'budgets', uid), newBudgets, { merge: true });
-    } catch (error) {
-      console.error("Error updating budget: ", error);
-    }
-  };
+    await callFn('setBudget', { category, limitMinor: toMinor(amount || 0) });
+  }, [uid]);
 
   return { budgets, updateBudget };
 };

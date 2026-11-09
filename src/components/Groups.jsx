@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGroups } from '../hooks/useGroups';
-import { Users, Plus, UserPlus, ArrowLeft } from 'lucide-react';
+import { Users, Plus, UserPlus } from 'lucide-react';
 import GroupDetails from './GroupDetails';
 import { motion, AnimatePresence } from 'framer-motion';
 

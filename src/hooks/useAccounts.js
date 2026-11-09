@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { callFn, newRequestId } from '../services/api';
+import { mapAccountDoc } from '../utils/mappers';
+import { toMinor } from '../utils/money';
 
+/**
+ * Cuentas del usuario. Lectura en tiempo real desde Firestore; toda escritura pasa por
+ * Cloud Functions (ADR 001). Los componentes siguen viendo pesos (`initialBalance`, `currentBalance`).
+ */
 export const useAccounts = (uid) => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,62 +21,42 @@ export const useAccounts = (uid) => {
     }
 
     setLoading(true);
-    const q = query(
-      collection(db, 'accounts'),
-      where('userId', '==', uid)
-    );
+    const q = query(collection(db, 'accounts'), where('userId', '==', uid));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort by creation date or name
+      const data = snapshot.docs.map((d) => mapAccountDoc({ id: d.id, ...d.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
       setAccounts(data);
       setLoading(false);
     }, (error) => {
-      console.error("Error fetching accounts: ", error);
+      console.error('Error fetching accounts: ', error);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, [uid]);
 
-  const addAccount = useCallback(async (accountData) => {
+  /** data: { name, type, initialBalance (pesos), requestId? } → id de la cuenta */
+  const addAccount = useCallback(async (data) => {
     if (!uid) return null;
-    try {
-      const docRef = await addDoc(collection(db, 'accounts'), {
-        ...accountData,
-        userId: uid,
-        createdAt: serverTimestamp()
-      });
-      return docRef.id;
-    } catch (error) {
-      console.error("Error adding account: ", error);
-      throw error;
-    }
+    const result = await callFn('createAccount', {
+      requestId: data.requestId ?? newRequestId(),
+      name: data.name,
+      type: data.type,
+      openingBalanceMinor: toMinor(data.initialBalance || 0),
+    });
+    return result.accountId;
   }, [uid]);
 
-  const updateAccount = useCallback(async (id, updatedData) => {
+  /** Solo nombre y tipo: el saldo lo maneja el servidor. */
+  const updateAccount = useCallback(async (id, data) => {
     if (!uid) return;
-    try {
-      await updateDoc(doc(db, 'accounts', id), updatedData);
-    } catch (error) {
-      console.error("Error updating account: ", error);
-      throw error;
-    }
+    await callFn('updateAccount', { accountId: id, name: data.name, type: data.type });
   }, [uid]);
 
   const deleteAccount = useCallback(async (id) => {
     if (!uid) return;
-    try {
-      await deleteDoc(doc(db, 'accounts', id));
-    } catch (error) {
-      console.error("Error deleting account: ", error);
-      throw error;
-    }
+    await callFn('deleteAccount', { accountId: id });
   }, [uid]);
 
   return {
@@ -77,6 +64,6 @@ export const useAccounts = (uid) => {
     loadingAccounts: loading,
     addAccount,
     updateAccount,
-    deleteAccount
+    deleteAccount,
   };
 };

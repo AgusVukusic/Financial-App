@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import Card from '../ui/Card';

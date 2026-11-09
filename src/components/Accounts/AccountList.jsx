@@ -1,4 +1,3 @@
-import React from 'react';
 import AccountCard from './AccountCard';
 import Button from '../ui/Button';
 import { Plus } from 'lucide-react';

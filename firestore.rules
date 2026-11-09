@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper para verificar autenticación y propiedad
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Por defecto, denegar TODO
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reglas específicas por colección
+    
+    // betaInvites: Documento interno para la lista de invitados.
+    // Nunca es legible ni escribible por el cliente.
+    match /betaInvites/{inviteId} {
+      allow read, write: if false;
+    }
+
+    // users: Perfil de usuario.
+    // Solo lectura para el propio usuario, sin escrituras directas.
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    match /accounts/{accountId} {
+      // Solo lecturas de cuentas propias
+      allow read: if isOwner(resource.data.userId);
+      // Escrituras PROHIBIDAS (solo backend)
+      allow write: if false; 
+    }
+
+    match /transactions/{transactionId} {
+      // Solo lecturas de transacciones propias
+      allow read: if isOwner(resource.data.userId);
+      // Escrituras PROHIBIDAS (solo backend)
+      allow write: if false;
+    }
+
+    match /budgets/{budgetId} {
+      // El ID del documento es el uid del dueño (un doc de presupuestos por usuario)
+      allow read: if isOwner(budgetId);
+      allow write: if false;
+    }
+
+    match /subscriptions/{subscriptionId} {
+      allow read: if isOwner(resource.data.userId);
+      allow write: if false;
+    }
+
+  }
+}

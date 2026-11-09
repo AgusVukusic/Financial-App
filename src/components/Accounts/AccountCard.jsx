@@ -1,6 +1,4 @@
-import React from 'react';
 import Card from '../ui/Card';
-import { Landmark, Smartphone, Wallet, CreditCard } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { ACCOUNT_TYPES } from './AddAccountModal';
 

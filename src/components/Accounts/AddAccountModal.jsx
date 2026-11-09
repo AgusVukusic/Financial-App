@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Landmark, Smartphone, Wallet, CreditCard } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -6,8 +6,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import { useToast } from '../ui/ToastContext';
 import { useDialog } from '../../contexts/DialogContext';
-import { db } from '../../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useRequestId } from '../../hooks/useRequestId';
 
 export const ACCOUNT_TYPES = [
   { id: 'bank', label: 'Banco', icon: Landmark },
@@ -16,12 +15,14 @@ export const ACCOUNT_TYPES = [
   { id: 'credit', label: 'Tarjeta de Crédito', icon: CreditCard }
 ];
 
-const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData, uid }) => {
+const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData }) => {
   const { showToast } = useToast();
   const { confirm } = useDialog();
   const [name, setName] = useState('');
   const [type, setType] = useState('bank');
   const [initialBalance, setInitialBalance] = useState('');
+  const [saving, setSaving] = useState(false);
+  const { getId, reset: resetRequestId } = useRequestId();
 
   useEffect(() => {
     if (isOpen) {
@@ -45,7 +46,7 @@ const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name) return;
+    if (!name || saving) return;
 
     const data = {
       name,
@@ -53,48 +54,27 @@ const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData
       initialBalance: parseFloat(initialBalance || 0)
     };
 
+    setSaving(true);
     try {
       if (initialData && initialData.id && onEdit) {
         await onEdit(initialData.id, data);
         showToast('Cuenta actualizada', 'success');
       } else {
-        await onAdd(data);
+        await onAdd({ ...data, requestId: getId(data) });
         showToast('Cuenta creada', 'success');
       }
+      resetRequestId();
       onClose();
     } catch (error) {
       showToast('Error al guardar la cuenta: ' + error.message, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async () => {
     if (!initialData || !initialData.id) return;
     
-    try {
-      let q1, q2;
-      if (uid) {
-        q1 = query(collection(db, 'transactions'), where('userId', '==', uid), where('accountId', '==', initialData.id));
-        q2 = query(collection(db, 'transactions'), where('userId', '==', uid), where('transferToAccountId', '==', initialData.id));
-      } else {
-        q1 = query(collection(db, 'transactions'), where('accountId', '==', initialData.id));
-        q2 = query(collection(db, 'transactions'), where('transferToAccountId', '==', initialData.id));
-      }
-      
-      const snap1 = await getDocs(q1);
-      const snap2 = await getDocs(q2);
-
-      if (!snap1.empty || !snap2.empty) {
-        showToast('No puedes eliminar una cuenta que tiene movimientos asociados.', 'error');
-        return;
-      }
-    } catch (err) {
-      console.warn("Error verificando transacciones, es posible que falte un índice:", err);
-      // Si falla la verificación (por ej. falta de índice o permisos), 
-      // dejamos que intente borrar la cuenta si el usuario confirma, 
-      // o avisamos del error.
-      // showToast('No se pudo verificar si la cuenta tiene movimientos.', 'warning');
-    }
-
     const isConfirmed = await confirm(`¿Estás seguro de que quieres eliminar la cuenta "${initialData.name}"?`);
     if (isConfirmed) {
       try {
@@ -156,8 +136,8 @@ const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-            <Button type="submit" variant="primary" style={{ flex: 1, padding: '16px' }}>
-              Guardar
+            <Button type="submit" variant="primary" disabled={saving} style={{ flex: 1, padding: '16px' }}>
+              {saving ? 'Guardando...' : 'Guardar'}
             </Button>
             {initialData && (
               <Button type="button" variant="danger" style={{ padding: '16px' }} onClick={handleDelete}>

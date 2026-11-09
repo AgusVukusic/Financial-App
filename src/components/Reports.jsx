@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { formatCurrency } from '../utils/formatters';
 import { Settings, Check } from 'lucide-react';
@@ -8,13 +8,15 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import BudgetAlerts from './dashboard/BudgetAlerts';
 import { useAllTransactions } from '../hooks/useAllTransactions';
+import { useToast } from './ui/ToastContext';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBudget }) => {
+const Reports = ({ uid, expensesByCategory, budgets = {}, updateBudget }) => {
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
   const allTransactions = useAllTransactions(uid);
+  const { showToast } = useToast();
 
   const chartData = Object.keys(expensesByCategory).map(key => ({
     name: key,
@@ -28,9 +30,13 @@ const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBu
     return COLORS[index !== -1 ? (index % COLORS.length) : (COLORS.length - 1)];
   };
 
-  const handleSaveBudget = (category) => {
-    updateBudget(category, budgetInput);
-    setEditingBudget(null);
+  const handleSaveBudget = async (category) => {
+    try {
+      await updateBudget(category, budgetInput);
+      setEditingBudget(null);
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
   };
 
   // Prepare data for temporal evolution (last 6 months)
@@ -122,7 +128,7 @@ const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBu
           <div style={{ marginTop: 'var(--spacing-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
             <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>Presupuestos por Categoría</h3>
             
-            {CATEGORIES.map((category, index) => {
+            {CATEGORIES.map((category) => {
               const spent = expensesByCategory[category] || 0;
               const limit = budgets[category] || 0;
               const hasBudget = limit > 0;

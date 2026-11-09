@@ -7,7 +7,7 @@ export const useTheme = () => {
     try {
       const savedTheme = window.localStorage.getItem(THEME_KEY);
       return savedTheme || 'dark'; // dark is default
-    } catch (error) {
+    } catch {
       return 'dark';
     }
   });
