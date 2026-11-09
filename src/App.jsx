@@ -5,6 +5,8 @@ import { useBudgets } from './hooks/useBudgets';
 import { useAccounts } from './hooks/useAccounts';
 import { useTheme } from './hooks/useTheme';
 import { useUser } from './hooks/useUser';
+import { useBetaAccess } from './hooks/useBetaAccess';
+import ActivationScreen from './components/ActivationScreen';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
@@ -30,10 +32,13 @@ function App() {
 
   const { theme, toggleTheme } = useTheme();
   const { user, loading, userName, clearUser } = useUser();
-  const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, user?.uid);
-  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(user?.uid);
-  const { budgets, updateBudget } = useBudgets(user?.uid);
-  const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(user?.uid);
+  const { status: accessStatus, activate } = useBetaAccess(user?.uid);
+  // Los datos solo se cargan con el perfil Beta activo (ADR 002)
+  const activeUid = accessStatus === 'active' ? user.uid : undefined;
+  const { transactions, addTransaction, updateTransaction, deleteTransaction, totalIncome, totalExpense, expensesByCategory, balance } = useTransactions(selectedMonth, selectedYear, activeUid);
+  const { subscriptions, addSubscription, deleteSubscription, editSubscription } = useSubscriptions(activeUid);
+  const { budgets, updateBudget } = useBudgets(activeUid);
+  const { accounts, loadingAccounts, addAccount, updateAccount, deleteAccount } = useAccounts(activeUid);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState(null);
@@ -44,10 +49,10 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
-    if (user?.uid && !loadingAccounts && accounts.length === 0 && transactions.length > 0) {
+    if (activeUid && !loadingAccounts && accounts.length === 0 && transactions.length > 0) {
       addAccount({ name: 'General', type: 'cash', initialBalance: 0 });
     }
-  }, [user?.uid, loadingAccounts, accounts.length, transactions.length, addAccount]);
+  }, [activeUid, loadingAccounts, accounts.length, transactions.length, addAccount]);
 
   const { balances: accountBalances, totalNetWorth } = useMemo(() => {
     const balances = {};
@@ -99,7 +104,7 @@ function App() {
     document.title = titles[activeTab] || 'Financial App';
   }, [activeTab]);
 
-  if (loading || (user && loadingAccounts)) {
+  if (loading || (user && accessStatus === 'checking') || (activeUid && loadingAccounts)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-base)' }}>
         <p style={{ color: 'var(--text-primary)' }}>Cargando...</p>
@@ -112,6 +117,18 @@ function App() {
       return <WelcomeScreen onBack={() => setShowLogin(false)} />;
     }
     return <LandingPage onLoginClick={() => setShowLogin(true)} />;
+  }
+
+  if (accessStatus !== 'active') {
+    return (
+      <ActivationScreen
+        key={user.uid}
+        email={user.email}
+        onActivate={activate}
+        onSignOut={clearUser}
+        connectionError={accessStatus === 'error'}
+      />
+    );
   }
 
   return (
