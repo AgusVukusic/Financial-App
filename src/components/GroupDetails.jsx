@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useGroupDetails } from '../hooks/useGroups';
 import { useAccounts } from '../hooks/useAccounts';
 import { ArrowLeft, User, Plus, Trash2, Edit2, Clock } from 'lucide-react';

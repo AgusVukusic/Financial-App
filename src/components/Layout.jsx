@@ -1,4 +1,3 @@
-import React from 'react';
 import { Home, PlusCircle, PieChart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './Layout.css';

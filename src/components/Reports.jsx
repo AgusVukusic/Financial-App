@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { formatCurrency } from '../utils/formatters';
 import { Settings, Check } from 'lucide-react';
@@ -12,7 +12,7 @@ import { useToast } from './ui/ToastContext';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
 
-const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBudget }) => {
+const Reports = ({ uid, expensesByCategory, budgets = {}, updateBudget }) => {
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
   const allTransactions = useAllTransactions(uid);
@@ -128,7 +128,7 @@ const Reports = ({ transactions, uid, expensesByCategory, budgets = {}, updateBu
           <div style={{ marginTop: 'var(--spacing-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
             <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>Presupuestos por Categoría</h3>
             
-            {CATEGORIES.map((category, index) => {
+            {CATEGORIES.map((category) => {
               const spent = expensesByCategory[category] || 0;
               const limit = budgets[category] || 0;
               const hasBudget = limit > 0;

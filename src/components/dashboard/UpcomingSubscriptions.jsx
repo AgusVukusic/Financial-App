@@ -1,4 +1,3 @@
-import React from 'react';
 import { getSubscriptionStatus } from '../../utils/subscriptionUtils';
 import { formatCurrency } from '../../utils/formatters';
 import { Bell, ChevronRight, Calendar } from 'lucide-react';

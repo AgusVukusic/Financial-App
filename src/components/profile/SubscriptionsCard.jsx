@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusCircle, Zap, Edit2, X, Check, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';

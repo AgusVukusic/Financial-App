@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Coffee, ShoppingBag, Home, Car, Zap, DollarSign, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';

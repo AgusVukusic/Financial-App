@@ -1,4 +1,3 @@
-import React from 'react';
 import { User, Shield, FileText } from 'lucide-react';
 import { exportToPDF, exportToCSV } from '../utils/formatters';
 import { motion } from 'framer-motion';

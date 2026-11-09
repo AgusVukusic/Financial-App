@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTransactions } from './hooks/useTransactions';
 import { useSubscriptions } from './hooks/useSubscriptions';
 import { useBudgets } from './hooks/useBudgets';
@@ -17,7 +17,6 @@ import Profile from './components/Profile';
 import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
-import { exportToCSV } from './utils/formatters';
 
 import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from './components/ui/Card';
@@ -179,7 +178,6 @@ function App() {
 
       {activeTab === 'reports' && (
         <Reports 
-          transactions={transactions} 
           uid={user?.uid} 
           expensesByCategory={expensesByCategory}
           budgets={budgets} 

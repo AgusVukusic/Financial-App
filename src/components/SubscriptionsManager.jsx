@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlusCircle, Calendar, Edit2, X, Check, Trash2, CreditCard, Clock } from 'lucide-react';
+import { PlusCircle, Calendar, Edit2, X, Trash2, CreditCard, Clock } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import { useDialog } from '../contexts/DialogContext';
 import { useToast } from './ui/ToastContext';
