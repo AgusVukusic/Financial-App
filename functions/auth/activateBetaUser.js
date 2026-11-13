@@ -1,8 +1,8 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { normalizeEmail } = require('../utils/normalize');
 
-exports.activateBetaUser = onCall(async (request) => {
+exports.activateBetaUser = async (request) => {
   // 1. Verificar autenticación
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Debes estar autenticado para activar tu cuenta.');
@@ -65,4 +65,4 @@ exports.activateBetaUser = onCall(async (request) => {
     console.error("Error activating beta user:", error);
     throw new HttpsError('internal', 'Ocurrió un error interno al intentar activar la cuenta.');
   }
-});
+};

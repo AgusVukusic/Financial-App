@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { requireAuth, requireActiveUser } = require('../utils/guards');
 const v = require('../utils/validate');
@@ -10,7 +10,7 @@ const MAX_CATEGORIES = 50;
  * Fija el límite mensual de una categoría. Un documento por usuario: budgets/{uid},
  * con `limitsMinor: { [categoría]: centavos }`. Límite 0 = sin tope.
  */
-exports.setBudget = onCall(async (request) => {
+exports.setBudget = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -40,4 +40,4 @@ exports.setBudget = onCall(async (request) => {
     );
     return { category, limitMinor, status: 'updated' };
   });
-});
+};

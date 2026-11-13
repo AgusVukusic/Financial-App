@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { requireAuth, requireActiveUser, requireOwned } = require('../utils/guards');
 const v = require('../utils/validate');
@@ -16,7 +16,7 @@ function parseFields(data) {
   };
 }
 
-exports.createSubscription = onCall(async (request) => {
+exports.createSubscription = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -45,10 +45,10 @@ exports.createSubscription = onCall(async (request) => {
     });
     return { subscriptionId: id, status: 'created' };
   });
-});
+};
 
 /** Reemplaza los campos editables. `lastPaidAt` solo lo cambia paySubscription. */
-exports.updateSubscription = onCall(async (request) => {
+exports.updateSubscription = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -65,9 +65,9 @@ exports.updateSubscription = onCall(async (request) => {
     t.update(ref, { ...fields, updatedAt: FieldValue.serverTimestamp() });
     return { subscriptionId, status: 'updated' };
   });
-});
+};
 
-exports.deleteSubscription = onCall(async (request) => {
+exports.deleteSubscription = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -80,7 +80,7 @@ exports.deleteSubscription = onCall(async (request) => {
     t.delete(ref);
     return { subscriptionId, status: 'deleted' };
   });
-});
+};
 
 /**
  * Registra el pago de un gasto fijo: crea el gasto, descuenta el saldo y marca
@@ -88,7 +88,7 @@ exports.deleteSubscription = onCall(async (request) => {
  * del gasto fijo guardado, nunca del cliente. Idempotente por `requestId`
  * (el ID del movimiento).
  */
-exports.paySubscription = onCall(async (request) => {
+exports.paySubscription = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -140,4 +140,4 @@ exports.paySubscription = onCall(async (request) => {
     });
     return { transactionId: id, status: 'created' };
   });
-});
+};

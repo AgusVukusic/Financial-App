@@ -1,5 +1,7 @@
 const { initializeApp } = require('firebase-admin/app');
 const { setGlobalOptions } = require('firebase-functions/v2');
+const { onCall } = require('firebase-functions/v2/https');
+const handlers = require('./handlers');
 
 // Inicializar la app de Admin SDK
 initializeApp();
@@ -10,24 +12,7 @@ setGlobalOptions({
   maxInstances: 10,
 });
 
-// Exportar funciones
-exports.activateBetaUser = require('./auth/activateBetaUser').activateBetaUser;
-
-const accounts = require('./finance/accounts');
-exports.createAccount = accounts.createAccount;
-exports.updateAccount = accounts.updateAccount;
-exports.deleteAccount = accounts.deleteAccount;
-
-const transactions = require('./finance/transactions');
-exports.createTransaction = transactions.createTransaction;
-exports.voidTransaction = transactions.voidTransaction;
-exports.replaceTransaction = transactions.replaceTransaction;
-
-const budgets = require('./finance/budgets');
-exports.setBudget = budgets.setBudget;
-
-const subscriptions = require('./finance/subscriptions');
-exports.createSubscription = subscriptions.createSubscription;
-exports.updateSubscription = subscriptions.updateSubscription;
-exports.deleteSubscription = subscriptions.deleteSubscription;
-exports.paySubscription = subscriptions.paySubscription;
+// Cada handler se expone como Callable con el mismo nombre (onCall arma request.auth/request.data)
+for (const [name, handler] of Object.entries(handlers)) {
+  exports[name] = onCall(handler);
+}
