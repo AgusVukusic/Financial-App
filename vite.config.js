@@ -7,6 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        // Las llamadas al backend nunca se resuelven con el index.html del service worker
+        navigateFallbackDenylist: [/^\/api\//],
+      },
       manifest: {
         name: 'Finanzas Personales',
         short_name: 'Finanzas',
@@ -25,6 +29,10 @@ export default defineConfig({
       }
     })
   ],
+  server: {
+    // Desarrollo con VITE_API_TRANSPORT=http: /api va al servidor local de `npm run dev:api`
+    proxy: { '/api': 'http://127.0.0.1:5002' },
+  },
   test: {
     environment: 'jsdom',
     globals: true,

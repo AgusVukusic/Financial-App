@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { auth, db, functions } from '../firebase';
+import { auth, db } from '../firebase';
+import { invokeFn } from '../services/api';
 
 /**
  * Puerta de acceso de la Beta (ADR 002).
@@ -35,8 +35,7 @@ export const useBetaAccess = (uid) => {
     if (!currentUser) throw new Error('No hay una sesión activa.');
     // Forzar token nuevo: el claim email_verified puede estar desactualizado
     await currentUser.getIdToken(true);
-    const { data } = await httpsCallable(functions, 'activateBetaUser')();
-    return data;
+    return invokeFn('activateBetaUser');
   }, []);
 
   let status;

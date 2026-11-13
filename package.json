@@ -14,9 +14,12 @@
     "test:rules": "npx firebase-tools@15.35.0 emulators:exec --project beta --only firestore \"vitest run test/firestore.rules.emulator.test.js\"",
     "test:functions": "npx firebase-tools@15.35.0 emulators:exec --project beta --only firestore,functions \"vitest run test/functions/ --no-file-parallelism --testTimeout=30000\"",
     "test:all": "npm run test:unit && npm run test:rules && npm run test:functions",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:api": "node scripts/dev-api.js"
   },
   "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.4.0",
     "framer-motion": "^12.40.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
@@ -42,5 +45,8 @@
     "vite": "^8.0.12",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }
