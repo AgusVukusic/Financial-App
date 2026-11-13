@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { requireAuth, requireActiveUser, requireOwned } = require('../utils/guards');
 const v = require('../utils/validate');
@@ -171,7 +171,7 @@ function applyVoidPlan(t, uid, plan, ctx, { restoreSubscription = true } = {}) {
  * - Transferencia = dos documentos (OUT + IN) con el mismo `transferId`.
  * - Cada cuenta referenciada se verifica como propia dentro de la transacción.
  */
-exports.createTransaction = onCall(async (request) => {
+exports.createTransaction = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -188,7 +188,7 @@ exports.createTransaction = onCall(async (request) => {
     flushAccounts(t, ctx);
     return { transactionIds: movementIds(id, input.kind), status: 'created' };
   });
-});
+};
 
 /**
  * Anula un movimiento con una transacción compensatoria (las originales son inmutables).
@@ -198,7 +198,7 @@ exports.createTransaction = onCall(async (request) => {
  * - La compensación conserva el `occurredAt` original: en el mes del movimiento se netea a cero.
  *   El cliente debe tratar el par (original + `voidsTransactionId`) como "anulado".
  */
-exports.voidTransaction = onCall(async (request) => {
+exports.voidTransaction = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -214,7 +214,7 @@ exports.voidTransaction = onCall(async (request) => {
     flushAccounts(t, ctx);
     return { voidIds: plan.voidRefs.map((r) => r.id), status: 'voided' };
   });
-});
+};
 
 /**
  * Edita un movimiento = anula el original y crea el nuevo EN LA MISMA transacción de Firestore:
@@ -225,7 +225,7 @@ exports.voidTransaction = onCall(async (request) => {
  * - Un pago de gasto fijo solo puede reemplazarse por otro gasto; conserva `subscriptionId` y
  *   `previousLastPaidAt`, y mueve `lastPaidAt` a la nueva fecha si ese pago era el último.
  */
-exports.replaceTransaction = onCall(async (request) => {
+exports.replaceTransaction = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -268,4 +268,4 @@ exports.replaceTransaction = onCall(async (request) => {
     }
     return { transactionIds: movementIds(id, input.kind), status: 'replaced' };
   });
-});
+};

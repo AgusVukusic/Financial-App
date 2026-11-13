@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { HttpsError } = require('firebase-functions/v2/https');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { requireAuth, requireActiveUser, requireOwned } = require('../utils/guards');
 const v = require('../utils/validate');
@@ -9,7 +9,7 @@ const CURRENCY = 'ARS';
  * Crea una cuenta. `requestId` es el ID del documento → los reintentos son idempotentes.
  * El saldo (balanceMinor) arranca igual al saldo inicial y solo lo modifican las funciones.
  */
-exports.createAccount = onCall(async (request) => {
+exports.createAccount = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -41,10 +41,10 @@ exports.createAccount = onCall(async (request) => {
     });
     return { accountId: id, status: 'created' };
   });
-});
+};
 
 /** Solo permite cambiar nombre y tipo. Los saldos nunca vienen del cliente. */
-exports.updateAccount = onCall(async (request) => {
+exports.updateAccount = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -59,14 +59,14 @@ exports.updateAccount = onCall(async (request) => {
     t.update(ref, { name, type, updatedAt: FieldValue.serverTimestamp() });
     return { accountId, status: 'updated' };
   });
-});
+};
 
 /**
  * Borra una cuenta solo si no tiene movimientos (las transacciones son inmutables
  * y quedarían huérfanas). Lee la cuenta dentro de la transacción: una createTransaction
  * concurrente también la lee/escribe, por lo que Firestore serializa ambas.
  */
-exports.deleteAccount = onCall(async (request) => {
+exports.deleteAccount = async (request) => {
   requireAuth(request);
   const db = getFirestore();
   const data = v.asObject(request.data);
@@ -92,4 +92,4 @@ exports.deleteAccount = onCall(async (request) => {
     t.delete(ref);
     return { accountId, status: 'deleted' };
   });
-});
+};
