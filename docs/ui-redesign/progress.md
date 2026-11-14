@@ -120,10 +120,13 @@ combinaciones; objetivos de 44 px o más; sin editar/borrar en cada fila.
 
 ## Estado de git (2026-11-13)
 
-Rama local `feature/ui-design-system` con 5 commits sobre `main`. **El push falló (403):** las credenciales de git de esta
-máquina son de otra cuenta (`AgusVuku7`) sin permiso sobre `AgusVukusic/Financial-App`. No se probó con otras credenciales.
-Hace falta que el usuario haga el push (o arregle la credencial) y abra el PR; el cuerpo está en
-`docs/ui-redesign/pr-design-system.md`. No hay `gh` instalado. Sin push no hay preview de Vercel ni CI corrido.
+Rama `feature/ui-design-system` subida a origin (el primer push dio 403 por credenciales; el segundo intento funcionó). Todavía sin PR:
+lo abre el usuario desde GitHub (no hay `gh`); el cuerpo está en `docs/ui-redesign/pr-design-system.md`. El CI (`test.yml`) corre al abrir el PR
+hacia `main`, no en pushes de ramas. Vercel generó preview de la rama.
+
+Prueba en formato iPhone (393×852, dpr 2, táctil) en el navegador integrado: UA de Chrome Android, no Safari iOS, así que no
+cubre safe areas reales, el modo instalado ni el comportamiento de iOS al enfocar inputs. Resultado: sin scroll horizontal; en el
+Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el flujo anotar gasto → aviso con el sistema nuevo funciona.
 
 ## Pantallas terminadas / PRs
 
