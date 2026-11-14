@@ -4,6 +4,8 @@ const FOCUSABLE =
   'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 let scrollLocks = 0;
+// Diálogos abiertos, el último es el de arriba: solo ese atiende Escape y Tab (por ejemplo, una confirmación sobre una hoja).
+const stack = [];
 
 /**
  * Comportamiento accesible de un diálogo modal: foco adentro (en [data-autofocus] o el primer control),
@@ -22,6 +24,7 @@ export const useDialogA11y = ({ open, onClose, containerRef }) => {
     if (!node) return undefined;
 
     const previous = document.activeElement;
+    stack.push(node);
     scrollLocks += 1;
     if (scrollLocks === 1) document.body.style.overflow = 'hidden';
 
@@ -29,6 +32,7 @@ export const useDialogA11y = ({ open, onClose, containerRef }) => {
     (first || node).focus();
 
     const onKeyDown = (event) => {
+      if (stack[stack.length - 1] !== node) return;
       if (event.key === 'Escape') {
         event.stopPropagation();
         closeRef.current?.();
@@ -55,6 +59,7 @@ export const useDialogA11y = ({ open, onClose, containerRef }) => {
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      stack.splice(stack.indexOf(node), 1);
       scrollLocks -= 1;
       if (scrollLocks === 0) document.body.style.overflow = '';
       previous?.focus?.();

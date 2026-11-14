@@ -1,62 +1,51 @@
-import { useState, useEffect } from 'react';
-import { X, Landmark, Smartphone, Wallet, CreditCard } from 'lucide-react';
-import Card from '../ui/Card';
+import { useRef, useState } from 'react';
+import { Landmark, Smartphone, Wallet, CreditCard } from 'lucide-react';
 import Button from '../ui/Button';
+import Chip from '../ui/Chip';
+import Field from '../ui/Field';
 import Input from '../ui/Input';
-import Select from '../ui/Select';
+import Sheet from '../ui/Sheet';
 import { useToast } from '../ui/ToastContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { useRequestId } from '../../hooks/useRequestId';
+import styles from '../FormSheet.module.css';
 
 export const ACCOUNT_TYPES = [
   { id: 'bank', label: 'Banco', icon: Landmark },
-  { id: 'wallet', label: 'Billetera Virtual', icon: Smartphone },
+  { id: 'wallet', label: 'Billetera virtual', icon: Smartphone },
   { id: 'cash', label: 'Efectivo', icon: Wallet },
-  { id: 'credit', label: 'Tarjeta de Crédito', icon: CreditCard }
+  { id: 'credit', label: 'Tarjeta de crédito', icon: CreditCard },
 ];
 
-const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData }) => {
+/** Formulario de cuenta; se monta solo con la hoja abierta (el estado inicial sale de las props). */
+const AccountForm = ({ onClose, onAdd, onEdit, onDelete, initialData }) => {
   const { showToast } = useToast();
   const { confirm } = useDialog();
-  const [name, setName] = useState('');
-  const [type, setType] = useState('bank');
-  const [initialBalance, setInitialBalance] = useState('');
-  const [saving, setSaving] = useState(false);
   const { getId, reset: resetRequestId } = useRequestId();
+  const nameRef = useRef(null);
+  const isEdit = Boolean(initialData && initialData.id);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      if (initialData) {
-        setName(initialData.name || '');
-        setType(initialData.type || 'bank');
-        setInitialBalance(initialData.initialBalance?.toString() || '0');
-      } else {
-        setName('');
-        setType('bank');
-        setInitialBalance('');
-      }
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => { document.body.style.overflow = 'auto'; };
-  }, [isOpen, initialData]);
-
-  if (!isOpen) return null;
+  const [name, setName] = useState(initialData?.name || '');
+  const [type, setType] = useState(initialData?.type || 'bank');
+  const [initialBalance, setInitialBalance] = useState(initialData ? initialData.initialBalance?.toString() || '0' : '');
+  const [saving, setSaving] = useState(false);
+  const [nameError, setNameError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || saving) return;
+    if (saving) return;
+    if (!name.trim()) {
+      setNameError('Ponele un nombre a la cuenta.');
+      nameRef.current?.focus();
+      return;
+    }
+    setNameError('');
 
-    const data = {
-      name,
-      type,
-      initialBalance: parseFloat(initialBalance || 0)
-    };
+    const data = { name, type, initialBalance: parseFloat(initialBalance || 0) };
 
     setSaving(true);
     try {
-      if (initialData && initialData.id && onEdit) {
+      if (isEdit && onEdit) {
         await onEdit(initialData.id, data);
         showToast('Cuenta actualizada', 'success');
       } else {
@@ -73,82 +62,84 @@ const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData
   };
 
   const handleDelete = async () => {
-    if (!initialData || !initialData.id) return;
-    
-    const isConfirmed = await confirm(`¿Estás seguro de que quieres eliminar la cuenta "${initialData.name}"?`);
-    if (isConfirmed) {
-      try {
-        await onDelete(initialData.id);
-        showToast('Cuenta eliminada', 'success');
-        onClose();
-      } catch (error) {
-        showToast('Error al eliminar: ' + error.message, 'error');
-      }
+    if (!isEdit) return;
+    const isConfirmed = await confirm(`¿Eliminar la cuenta "${initialData.name}"?`);
+    if (!isConfirmed) return;
+    try {
+      await onDelete(initialData.id);
+      showToast('Cuenta eliminada', 'success');
+      onClose();
+    } catch (error) {
+      showToast('Error al eliminar: ' + error.message, 'error');
     }
   };
 
   return (
-    <div className="modal-overlay animate-fade-in">
-      <Card className="modal-content animate-slide-up" style={{ padding: 'var(--spacing-xl)' }}>
-        <div className="modal-header">
-          <h2>{initialData ? 'Editar Cuenta' : 'Nueva Cuenta'}</h2>
-          <Button variant="ghost" className="close-btn" onClick={onClose} style={{ padding: '8px' }}>
-            <X size={24} />
-          </Button>
+    <form onSubmit={handleSubmit} className={styles.form} noValidate>
+      <Field label="Nombre de la cuenta" error={nameError}>
+        {(p) => (
+          <Input
+            {...p}
+            ref={nameRef}
+            type="text"
+            fullWidth
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ej. Mercado Pago"
+            maxLength={25}
+            data-autofocus={isEdit ? undefined : true}
+          />
+        )}
+      </Field>
+
+      <div>
+        <p className={styles.groupLabel} id="tipo-cuenta-label">
+          Tipo
+        </p>
+        <div role="group" aria-labelledby="tipo-cuenta-label" className={styles.group}>
+          {ACCOUNT_TYPES.map((t) => (
+            <Chip key={t.id} pressed={type === t.id} onClick={() => setType(t.id)} icon={<t.icon size={16} aria-hidden="true" />}>
+              {t.label}
+            </Chip>
+          ))}
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Nombre de la cuenta</label>
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ej. Mercado Pago"
-              required
-              maxLength={25}
-            />
-          </div>
+      <Field label="Saldo inicial ($)" hint={isEdit ? 'El saldo inicial de una cuenta existente no se puede editar.' : undefined}>
+        {(p) => (
+          <Input
+            {...p}
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            fullWidth
+            value={initialBalance}
+            onChange={(e) => setInitialBalance(e.target.value)}
+            placeholder="0"
+            disabled={isEdit}
+          />
+        )}
+      </Field>
 
-          <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Tipo</label>
-            <Select 
-              value={type} 
-              onChange={(e) => setType(e.target.value)}
-            >
-              {ACCOUNT_TYPES.map(t => (
-                <option key={t.id} value={t.id}>{t.label}</option>
-              ))}
-            </Select>
-          </div>
-
-          <div className="form-group" style={{ marginBottom: 'var(--spacing-xl)' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Saldo Inicial ($)</label>
-            <Input
-              type="number"
-              value={initialBalance}
-              onChange={(e) => setInitialBalance(e.target.value)}
-              placeholder="0.00"
-              step="0.01"
-              disabled={!!initialData}
-            />
-            {initialData && <small style={{ color: 'var(--text-tertiary)', marginTop: '4px', display: 'block' }}>No puedes editar el saldo inicial de una cuenta existente.</small>}
-          </div>
-
-          <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-            <Button type="submit" variant="primary" disabled={saving} style={{ flex: 1, padding: '16px' }}>
-              {saving ? 'Guardando...' : 'Guardar'}
-            </Button>
-            {initialData && (
-              <Button type="button" variant="danger" style={{ padding: '16px' }} onClick={handleDelete}>
-                Eliminar
-              </Button>
-            )}
-          </div>
-        </form>
-      </Card>
-    </div>
+      <div className={styles.submit}>
+        <Button type="submit" variant="primary" size="lg" disabled={saving}>
+          {saving ? 'Guardando…' : 'Guardar cuenta'}
+        </Button>
+        {isEdit && (
+          <Button type="button" variant="danger" size="lg" onClick={handleDelete}>
+            Eliminar
+          </Button>
+        )}
+      </div>
+    </form>
   );
 };
+
+/** Hoja para crear o editar una cuenta. Props sin cambios respecto de la versión anterior. */
+const AddAccountModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData }) => (
+  <Sheet open={isOpen} onClose={onClose} title={initialData ? 'Editar cuenta' : 'Nueva cuenta'}>
+    <AccountForm onClose={onClose} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} initialData={initialData} />
+  </Sheet>
+);
 
 export default AddAccountModal;

@@ -150,9 +150,15 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - break-ui: no se corrió la skill; se hicieron casos extremos a mano y en pruebas (320 px, cifras de 15 dígitos, nombres largos,
     sin cuentas, sin frecuentes, mes distinto del actual). Encontró y corrigió un desborde del saldo a 320 px.
 
+- **Modales de movimiento y cuenta** (rama `feature/ui-transaction-sheet`, desde `main` con #5 y #6 mergeados): ahora son hojas inferiores sobre `Sheet`
+  (`AddTransactionModal`, `AddAccountModal`; mismas props, lógica de guardado y `requestId` intactos). Monto primero con teclado decimal y foco,
+  categorías como botones, fecha/descripción plegadas, transferencia apilada (corrige el desborde de la auditoría), validación inline con ícono y texto.
+  `useDialogA11y` ahora tiene pila: una confirmación sobre una hoja atiende Escape sola. Capturas en `docs/ui-redesign/sheets/`.
+  Archivos sin uso pendientes de borrar con OK: `src/App.css`, `src/components/AddTransactionModal.css`.
+
 ## Pantallas terminadas / PRs
 
-PR #5 (sistema de diseño) mergeado. Layout/navegación en `feature/ui-layout`, pendiente de PR.
+PR #5 (sistema de diseño) mergeado. PR #6 (Layout + Dashboard) mergeado.
 ## Pendiente
 
 - OK del usuario al sistema de diseño (fase 3), luego fase 4: Layout/navegación → Dashboard → modal de transacción → ...
