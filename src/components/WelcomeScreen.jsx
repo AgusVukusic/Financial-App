@@ -125,7 +125,7 @@ const WelcomeScreen = ({ onBack }) => {
             <button 
               type="button"
               onClick={handleResendVerification}
-              style={{ background: 'var(--danger)', color: 'white', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+              style={{ background: 'var(--danger)', color: 'var(--bg)', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
             >
               Reenviar correo de verificación
             </button>
@@ -180,7 +180,7 @@ const WelcomeScreen = ({ onBack }) => {
           
           <button type="submit" disabled={loading} style={{
             background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover))',
-            color: 'white', border: 'none', padding: '12px', borderRadius: '8px',
+            color: 'var(--onacc)', border: 'none', padding: '12px', borderRadius: '8px',
             fontSize: '1rem', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1, transition: 'transform 0.2s ease', marginTop: '8px'
           }}>

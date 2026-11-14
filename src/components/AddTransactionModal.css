@@ -89,13 +89,13 @@
 
 .type-btn.active-expense {
   background-color: var(--danger);
-  color: white;
+  color: var(--bg);
   box-shadow: var(--shadow-sm);
 }
 
 .type-btn.active-income {
   background-color: var(--success);
-  color: white;
+  color: var(--bg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -131,7 +131,7 @@
 
 .submit-btn {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
-  color: white;
+  color: var(--onacc);
   border: none;
   padding: var(--spacing-md);
   border-radius: var(--radius-md);

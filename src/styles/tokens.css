@@ -103,11 +103,17 @@ body.light-theme,
   --z-sheet: 100;
   --z-toast: 200;
   --z-dialog: 300;
+}
 
-  /*
-   * Alias de la versión anterior. Las pantallas que todavía no se rehicieron siguen leyendo estos nombres;
-   * se van a borrar cuando se rehaga la última. No usarlos en código nuevo.
-   */
+/*
+ * Los alias se declaran en CADA selector de tema: una custom property con var() se resuelve donde se declara,
+ * así que si vivieran solo en :root quedarían fijos con los valores del tema oscuro.
+ */
+:root,
+[data-theme],
+body.light-theme {
+  /* Alias de la versión anterior. Las pantallas que todavía no se rehicieron siguen leyendo estos nombres;
+     se borran cuando se rehaga la última. No usarlos en código nuevo. */
   --bg-base: var(--bg);
   --bg-surface: var(--surf);
   --bg-glass: var(--chip);
