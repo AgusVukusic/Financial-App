@@ -1,0 +1,30 @@
+.meter {
+  display: flex;
+  gap: 3px;
+  height: 16px;
+}
+
+.meter > i {
+  flex: 1;
+  border: var(--bw) solid var(--ink2);
+  border-radius: 2px;
+  background: transparent;
+}
+
+.meter > i.on {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Exceso: segmento rayado aparte, con otro tono pero sobre todo con otra forma */
+.meter > i.ex {
+  flex: none;
+  width: 12px;
+  border-color: var(--bad);
+  background: repeating-linear-gradient(45deg, var(--bad) 0 2px, transparent 2px 4px);
+}
+
+.nolim {
+  height: 8px;
+  border-top: 2px dotted var(--ink2);
+}

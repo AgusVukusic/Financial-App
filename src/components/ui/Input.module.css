@@ -1,22 +1,33 @@
 .input {
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 48px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-lg);
+  border: var(--bw) solid var(--ink2);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px; /* 16 px evita el zoom automático de iOS al enfocar */
+  transition: border-color var(--dur-2) ease;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--acc);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--bad);
 }
 
 .input::placeholder {
-  color: var(--text-secondary);
+  color: var(--ink2);
+  opacity: 1;
+}
+
+.input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .fullWidth {

@@ -1,0 +1,27 @@
+.pat {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background-color: var(--surf);
+  border-right: var(--bw) solid var(--ink);
+}
+
+.pat:last-child {
+  border-right: 0;
+}
+
+.p0 { background-image: radial-gradient(var(--ink) 1px, transparent 1.2px); background-size: 3px 3px; }
+.p1 { background-image: radial-gradient(var(--ink) 1.8px, transparent 2.1px); background-size: 8px 8px; }
+.p2 { background-image: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 5px); }
+.p3 { background-image: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 5px); }
+.p4 { background-image: repeating-linear-gradient(0deg, var(--ink) 0 2px, transparent 2px 5px); }
+.p5 { background-image: linear-gradient(var(--ink), var(--ink)); }
+
+.stack {
+  display: flex;
+  height: 22px;
+  overflow: hidden;
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-sm);
+  background: var(--surf);
+}

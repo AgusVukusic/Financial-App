@@ -1,0 +1,39 @@
+.od {
+  display: inline-flex;
+  align-items: flex-end;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.d {
+  display: inline-block;
+  overflow: hidden;
+  height: 1em;
+  line-height: 1em;
+  vertical-align: bottom;
+}
+
+.s {
+  display: flex;
+  flex-direction: column;
+}
+
+.s > span {
+  display: block;
+  height: 1em;
+  line-height: 1em;
+  text-align: center;
+}
+
+.c {
+  display: inline-block;
+  height: 1em;
+  line-height: 1em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s {
+    transition: transform var(--dur-odo) var(--ease-out);
+  }
+}
