@@ -90,7 +90,7 @@
 
 .btn-primary {
   background: var(--accent-gradient);
-  color: white;
+  color: var(--onacc);
   border: none;
   border-radius: var(--radius-lg);
   padding: 16px 24px;

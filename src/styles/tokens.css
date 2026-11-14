@@ -1,0 +1,154 @@
+/*
+ * Tokens de diseño: "Panel de taller".
+ * Oscuro = panel (por defecto). Claro = papel de taller. Un solo acento (naranja vivo) para lo accionable;
+ * el color de estado (entró / alerta / aviso) nunca se usa como acento y siempre va con ícono o texto.
+ *
+ * Tema: `body.light-theme` (lo maneja useTheme) o `data-theme="light|dark"` en cualquier subárbol
+ * (útil para mostrar los dos temas lado a lado).
+ *
+ * Contraste (texto, WCAG AA 4.5:1) verificado por cálculo contra --bg, --surf y --chip en ambos temas.
+ */
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Superficies y tinta */
+  --bg: #131311;
+  --surf: #1f1e1b;
+  --chip: #2c2a26;
+  --ink: #f2efe7;
+  --ink2: #a9a497; /* texto secundario */
+  --rule: #3c3a35; /* filetes y bordes suaves */
+
+  /* Acento: única señal de "se puede tocar" */
+  --acc: #ff6b1a;
+  --onacc: #1b0a00;
+
+  /* Estado */
+  --in: #5ed38a; /* entró (siempre con signo +) */
+  --bad: #ff8aa6; /* vencido / superado / error (siempre con ícono + texto) */
+  --warn: #f0c24b; /* cerca del límite */
+}
+
+body.light-theme,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #efece2;
+  --surf: #fbfaf5;
+  --chip: #e3dece;
+  --ink: #1a1916;
+  --ink2: #58544a;
+  --rule: #c9c3b3;
+
+  --acc: #bf3f0a;
+  --onacc: #ffffff;
+
+  --in: #1b6b32;
+  --bad: #b0123c;
+  --warn: #7e5006;
+}
+
+:root {
+  /* Tipografía */
+  --font-ui: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-dot: 'Doto', 'Geist Mono', ui-monospace, monospace; /* solo el saldo grande, 48 px o más */
+
+  --fs-label: 0.6875rem; /* 11 px, rótulos de panel en mayúsculas mono */
+  --fs-small: 0.8125rem; /* 13 */
+  --fs-body: 0.9375rem; /* 15 */
+  --fs-lead: 1.0625rem; /* 17 */
+  --fs-title: 1.25rem; /* 20 */
+  --fs-num: 1.5rem; /* 24, cifras destacadas */
+  --fs-display: 3rem; /* 48, saldo en puntos */
+  --lh-tight: 1.2;
+  --lh-body: 1.4;
+  --ls-label: 0.08em;
+
+  /* Espaciado (base de 4 px) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* Radios */
+  --r-xs: 3px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+  --r-pill: 999px;
+
+  /* Bordes, teclas y objetivos táctiles */
+  --bw: 1px;
+  --bw-strong: 2px;
+  --key-depth: 3px; /* relieve de las teclas */
+  --tap: 44px; /* objetivo táctil mínimo */
+  --tap-lg: 56px;
+
+  /* Movimiento */
+  --ease-out: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --dur-1: 80ms;
+  --dur-2: 160ms;
+  --dur-3: 280ms;
+  --dur-odo: 800ms;
+
+  /* Capas */
+  --z-nav: 50;
+  --z-sheet: 100;
+  --z-toast: 200;
+  --z-dialog: 300;
+}
+
+/*
+ * Los alias se declaran en CADA selector de tema: una custom property con var() se resuelve donde se declara,
+ * así que si vivieran solo en :root quedarían fijos con los valores del tema oscuro.
+ */
+:root,
+[data-theme],
+body.light-theme {
+  /* Alias de la versión anterior. Las pantallas que todavía no se rehicieron siguen leyendo estos nombres;
+     se borran cuando se rehaga la última. No usarlos en código nuevo. */
+  --bg-base: var(--bg);
+  --bg-surface: var(--surf);
+  --bg-glass: var(--chip);
+  --bg-glass-hover: var(--chip);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink2);
+  --text-muted: var(--ink2);
+  --accent-primary: var(--acc);
+  --accent-primary-hover: color-mix(in srgb, var(--acc) 85%, var(--ink));
+  --accent-gradient: linear-gradient(var(--acc), var(--acc));
+  --success: var(--in);
+  --success-bg: color-mix(in srgb, var(--in) 14%, transparent);
+  --success-glow: transparent;
+  --danger: var(--bad);
+  --danger-bg: color-mix(in srgb, var(--bad) 14%, transparent);
+  --danger-glow: transparent;
+  --warning: var(--warn);
+  --warning-bg: color-mix(in srgb, var(--warn) 16%, transparent);
+  --border-color: var(--rule);
+  --border-light: color-mix(in srgb, var(--rule) 50%, transparent);
+  --spacing-xs: var(--sp-1);
+  --spacing-sm: var(--sp-2);
+  --spacing-md: var(--sp-4);
+  --spacing-lg: var(--sp-5);
+  --spacing-xl: var(--sp-6);
+  --spacing-xxl: var(--sp-7);
+  --radius-sm: var(--r-md);
+  --radius-md: var(--r-lg);
+  --radius-lg: var(--r-xl);
+  --radius-xl: 16px;
+  --radius-full: var(--r-pill);
+  --shadow-sm: 0 1px 0 var(--rule);
+  --shadow-md: 0 var(--key-depth) 0 var(--rule);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.3);
+  --shadow-glass: none;
+  --shadow-accent: 0 var(--key-depth) 0 var(--ink);
+  --glow-color: transparent;
+}

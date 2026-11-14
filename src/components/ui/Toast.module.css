@@ -1,0 +1,76 @@
+/* Avisos abajo, al alcance del pulgar y por encima de la navegación. */
+.container {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--toast-bottom, 104px) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  z-index: var(--z-toast);
+  width: calc(100% - 2 * var(--sp-4));
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 52px;
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);
+  border-radius: var(--r-lg);
+  /* Invertido respecto de la pantalla: destaca en claro y en oscuro */
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  pointer-events: auto;
+}
+
+.icon {
+  flex: none;
+}
+
+.message {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.action,
+.close {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  flex: none;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.action {
+  padding: 0 var(--sp-3);
+  border: var(--bw) solid currentColor;
+  font-weight: 700;
+}
+
+.close {
+  border: 0;
+}
+
+.toast :focus-visible {
+  outline-color: var(--bg);
+}

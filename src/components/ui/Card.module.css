@@ -1,22 +1,20 @@
 .card {
-  background: var(--bg-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: var(--shadow-lg);
+  background: var(--surf);
+  border: var(--bw) solid var(--rule);
+  border-radius: var(--r-lg);
+  color: var(--ink);
 }
 
 .withPadding {
-  padding: var(--spacing-lg);
+  padding: var(--sp-4);
 }
 
-body.light-theme .card:hover {
-  border-color: rgba(0, 0, 0, 0.1);
+.dotted {
+  background-image: radial-gradient(var(--rule) 1px, transparent 1.3px);
+  background-size: 7px 7px;
+}
+
+.dashed {
+  background: transparent;
+  border-style: dashed;
 }

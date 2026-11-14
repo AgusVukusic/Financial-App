@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Finanzas Personales',
         short_name: 'Finanzas',
         description: 'Controla tus gastos de forma fácil y rápida',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#131311',
+        background_color: '#131311',
         display: 'standalone',
         icons: [
           {

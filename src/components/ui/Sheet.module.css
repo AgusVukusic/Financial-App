@@ -1,0 +1,64 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgb(0 0 0 / 0.55);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-sheet) + 1);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 92vh;
+  max-height: 92dvh;
+  margin: 0 auto;
+  background: var(--surf);
+  color: var(--ink);
+  border-top: var(--bw-strong) solid var(--ink);
+  border-radius: 16px 16px 0 0;
+}
+
+.sheet:focus {
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-2) var(--sp-2) var(--sp-4);
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  flex: none;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom, 0px));
+}

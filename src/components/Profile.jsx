@@ -27,7 +27,7 @@ const Profile = ({ userName, uid, onClearData }) => {
       
       <Card className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
         <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
-          <User size={32} color="white" />
+          <User size={32} color="currentColor" style={{ color: 'var(--onacc)' }} />
         </div>
         <div style={{ overflow: 'hidden' }}>
           <h3 style={{ fontSize: '1.2rem', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userName}</h3>

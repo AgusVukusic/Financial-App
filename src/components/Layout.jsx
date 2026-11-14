@@ -32,7 +32,7 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <PlusCircle size={32} color="#fff" />
+            <PlusCircle size={32} color="currentColor" style={{ color: 'var(--onacc)' }} />
           </motion.button>
         </div>
 

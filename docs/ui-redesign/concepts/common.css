@@ -1,0 +1,28 @@
+/* Base común. Cada concepto define sus tokens en .kN.light y .kN.dark:
+   --bg --surf --ink --ink2 --rule --acc --onacc --in --bad --warn --chip */
+.phone{position:relative;width:min(375px,100%);height:780px;border-radius:34px;border:1px solid var(--pg-line);background:var(--bg);color:var(--ink);overflow:hidden;font-size:15px;line-height:1.35;isolation:isolate}
+:where(.phone) *{box-sizing:border-box;min-width:0}
+:where(.phone) button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;text-align:inherit}
+:where(.phone) input{font:inherit;color:inherit}
+:where(.phone) :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.ck-app{display:flex;flex-direction:column;height:100%}
+.ck-scroll{flex:1;overflow:auto;overscroll-behavior:contain;scrollbar-width:none}
+.ck-scroll::-webkit-scrollbar{display:none}
+.ck-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ck-back{position:absolute;inset:0;background:rgb(0 0 0/.5);z-index:20}
+.ck-sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--surf);color:var(--ink);border-radius:24px 24px 0 0;max-height:92%;overflow:auto}
+.ck-toast{position:absolute;left:12px;right:12px;bottom:96px;z-index:30;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;min-height:52px;border-radius:12px;background:var(--ink);color:var(--bg);box-shadow:0 8px 24px rgb(0 0 0/.3)}
+.ck-toast .t{flex:1;font-weight:600}
+.ck-toast button{min-height:44px;min-width:44px;padding:0 14px;font-weight:700;border:1px solid currentColor;border-radius:8px;color:inherit}
+.od{display:inline-flex;align-items:flex-end;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.od-d{display:inline-block;overflow:hidden;height:1em;line-height:1em;vertical-align:bottom}
+.od-s{display:flex;flex-direction:column}
+.od-s>span{display:block;height:1em;line-height:1em;text-align:center}
+.od-c{display:inline-block;height:1em;line-height:1em}
+@media (prefers-reduced-motion:no-preference){
+  .od-ready .od-s{transition:transform .8s cubic-bezier(.2,.9,.25,1)}
+  .ck-toast{animation:ck-in .25s ease-out}
+  .ck-sheet{animation:ck-up .3s cubic-bezier(.2,.9,.25,1)}
+  @keyframes ck-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes ck-up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+}

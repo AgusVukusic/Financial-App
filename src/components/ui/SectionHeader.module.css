@@ -1,0 +1,28 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: 6px;
+  margin-bottom: var(--sp-3);
+  border-bottom: var(--bw-strong) solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.index {
+  color: var(--acc);
+}
+
+.title {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.meta {
+  margin-left: auto;
+  text-align: right;
+  color: var(--ink2);
+}
