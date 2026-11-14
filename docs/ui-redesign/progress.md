@@ -2,8 +2,14 @@
 
 ## Fase actual
 
-Fase 2 (dirección visual) entregada el 2026-11-13. Esperando que elijas una dirección o pidas mezcla/otra tanda.
-Siguiente: fase 3 (sistema de diseño: tokens y componentes base en `src/components/ui/`).
+**Dirección elegida (2026-11-13): "3 · Panel de taller"** (hardware: teclas con relieve, rótulos de panel mono, saldo en
+puntos Doto, un solo acento naranja, tramas/dither para distinguir categorías, entrada por texto "café 3500").
+Por qué: al usuario "le fascinó"; cumple saldo primero, estado por texto/ícono/forma y registro rápido.
+
+Fase 3 (sistema de diseño) implementada en la rama `feature/ui-design-system`: tokens claro/oscuro (`src/styles/tokens.css`),
+componentes base rehechos y nuevos (`src/components/ui/`), página de muestra `/showcase.html` (solo dev), guía en
+`docs/ui-redesign/design-system.md`, capturas en `docs/ui-redesign/system/`. ✋ Esperando OK del usuario antes de la fase 4
+(rediseño pantalla por pantalla, empezando por Layout/navegación).
 
 ## Respuestas de gusto (fase 1)
 
@@ -114,11 +120,12 @@ combinaciones; objetivos de 44 px o más; sin editar/borrar en cada fila.
 
 ## Pantallas terminadas / PRs
 
-Ninguna. Todavía no hay ramas ni PRs; los archivos de las fases 1 y 2 están sin commitear en `main` local.
+Ninguna pantalla todavía. Rama `feature/ui-design-system` (docs de las fases 1-2 + sistema de diseño). `.claude/` y
+`.impeccable/` quedan sin commitear a propósito (skills instaladas y config local del detector).
 
 ## Pendiente
 
-- Elegir dirección (o mezcla).
-- Decidir en qué rama entran `docs/ui-redesign/`, `PRODUCT.md`, `scripts/seed-emulators.js` y `.claude/launch.json`
-  (propuesta: `feature/ui-design-system`).
+- OK del usuario al sistema de diseño (fase 3), luego fase 4: Layout/navegación → Dashboard → modal de transacción → ...
 - Confirmar el hallazgo 7 (login sin verificar) como arreglo en `App.jsx`/`WelcomeScreen.jsx`.
+- Borrar `src/components/ui/Toast.css` y `ConfirmDialog.css` (sin uso) con OK del usuario.
+- Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
