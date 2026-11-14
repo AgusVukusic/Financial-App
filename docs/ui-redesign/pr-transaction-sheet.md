@@ -25,7 +25,7 @@ idioma es-AR. Ahora el monto es texto con teclado decimal y `parseAmountInput` (
   monto); gasto en tinta neutra con signo −, ingreso con + y color, **transferencia con ⇄ y "origen → destino"** (nombres de cuentas); 20 renglones y
   "Ver los N restantes"; estado vacío con "Anotar el primero". Se acabaron los dos íconos de 24 px por fila.
 - **Eliminar** dentro de la hoja de edición (botón rojo + confirmación "Eliminar"). Probado en el emulador: saldo +$21.000, el renglón desaparece y el aviso lo confirma.
-- Mismas props que antes (`isOpen`, `onClose`, `onAdd`, `onEdit`, `onDelete`, `initialData`, `accounts`): `App.jsx` no cambia.
+- Mismas props que antes (`isOpen`, `onClose`, `onAdd`, `onEdit`, `onDelete`, `initialData`, `accounts`) más `onDelete` en el modal de movimiento (`App.jsx` solo pasa `accounts`, `onOpenAdd` y `onDelete`).
 
 ### Antes / después
 Antes (auditoría): `docs/ui-redesign/audit/06-modal-gasto-oscuro.jpg`, `08-dashboard-lista-oscuro.jpg`, `17-transferencia-desborde.jpg`.
