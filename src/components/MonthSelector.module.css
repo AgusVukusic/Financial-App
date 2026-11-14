@@ -1,0 +1,18 @@
+.wrap {
+  display: grid;
+  grid-template-columns: var(--tap) 1fr var(--tap);
+  align-items: center;
+  margin-bottom: var(--sp-4);
+  background: var(--surf);
+  border: var(--bw) solid var(--ink2);
+  border-radius: var(--r-lg);
+}
+
+.label {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}

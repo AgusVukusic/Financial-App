@@ -1,48 +1,43 @@
-import { Home, PlusCircle, PieChart, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Home, PieChart, Plus, User } from 'lucide-react';
 import './Layout.css';
 
+/**
+ * Estructura de la app: contenido + navegación principal.
+ * Celular: barra inferior anclada al borde (nunca flota sobre el contenido). Escritorio: riel lateral.
+ * "Gastos fijos" es una vista dentro de Inicio, así que Inicio queda marcado como actual.
+ */
 const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
+  const current = activeTab === 'subscriptions' ? 'home' : activeTab;
+
+  const item = (id, label, Icon) => (
+    <button
+      type="button"
+      className="layout__item"
+      aria-current={current === id ? 'page' : undefined}
+      onClick={() => onTabChange(id)}
+    >
+      <Icon size={22} aria-hidden="true" />
+      <span>{label}</span>
+    </button>
+  );
+
   return (
-    <div className="layout-container">
-      <main className="main-content">
+    <div className="layout">
+      <a className="layout__skip" href="#contenido">
+        Saltar al contenido
+      </a>
+      <main className="layout__main" id="contenido" tabIndex={-1}>
         {children}
       </main>
-      
-      <nav className="bottom-nav glass-panel">
-        <button 
-          className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
-          onClick={() => onTabChange('home')}
-        >
-          <Home size={24} />
-          <span>Inicio</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
-          onClick={() => onTabChange('reports')}
-        >
-          <PieChart size={24} />
-          <span>Reportes</span>
-        </button>
-        
-        <div className="nav-fab-container">
-          <motion.button 
-            className="fab" 
-            onClick={onAddClick}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <PlusCircle size={32} color="currentColor" style={{ color: 'var(--onacc)' }} />
-          </motion.button>
-        </div>
 
-        <button 
-          className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => onTabChange('profile')}
-        >
-          <User size={24} />
-          <span>Perfil</span>
+      <nav className="layout__nav" aria-label="Navegación principal">
+        {item('home', 'Inicio', Home)}
+        {item('reports', 'Reportes', PieChart)}
+        <button type="button" className="layout__add" onClick={onAddClick}>
+          <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
+          <span>Anotar</span>
         </button>
+        {item('profile', 'Perfil', User)}
       </nav>
     </div>
   );

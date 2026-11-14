@@ -18,10 +18,8 @@ import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
 
-import { Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react';
-import Card from './components/ui/Card';
-import Button from './components/ui/Button';
-import './App.css';
+import AppHeader from './components/AppHeader';
+import MonthSelector from './components/MonthSelector';
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -128,27 +126,16 @@ function App() {
       onTabChange={setActiveTab} 
       onAddClick={handleOpenModal}
     >
-      <header className="app-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h2>Hola, {userName} 👋</h2>
-          <p className="text-secondary">
-            {activeTab === 'home' && "Aquí está tu resumen financiero"}
-            {activeTab === 'reports' && "Analiza en qué estás gastando"}
-            {activeTab === 'profile' && "Gestiona tu cuenta y datos"}
-          </p>
-        </div>
-        
-        <Button variant="ghost" isIcon onClick={toggleTheme} className="theme-toggle">
-          {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
-        </Button>
-      </header>
+      <AppHeader
+        userName={userName}
+        activeTab={activeTab}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onBack={() => setActiveTab('home')}
+      />
 
       {(activeTab === 'home' || activeTab === 'reports') && (
-        <Card noPadding style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-sm) var(--spacing-md)', marginBottom: 'var(--spacing-md)', borderRadius: 'var(--radius-full)' }}>
-          <Button variant="ghost" isIcon onClick={() => handleMonthChange(-1)}><ChevronLeft size={20} /></Button>
-          <span style={{ fontWeight: '500' }}>{monthNames[selectedMonth]} {selectedYear}</span>
-          <Button variant="ghost" isIcon onClick={() => handleMonthChange(1)}><ChevronRight size={20} /></Button>
-        </Card>
+        <MonthSelector label={`${monthNames[selectedMonth]} ${selectedYear}`} onChange={handleMonthChange} />
       )}
 
       {activeTab === 'home' && (

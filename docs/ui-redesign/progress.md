@@ -128,11 +128,16 @@ Prueba en formato iPhone (393×852, dpr 2, táctil) en el navegador integrado: U
 cubre safe areas reales, el modo instalado ni el comportamiento de iOS al enfocar inputs. Resultado: sin scroll horizontal; en el
 Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el flujo anotar gasto → aviso con el sistema nuevo funciona.
 
+## Fase 4: pantalla por pantalla
+
+- **Layout/navegación** (rama `feature/ui-layout`, 2026-11-14): barra inferior anclada de 4 destinos con rótulo siempre visible, `aria-current`,
+  tecla "Anotar" de acento, área segura; riel lateral desde 768 px; salto al contenido; `AppHeader` (saludo sin emoji + tema con
+  `aria-label`; en Gastos fijos, botón Volver); `MonthSelector` (botones de 44 px, mes anunciado). Capturas en `docs/ui-redesign/layout/`.
+  `App.css` quedó sin uso (ya no se importa): pendiente de borrar con OK.
+
 ## Pantallas terminadas / PRs
 
-Ninguna pantalla todavía. Rama `feature/ui-design-system` (docs de las fases 1-2 + sistema de diseño). `.claude/` y
-`.impeccable/` quedan sin commitear a propósito (skills instaladas y config local del detector).
-
+PR #5 (sistema de diseño) mergeado. Layout/navegación en `feature/ui-layout`, pendiente de PR.
 ## Pendiente
 
 - OK del usuario al sistema de diseño (fase 3), luego fase 4: Layout/navegación → Dashboard → modal de transacción → ...
