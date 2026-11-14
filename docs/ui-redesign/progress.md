@@ -6,10 +6,9 @@
 puntos Doto, un solo acento naranja, tramas/dither para distinguir categorías, entrada por texto "café 3500").
 Por qué: al usuario "le fascinó"; cumple saldo primero, estado por texto/ícono/forma y registro rápido.
 
-Fase 3 (sistema de diseño) implementada en la rama `feature/ui-design-system`: tokens claro/oscuro (`src/styles/tokens.css`),
-componentes base rehechos y nuevos (`src/components/ui/`), página de muestra `/showcase.html` (solo dev), guía en
-`docs/ui-redesign/design-system.md`, capturas en `docs/ui-redesign/system/`. ✋ Esperando OK del usuario antes de la fase 4
-(rediseño pantalla por pantalla, empezando por Layout/navegación).
+**Estado (2026-11-14):** fases 0–3 cerradas y fase 4 a mitad. Mergeados en `main` (14e9add): #5 sistema de diseño, #6 Layout + Dashboard,
+#7 hojas de movimiento/cuenta + lista de Movimientos. **Siguiente: Reportes**, luego Gastos fijos, Perfil, Landing/Login/Activación y
+la fase 5 (cierre). Para retomar en una sesión nueva leer `docs/ui-redesign/handoff.md` (estado completo, reglas, trampas, plan por pantalla).
 
 ## Respuestas de gusto (fase 1)
 
@@ -98,7 +97,7 @@ combinaciones; objetivos de 44 px o más; sin editar/borrar en cada fila.
 
 - Skills: `impeccable` (auditoría/rediseño), `mobile-native`, `break-ui`, `animate`, `animation-performance`, `dataviz`,
   `artifact-design`. No están instaladas `emil-design-eng`, `review-animations` ni `apple-design`.
-- Dirección elegida: pendiente.
+- Dirección elegida: **3 · Panel de taller** (2026-11-13).
 - La capa de datos no se toca (`functions/`, `api/`, `firestore.rules`, `src/services/api.js`, `src/utils/money.js`,
   `src/utils/mappers.js`, contratos de los hooks). Grupos queda afuera.
 - Se usó la página de comparación (artifact) en lugar de la página de decisión de impeccable (`serve-question`).
@@ -166,10 +165,14 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 ## Pantallas terminadas / PRs
 
-PR #5 (sistema de diseño) mergeado. PR #6 (Layout + Dashboard) mergeado.
+- #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
+- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Reportes → Gastos fijos → Perfil → Landing/Login/Activación.
+
 ## Pendiente
 
-- OK del usuario al sistema de diseño (fase 3), luego fase 4: Layout/navegación → Dashboard → modal de transacción → ...
-- Confirmar el hallazgo 7 (login sin verificar) como arreglo en `App.jsx`/`WelcomeScreen.jsx`.
-- (Hecho) `Toast.css` y `ConfirmDialog.css` borrados con OK del usuario.
+- Fase 4: Reportes, Gastos fijos (confirmar pagar con `destructive: false`, sin segundo aviso), Perfil, Landing/Login/Activación
+  (hallazgo 7: login sin verificar; errores técnicos de Firebase en texto humano).
+- Fase 5: lint/tests/build, pasada final de accesibilidad y `prefers-reduced-motion`, quitar alias legados de `tokens.css`, `DESIGN.md`, resumen.
+- Verificar y pedir OK antes de borrar `profile/SubscriptionsCard.jsx` y `dashboard/ExpenseChart.jsx` (parecen sin uso).
 - Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
+- Preguntas abiertas para el usuario: ver `handoff.md` sección 12.
