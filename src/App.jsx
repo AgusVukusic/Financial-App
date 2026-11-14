@@ -81,6 +81,10 @@ function App() {
     });
   };
 
+  // Los frecuentes anotan "hoy": solo tienen sentido mirando el mes actual.
+  const today = new Date();
+  const isCurrentMonth = selectedMonth === today.getMonth() && selectedYear === today.getFullYear();
+
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
   useEffect(() => {
@@ -151,6 +155,10 @@ function App() {
             accounts={accounts}
             accountBalances={accountBalances}
             subscriptions={subscriptions}
+            quickAddEnabled={isCurrentMonth}
+            onAddTransaction={addTransaction}
+            onDeleteTransaction={deleteTransaction}
+            onOpenAdd={handleOpenModal}
             onNavigateToSubscriptions={() => setActiveTab('subscriptions')}
             onAddAccountClick={() => handleOpenAccountModal()}
             onEditAccountClick={(acc) => handleOpenAccountModal(acc)}

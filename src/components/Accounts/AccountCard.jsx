@@ -1,35 +1,33 @@
-import Card from '../ui/Card';
 import { formatCurrency } from '../../utils/formatters';
+import Tag from '../ui/Tag';
 import { ACCOUNT_TYPES } from './AddAccountModal';
+import styles from './AccountList.module.css';
 
+/**
+ * Fila de una cuenta (todo el renglón es un botón que abre la edición). La deuda de tarjeta se rotula "Deuda":
+ * el saldo negativo no se distingue solo por el signo. Los nombres largos se cortan con puntos suspensivos.
+ */
 const AccountCard = ({ account, balance, onClick }) => {
-  const accountType = ACCOUNT_TYPES.find(t => t.id === account.type) || ACCOUNT_TYPES[0];
+  const accountType = ACCOUNT_TYPES.find((t) => t.id === account.type) || ACCOUNT_TYPES[0];
   const Icon = accountType.icon;
+  const isDebt = account.type === 'credit' && balance < 0;
 
   return (
-    <Card 
+    <button
+      type="button"
+      className={styles.row}
       onClick={() => onClick(account)}
-      style={{ 
-        minWidth: '200px', 
-        cursor: 'pointer', 
-        transition: 'transform 0.2s',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        gap: 'var(--spacing-md)'
-      }}
-      className="hover-lift"
+      aria-label={`Editar cuenta ${account.name}, saldo ${formatCurrency(balance)}${isDebt ? ', deuda' : ''}`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', color: 'var(--text-secondary)' }}>
-        <Icon size={20} />
-        <span style={{ fontSize: '14px', fontWeight: '500' }}>{account.name}</span>
-      </div>
-      <div>
-        <h3 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-          {formatCurrency(balance)}
-        </h3>
-      </div>
-    </Card>
+      <span className={styles.icon}>
+        <Icon size={20} aria-hidden="true" />
+      </span>
+      <span className={styles.info}>
+        <span className={styles.name}>{account.name}</span>
+        {isDebt && <Tag tone="dashed">Deuda</Tag>}
+      </span>
+      <b className={styles.amount}>{formatCurrency(balance)}</b>
+    </button>
   );
 };
 

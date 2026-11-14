@@ -1,35 +1,47 @@
-import { ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
+import { splitBalance } from '../../utils/dashboardFormat';
 import Card from '../ui/Card';
+import Odometer from '../ui/Odometer';
+import styles from './BalanceCard.module.css';
 
+// Doto es una fuente de puntos: solo se lee bien grande. Pasada esta cantidad de caracteres se usa mono nítida.
+const MAX_DOT_CHARS = 12;
+
+/**
+ * Saldo total en grande (lo primero que se ve) y lo que entró y salió del mes.
+ * Entró/salió llevan signo y flecha además de color; el saldo negativo lleva el signo −.
+ */
 const BalanceCard = ({ netWorth, balance, income, expense }) => {
+  const total = netWorth !== undefined ? netWorth : balance;
+  const { negative, digits } = splitBalance(total);
+  const text = `${negative ? '−' : ''}${digits}`;
+  const long = text.length > MAX_DOT_CHARS;
+
   return (
-    <Card className="balance-card">
-      <div className="balance-header">
-        <span className="text-secondary">Patrimonio Total</span>
-        <Wallet size={20} className="text-secondary" />
+    <Card variant="dotted" className={styles.card} aria-label="Saldo total">
+      <p className={styles.label}>Saldo total</p>
+      <div className={styles.balance} style={{ '--chars': text.length }}>
+        <span className={styles.currency} aria-hidden="true">
+          $
+        </span>
+        <Odometer value={text} className={long ? styles.valueMono : styles.value} />
       </div>
-      <h1 className="balance-amount">{formatCurrency(netWorth !== undefined ? netWorth : balance)}</h1>
-      
-      <div className="balance-stats">
-        <div className="stat-item income">
-          <div className="stat-icon bg-success">
-            <ArrowDownRight size={16} />
-          </div>
-          <div>
-            <div className="stat-label">Ingresos</div>
-            <div className="stat-value text-success">{formatCurrency(income)}</div>
-          </div>
+
+      <div className={styles.io}>
+        <div className={styles.cell}>
+          <span className={styles.cellLabel}>
+            <ArrowUp size={12} aria-hidden="true" />
+            Entró
+          </span>
+          <b className={styles.in}>+{formatCurrency(income)}</b>
         </div>
-        
-        <div className="stat-item expense">
-          <div className="stat-icon bg-danger">
-            <ArrowUpRight size={16} />
-          </div>
-          <div>
-            <div className="stat-label">Gastos</div>
-            <div className="stat-value text-danger">{formatCurrency(expense)}</div>
-          </div>
+        <div className={styles.cell}>
+          <span className={styles.cellLabel}>
+            <ArrowDown size={12} aria-hidden="true" />
+            Salió
+          </span>
+          <b>&minus;{formatCurrency(expense)}</b>
         </div>
       </div>
     </Card>
