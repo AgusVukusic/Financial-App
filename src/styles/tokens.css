@@ -98,11 +98,23 @@ body.light-theme,
   --dur-3: 280ms;
   --dur-odo: 800ms;
 
+  /* Navegación: alto de la barra inferior (sin el área segura) y posición de los avisos encima de ella */
+  --nav-h: 76px;
+  --nav-rail-w: 96px;
+  --toast-bottom: calc(var(--nav-h) + var(--sp-3));
+
   /* Capas */
   --z-nav: 50;
   --z-sheet: 100;
   --z-toast: 200;
   --z-dialog: 300;
+}
+
+/* Escritorio: la navegación pasa a un riel lateral y los avisos bajan al borde. */
+@media (min-width: 768px) {
+  :root {
+    --toast-bottom: var(--sp-5);
+  }
 }
 
 /*

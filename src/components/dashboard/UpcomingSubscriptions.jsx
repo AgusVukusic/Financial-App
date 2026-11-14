@@ -1,57 +1,63 @@
+import { AlertTriangle, ChevronRight, Clock } from 'lucide-react';
 import { getSubscriptionStatus } from '../../utils/subscriptionUtils';
 import { formatCurrency } from '../../utils/formatters';
-import { Bell, ChevronRight, Calendar } from 'lucide-react';
-import Card from '../ui/Card';
+import { dueText } from '../../utils/dashboardFormat';
 import Button from '../ui/Button';
+import Card from '../ui/Card';
+import SectionHeader from '../ui/SectionHeader';
+import Tag from '../ui/Tag';
+import styles from './UpcomingSubscriptions.module.css';
 
+/**
+ * "Para pagar": gastos fijos vencidos o por vencer (5 días), los más urgentes primero.
+ * El estado va en palabras con ícono (vencido o por vencer), no solo en color. Pagar se hace en Gestionar.
+ */
 const UpcomingSubscriptions = ({ subscriptions, onNavigate }) => {
-  // Filter subscriptions that are overdue or due soon (within 7 days)
-  const upcoming = (subscriptions || []).map(sub => ({
-    ...sub,
-    statusObj: getSubscriptionStatus(sub)
-  })).filter(s => s.statusObj.status === 'overdue' || s.statusObj.status === 'due_soon')
-  .sort((a, b) => a.statusObj.nextPayment - b.statusObj.nextPayment)
-  .slice(0, 3); // Show top 3
+  const upcoming = (subscriptions || [])
+    .map((sub) => ({ ...sub, statusObj: getSubscriptionStatus(sub) }))
+    .filter((s) => s.statusObj.status === 'overdue' || s.statusObj.status === 'due_soon')
+    .sort((a, b) => a.statusObj.nextPayment - b.statusObj.nextPayment)
+    .slice(0, 3);
 
   return (
-    <Card style={{ marginBottom: 'var(--spacing-md)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: upcoming.length > 0 ? 'var(--spacing-md)' : '0' }}>
-        <h3 style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-          <Bell size={18} color={upcoming.length > 0 ? "var(--warning)" : "var(--text-secondary)"} />
-          Gastos Fijos
-        </h3>
-        <Button variant="ghost" onClick={onNavigate} style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          Gestionar <ChevronRight size={16} />
-        </Button>
-      </div>
+    <section aria-label="Para pagar">
+      <SectionHeader
+        index="01"
+        title="Para pagar"
+        meta={
+          <Button variant="key" size="sm" onClick={onNavigate}>
+            Gestionar
+            <ChevronRight size={16} aria-hidden="true" />
+          </Button>
+        }
+      />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-        {upcoming.map(sub => (
-          <div key={sub.id} style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            padding: 'var(--spacing-sm)',
-            background: 'var(--bg-glass)',
-            borderRadius: 'var(--radius-sm)',
-            borderLeft: `3px solid ${sub.statusObj.status === 'overdue' ? 'var(--danger)' : 'var(--warning)'}`
-          }}>
-            <div>
-              <p style={{ margin: '0 0 2px 0', fontWeight: '500', fontSize: '0.9rem' }}>{sub.description}</p>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Calendar size={12} />
-                {sub.statusObj.status === 'overdue' 
-                  ? `Venció hace ${sub.statusObj.days} días` 
-                  : `Vence en ${sub.statusObj.days} días`}
-              </p>
-            </div>
-            <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>
-              {formatCurrency(sub.amount)}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
+      {upcoming.length === 0 ? (
+        <Card variant="dashed" className={styles.empty}>
+          Nada vence en los próximos 5 días.
+        </Card>
+      ) : (
+        <ul className={styles.list}>
+          {upcoming.map((sub) => {
+            const overdue = sub.statusObj.status === 'overdue';
+            return (
+              <li key={sub.id} className={styles.item}>
+                <div className={styles.main}>
+                  <span className={styles.name}>{sub.description}</span>
+                  <Tag
+                    tone={overdue ? 'bad' : 'warn'}
+                    icon={overdue ? <AlertTriangle size={12} aria-hidden="true" /> : <Clock size={12} aria-hidden="true" />}
+                  >
+                    {dueText(sub.statusObj.status, sub.statusObj.days)}
+                  </Tag>
+                </div>
+                <b className={styles.amount}>{formatCurrency(sub.amount)}</b>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 };
 

@@ -13,6 +13,13 @@
   pointer-events: none;
 }
 
+/* Con el riel lateral, el aviso se centra en el contenido y no en toda la ventana */
+@media (min-width: 768px) {
+  .container {
+    left: calc(50% + var(--nav-rail-w) / 2);
+  }
+}
+
 .toast {
   display: flex;
   align-items: center;
