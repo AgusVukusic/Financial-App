@@ -162,7 +162,7 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 - **Riesgo corregido**: `type="number"` leía "1.500" como 1,5 (probado con es-AR). Ahora `parseAmountInput` (`src/utils/amountInput.js`, 29 pruebas) en el monto
   y en el saldo inicial de la cuenta.
 - CI de `main` verificado en verde (check-runs de #5 y #6).
-- Archivos sin uso pendientes de borrar con OK: `src/App.css`, `src/components/AddTransactionModal.css`, `src/components/TransactionList.css`.
+- Borrados con OK del usuario: `src/App.css`, `src/components/AddTransactionModal.css` y `src/components/TransactionList.css` (ya no se importaban). `GroupDetails.jsx` (fuera de la Beta, inalcanzable) usaba las clases `.modal-overlay`/`.modal-content` de ese CSS: si vuelve, necesita su propio rediseño.
 
 ## Pantallas terminadas / PRs
 

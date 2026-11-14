@@ -40,7 +40,7 @@ claro y oscuro: carga de un gasto con teclado, transferencia con error, edición
 (en iOS el foco automático del monto depende de que la apertura sea un gesto del usuario).
 
 ### Pendiente
-Archivos sin uso (ya no se importan), pendientes de borrar con OK: `src/App.css`, `src/components/AddTransactionModal.css`, `src/components/TransactionList.css`.
+Borrados (ya no se importaban): `src/App.css`, `src/components/AddTransactionModal.css`, `src/components/TransactionList.css`. `GroupDetails.jsx` (fuera de la Beta) usaba `.modal-overlay` de ese CSS; necesita su propio rediseño si vuelve.
 Siguiente: Reportes.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
