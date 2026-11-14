@@ -118,6 +118,13 @@ combinaciones; objetivos de 44 px o más; sin editar/borrar en cada fila.
 - `docs/ui-redesign/direcciones.html` (fase 2).
 - `PRODUCT.md`.
 
+## Estado de git (2026-11-13)
+
+Rama local `feature/ui-design-system` con 5 commits sobre `main`. **El push falló (403):** las credenciales de git de esta
+máquina son de otra cuenta (`AgusVuku7`) sin permiso sobre `AgusVukusic/Financial-App`. No se probó con otras credenciales.
+Hace falta que el usuario haga el push (o arregle la credencial) y abra el PR; el cuerpo está en
+`docs/ui-redesign/pr-design-system.md`. No hay `gh` instalado. Sin push no hay preview de Vercel ni CI corrido.
+
 ## Pantallas terminadas / PRs
 
 Ninguna pantalla todavía. Rama `feature/ui-design-system` (docs de las fases 1-2 + sistema de diseño). `.claude/` y
