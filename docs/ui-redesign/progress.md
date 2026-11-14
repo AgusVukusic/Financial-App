@@ -150,9 +150,23 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - break-ui: no se corrió la skill; se hicieron casos extremos a mano y en pruebas (320 px, cifras de 15 dígitos, nombres largos,
     sin cuentas, sin frecuentes, mes distinto del actual). Encontró y corrigió un desborde del saldo a 320 px.
 
+- **Modales de movimiento y cuenta** (rama `feature/ui-transaction-sheet`, desde `main` con #5 y #6 mergeados): ahora son hojas inferiores sobre `Sheet`
+  (`AddTransactionModal`, `AddAccountModal`; mismas props, lógica de guardado y `requestId` intactos). Monto primero con teclado decimal y foco,
+  categorías como botones, fecha/descripción plegadas, transferencia apilada (corrige el desborde de la auditoría), validación inline con ícono y texto.
+  `useDialogA11y` ahora tiene pila: una confirmación sobre una hoja atiende Escape sola. Capturas en `docs/ui-redesign/sheets/`.
+  Archivos sin uso pendientes de borrar con OK: `src/App.css`, `src/components/AddTransactionModal.css`.
+
+- **Movimientos (lista)** (misma rama `feature/ui-transaction-sheet`; un solo PR con las hojas, porque la lista abre la hoja de edición): renglón de un solo botón,
+  transferencia con origen → destino, 20 + "Ver los N restantes", eliminar dentro de la hoja con confirmación (`DialogContext.confirm` ahora admite
+  `{ confirmText, destructive }`; usar `destructive: false` al rehacer Gastos fijos para que pagar no sea rojo). Capturas en `docs/ui-redesign/transactions/`.
+- **Riesgo corregido**: `type="number"` leía "1.500" como 1,5 (probado con es-AR). Ahora `parseAmountInput` (`src/utils/amountInput.js`, 29 pruebas) en el monto
+  y en el saldo inicial de la cuenta.
+- CI de `main` verificado en verde (check-runs de #5 y #6).
+- Borrados con OK del usuario: `src/App.css`, `src/components/AddTransactionModal.css` y `src/components/TransactionList.css` (ya no se importaban). `GroupDetails.jsx` (fuera de la Beta, inalcanzable) usaba las clases `.modal-overlay`/`.modal-content` de ese CSS: si vuelve, necesita su propio rediseño.
+
 ## Pantallas terminadas / PRs
 
-PR #5 (sistema de diseño) mergeado. Layout/navegación en `feature/ui-layout`, pendiente de PR.
+PR #5 (sistema de diseño) mergeado. PR #6 (Layout + Dashboard) mergeado.
 ## Pendiente
 
 - OK del usuario al sistema de diseño (fase 3), luego fase 4: Layout/navegación → Dashboard → modal de transacción → ...

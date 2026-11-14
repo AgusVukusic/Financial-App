@@ -1,0 +1,115 @@
+/* Estilos compartidos por las hojas de formulario (movimiento y cuenta). */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.groupLabel {
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+/* Tipo de movimiento: tres opciones del mismo ancho */
+.types {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.types > button {
+  justify-content: center;
+  gap: 4px;
+  padding: 0 var(--sp-1);
+  font-size: var(--fs-small);
+}
+
+/* Monto: lo primero, grande, en mono */
+.amount {
+  min-height: var(--tap-lg);
+  padding: 0 var(--sp-4);
+  border-width: var(--bw-strong);
+  border-color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount::placeholder {
+  font-weight: 400;
+}
+
+/* Fecha y descripción: plegados salvo al editar */
+.more {
+  border: var(--bw) solid var(--rule);
+  border-radius: var(--r-lg);
+}
+
+.more > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  padding: 0 var(--sp-3);
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.more > summary::after {
+  content: '+';
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.more[open] > summary::after {
+  content: '\2212';
+}
+
+.moreBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-1) var(--sp-3) var(--sp-3);
+}
+
+/* Botón de guardar: queda a la vista aunque el formulario scrollee */
+.submit {
+  position: sticky;
+  bottom: calc(-1 * (var(--sp-4) + env(safe-area-inset-bottom, 0px)));
+  z-index: 1;
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0 var(--sp-1);
+  background: var(--surf);
+}
+
+.submit > button:first-child {
+  flex: 1;
+}
+
+.note {
+  padding: var(--sp-4) 0;
+  color: var(--ink2);
+}

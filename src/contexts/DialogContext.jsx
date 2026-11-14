@@ -15,13 +15,16 @@ export const DialogProvider = ({ children }) => {
     onCancel: () => {}
   });
 
-  const confirm = (message, title = 'Confirmar') => {
+  /** options.confirmText: texto del botón (por defecto "Confirmar"); options.destructive: false para una confirmación que no es de borrado. */
+  const confirm = (message, title = 'Confirmar', options = {}) => {
     return new Promise((resolve) => {
       setDialogState({
         isOpen: true,
         message,
         title,
         type: 'confirm',
+        confirmText: options.confirmText,
+        destructive: options.destructive !== false,
         onConfirm: () => {
           setDialogState(prev => ({ ...prev, isOpen: false }));
           resolve(true);
@@ -62,8 +65,8 @@ export const DialogProvider = ({ children }) => {
         message={dialogState.message}
         onConfirm={dialogState.onConfirm}
         onCancel={dialogState.onCancel}
-        confirmText={dialogState.type === 'confirm' ? 'Confirmar' : 'Entendido'}
-        confirmVariant={dialogState.type === 'confirm' ? 'danger' : 'primary'}
+        confirmText={dialogState.type === 'confirm' ? dialogState.confirmText || 'Confirmar' : 'Entendido'}
+        confirmVariant={dialogState.type === 'confirm' && dialogState.destructive !== false ? 'danger' : 'primary'}
         hideCancel={dialogState.type === 'alert'}
       />
     </DialogContext.Provider>

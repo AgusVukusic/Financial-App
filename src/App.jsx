@@ -163,9 +163,10 @@ function App() {
             onAddAccountClick={() => handleOpenAccountModal()}
             onEditAccountClick={(acc) => handleOpenAccountModal(acc)}
           />
-          <TransactionList 
-            transactions={transactions} 
-            onDelete={deleteTransaction} 
+          <TransactionList
+            transactions={transactions}
+            accounts={accounts}
+            onOpenAdd={handleOpenModal}
             onEdit={(t) => { setModalInitialData(t); setIsModalOpen(true); }}
           />
         </>
@@ -206,6 +207,7 @@ function App() {
         onClose={() => setIsModalOpen(false)} 
         onAdd={addTransaction} 
         onEdit={updateTransaction}
+        onDelete={deleteTransaction}
       />
 
       <AddAccountModal
