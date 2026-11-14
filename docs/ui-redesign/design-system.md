@@ -67,4 +67,4 @@ control (inputs, teclas, chips) usan `--ink2` (6,4:1 o más).
 - Mover el modal de transacción y el de cuenta a `Sheet`.
 - Ícono de la PWA propio (hoy es una URL externa en `vite.config.js`) y `apple-touch-icon`.
 - Fuentes de Google en `index.html`: con `display=swap`; sin cache offline propia (la PWA no las precachea todavía).
-- Archivos sin uso: `src/components/ui/Toast.css` y `ConfirmDialog.css` (reemplazados por módulos), pendientes de borrar con tu OK.
+

@@ -37,6 +37,6 @@ navegador a 375 px en claro y oscuro. **No probado en un celular real.**
 ### Pendiente (fases siguientes)
 Layout/navegación, Dashboard, modal de transacción en `Sheet`, listas, Reportes, Gastos fijos, Perfil, Landing/Login.
 `DialogContext.confirm` usa el botón rojo (`danger`) para toda confirmación: para las no destructivas (pagar un gasto fijo) hay
-que pasarlas a `primary` al rehacer esa pantalla. `Toast.css` y `ConfirmDialog.css` quedaron sin uso (pendientes de borrar).
+que pasarlas a `primary` al rehacer esa pantalla.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

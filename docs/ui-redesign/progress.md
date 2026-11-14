@@ -134,5 +134,5 @@ Ninguna pantalla todavía. Rama `feature/ui-design-system` (docs de las fases 1-
 
 - OK del usuario al sistema de diseño (fase 3), luego fase 4: Layout/navegación → Dashboard → modal de transacción → ...
 - Confirmar el hallazgo 7 (login sin verificar) como arreglo en `App.jsx`/`WelcomeScreen.jsx`.
-- Borrar `src/components/ui/Toast.css` y `ConfirmDialog.css` (sin uso) con OK del usuario.
+- (Hecho) `Toast.css` y `ConfirmDialog.css` borrados con OK del usuario.
 - Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
