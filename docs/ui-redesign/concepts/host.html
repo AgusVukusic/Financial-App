@@ -1,0 +1,73 @@
+<title>Conceptos de Diseño</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="/*FONTS*/">
+<style>
+:root{--pg-bg:#F4F5F7;--pg-fg:#14171C;--pg-mute:#566070;--pg-line:#D9DDE4;--pg-card:#FFFFFF;--pg-acc:#1F3FBF;--pg-onacc:#FFFFFF;--f-ui:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg-bg:#0E1014;--pg-fg:#EEF1F5;--pg-mute:#9AA3B2;--pg-line:#272B33;--pg-card:#161A20;--pg-acc:#9DB0FF;--pg-onacc:#0B1230;color-scheme:dark}}
+:root[data-theme="dark"]{--pg-bg:#0E1014;--pg-fg:#EEF1F5;--pg-mute:#9AA3B2;--pg-line:#272B33;--pg-card:#161A20;--pg-acc:#9DB0FF;--pg-onacc:#0B1230;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg-bg);color:var(--pg-fg);font-family:var(--f-ui);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1{font-size:26px;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:6px 0 0;color:var(--pg-mute);max-width:64ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--pg-line);border-radius:12px;padding:3px;background:var(--pg-card);gap:2px;max-width:100%}
+.seg button{font:inherit;font-weight:600;font-size:14px;min-height:44px;padding:0 14px;border:0;border-radius:9px;background:transparent;color:var(--pg-mute);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--pg-acc);color:var(--pg-onacc)}
+.seg button:focus-visible{outline:2px solid var(--pg-fg);outline-offset:2px}
+.stage{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:flex-start}
+.slot{display:flex;flex-direction:column;gap:8px;align-items:center;min-width:0;width:min(375px,100%)}
+.slot>span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pg-mute)}
+.info{background:var(--pg-card);border:1px solid var(--pg-line);border-radius:16px;padding:20px;display:grid;gap:16px 28px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.info h2{margin:0;font-size:20px;letter-spacing:-.01em}
+.info h3{margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--pg-mute)}
+.info p,.info ul{margin:0}.info ul{padding-left:18px}.info li{margin:2px 0}
+.info .full{grid-column:1/-1}
+.note{font-size:13px;color:var(--pg-mute);max-width:75ch}
+/*CSS*/
+</style>
+<div class="wrap">
+  <header>
+    <h1>Conceptos de Diseño</h1>
+    <p class="lead">Tres conceptos nuevos, armados a partir de una investigación de apps, animaciones y patrones de interacción. Son prototipos con datos de demostración: probá anotar un gasto, pagar un gasto fijo y deshacer.</p>
+  </header>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Concepto" id="tabs"></div>
+    <div class="seg" role="group" aria-label="Tema" id="modes">
+      <button data-m="both" aria-pressed="true">Claro y oscuro</button>
+      <button data-m="light" aria-pressed="false">Claro</button>
+      <button data-m="dark" aria-pressed="false">Oscuro</button>
+    </div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <section class="info" id="info"></section>
+  <p class="note">Datos de demostración. Los prototipos funcionan solo dentro de esta página y no guardan nada.</p>
+</div>
+<script>/*JS*/</script>
+<script>
+(function(){
+var st={id:null,m:'both'};
+try{var h=(location.hash||'').replace('#','');if(CK.concepts.some(function(c){return c.id===h}))st.id=h}catch(e){}
+if(!st.id)st.id=CK.concepts[0].id;
+var tabs=document.getElementById('tabs');
+CK.concepts.forEach(function(c){var b=document.createElement('button');b.dataset.id=c.id;b.textContent=c.name;tabs.appendChild(b)});
+function li(a){return '<ul>'+(a||[]).map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'}
+function render(){
+  var c=CK.concepts.filter(function(x){return x.id===st.id})[0],modes=st.m==='both'?['light','dark']:[st.m],stage=document.getElementById('stage');
+  stage.innerHTML='';window.__ck={stores:[]};
+  modes.forEach(function(md){var slot=document.createElement('div');slot.className='slot';slot.innerHTML='<span>'+(md==='light'?'Tema claro':'Tema oscuro')+'</span>';
+    var ph=document.createElement('section');ph.className='phone '+c.id+' '+md;ph.setAttribute('aria-label',c.name+', tema '+(md==='light'?'claro':'oscuro'));
+    var store=CK.newStore();window.__ck.stores.push(store);c.mount(ph,store);slot.appendChild(ph);stage.appendChild(slot)});
+  var i=c.info||{};
+  document.getElementById('info').innerHTML='<div class="full"><h2>'+c.name+'</h2><p>'+(i.tagline||'')+'</p></div>'+
+   '<div><h3>Qué tiene de nuevo</h3>'+li(i.novelty)+'</div><div><h3>De dónde sale</h3>'+li(i.refs)+'</div>'+
+   '<div><h3>Tipografía y color</h3><p>'+(i.type||'')+'</p></div><div><h3>Riesgos</h3>'+li(i.risks)+'</div>';
+  [].forEach.call(tabs.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b.dataset.id===st.id)});
+  [].forEach.call(document.querySelectorAll('#modes button'),function(b){b.setAttribute('aria-pressed',b.dataset.m===st.m)});
+}
+tabs.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.id=b.dataset.id;try{history.replaceState(null,'','#'+st.id)}catch(x){}render()});
+document.getElementById('modes').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.m=b.dataset.m;render()});
+render();
+})();
+</script>

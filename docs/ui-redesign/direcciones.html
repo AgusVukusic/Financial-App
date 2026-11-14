@@ -1,0 +1,525 @@
+<title>Direcciones de Diseño</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=Figtree:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Big+Shoulders+Display:wght@700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Libre+Franklin:wght@400;500;600;700&family=Onest:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+/* Página de comparación: tres direcciones sobre el mismo esqueleto de Dashboard. */
+:root{
+  --pg-bg:#F4F5F7; --pg-fg:#14171C; --pg-mute:#566070; --pg-line:#D9DDE4; --pg-card:#FFFFFF; --pg-acc:#1F3FBF; --pg-onacc:#FFFFFF;
+  --f-ui:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --pg-bg:#0E1014; --pg-fg:#EEF1F5; --pg-mute:#9AA3B2; --pg-line:#272B33; --pg-card:#161A20; --pg-acc:#9DB0FF; --pg-onacc:#0B1230; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --pg-bg:#0E1014; --pg-fg:#EEF1F5; --pg-mute:#9AA3B2; --pg-line:#272B33; --pg-card:#161A20; --pg-acc:#9DB0FF; --pg-onacc:#0B1230; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg-bg);color:var(--pg-fg);font-family:var(--f-ui);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1{font-size:26px;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:6px 0 0;color:var(--pg-mute);max-width:62ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--pg-line);border-radius:12px;padding:3px;background:var(--pg-card);gap:2px;max-width:100%}
+.seg button{font:inherit;font-weight:600;font-size:14px;min-height:44px;padding:0 14px;border:0;border-radius:9px;background:transparent;color:var(--pg-mute);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--pg-acc);color:var(--pg-onacc)}
+.seg button:focus-visible{outline:2px solid var(--pg-fg);outline-offset:2px}
+.stage{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:flex-start}
+.slot{display:flex;flex-direction:column;gap:8px;align-items:center;min-width:0;width:min(375px,100%)}
+.slot>span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pg-mute)}
+.info{background:var(--pg-card);border:1px solid var(--pg-line);border-radius:16px;padding:20px;display:grid;gap:16px 28px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.info h2{margin:0;font-size:20px;letter-spacing:-.01em}
+.info h3{margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--pg-mute)}
+.info p{margin:0}
+.info .full{grid-column:1/-1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--pg-mute)}
+.sw i{width:18px;height:18px;border-radius:5px;border:1px solid var(--pg-line);display:inline-block}
+.note{font-size:13px;color:var(--pg-mute);max-width:75ch}
+
+/* ====== Teléfono: esqueleto común ====== */
+.phone{width:100%;border-radius:34px;border:1px solid var(--pg-line);background:var(--bg);color:var(--ink);overflow:hidden;display:flex;flex-direction:column;font-size:15px;line-height:1.35}
+.phone *{box-sizing:border-box;min-width:0}
+.pad{padding:12px 16px 0;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.month{display:flex;align-items:center;gap:0;font-weight:600}
+.b44{width:44px;height:44px;display:inline-grid;place-items:center;flex:none}
+.sect{display:flex;flex-direction:column;gap:8px}
+.sect>h4{margin:0;display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.sect>h4 small{font-size:12px;color:var(--ink2);font-weight:500}
+.quick{display:flex;gap:8px}
+.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;padding:0 16px;flex:1;white-space:nowrap}
+.btn2{min-height:48px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;padding:0 12px;white-space:nowrap;font-size:14px}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0}
+.grow{flex:1;min-width:0}
+.t1{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t2{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amt{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.in{color:var(--in)} .neg{color:var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--chip)}
+.pill.bad{color:var(--bad)} .pill.warn{color:var(--warn)}
+.pay{min-height:44px;min-width:72px;display:inline-grid;place-items:center;font-weight:700;font-size:14px;padding:0 14px}
+.track{height:8px;background:var(--chip);position:relative;overflow:hidden}
+.track b{position:absolute;inset:0 auto 0 0;display:block}
+.track u{position:absolute;inset:0 0 0 auto;width:3px;background:var(--bad)}
+.nav{margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1.1fr 1fr;align-items:center;padding:6px 8px 14px}
+.nav div{min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:600;color:var(--ink2)}
+.nav .on{color:var(--ink)}
+svg{flex:none}
+
+/* ====== Cada dirección, claro / oscuro ====== */
+.A.light{--bg:#EEF1EC;--surf:#F7F9F6;--ink:#14241D;--ink2:#46574E;--rule:#C3CEC6;--acc:#2540B8;--onacc:#fff;--in:#0A6B44;--bad:#B3261E;--warn:#7A4F00;--chip:#E1E7E2}
+.A.dark{--bg:#0D1612;--surf:#121D18;--ink:#E8F0EA;--ink2:#9FB2A7;--rule:#27382F;--acc:#8EA6FF;--onacc:#0A1230;--in:#5ED3A2;--bad:#FF8F86;--warn:#F2B84B;--chip:#1A2822}
+.B.light{--bg:#F2F4F8;--surf:#fff;--ink:#0A1A33;--ink2:#4A586F;--rule:#D3DAE6;--acc:#0A1A33;--onacc:#fff;--in:#0A7A3F;--bad:#C62828;--warn:#8A5300;--chip:#E6EAF1;--band:#0A1A33;--onband:#fff}
+.B.dark{--bg:#09111F;--surf:#101B2E;--ink:#EAF0FA;--ink2:#9AA9C0;--rule:#22314B;--acc:#EAF0FA;--onacc:#0A1A33;--in:#4FD18B;--bad:#FF8A80;--warn:#F5B94A;--chip:#18253B;--band:#16294A;--onband:#fff}
+.C.light{--bg:#F4F5F7;--surf:#fff;--ink:#101318;--ink2:#575E6B;--rule:#E2E5EA;--acc:#2F5BFF;--onacc:#fff;--in:#0A7A3F;--bad:#C62828;--warn:#8A5300;--chip:#ECEEF2}
+.C.dark{--bg:#0B0C0F;--surf:#15171C;--ink:#F2F4F7;--ink2:#9BA3B0;--rule:#262A32;--acc:#6D8BFF;--onacc:#0B0C0F;--in:#4FD18B;--bad:#FF8A80;--warn:#F5B94A;--chip:#1F2229}
+
+/* A · Libro mayor */
+.A{font-family:'Schibsted Grotesk',system-ui,sans-serif}
+.A .num,.A .amt{font-family:'Spline Sans Mono',ui-monospace,monospace}
+.A .lbl{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.A .big{font-size:38px;font-weight:600;letter-spacing:-.02em;line-height:1.1;padding-top:2px}
+.A .close{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);height:5px;margin-top:8px;position:relative}
+.A .close::after{content:"";position:absolute;left:0;right:0;top:1px;border-top:1px solid var(--ink)}
+.A .cols{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule)}
+.A .cols>div{padding:10px 0}
+.A .cols>div+div{padding-left:14px;border-left:1px solid var(--rule)}
+.A .btn{background:var(--acc);color:var(--onacc);border-radius:4px}
+.A .btn2{color:var(--acc);border:1px solid var(--acc);border-radius:4px;font-weight:700}
+.A .sect>h4{border-bottom:1px solid var(--ink);padding-bottom:6px;font-size:12px;letter-spacing:.09em;text-transform:uppercase}
+.A .row{border-bottom:1px solid var(--rule);padding:6px 0}
+.A .pay{border:1px solid var(--acc);color:var(--acc);border-radius:4px}
+.A .track{border-radius:0;height:6px}.A .track b{background:var(--ink)}
+.A .led{display:grid;grid-template-columns:1fr 92px 92px;gap:0 8px;align-items:center}
+.A .led.head{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);padding:0 0 4px}
+.A .led.head span:nth-child(n+2){text-align:right}
+.A .led .amt{text-align:right;font-size:14px}
+.A .led .t2{white-space:normal}
+.A .nav{border-top:1px solid var(--ink);background:var(--surf)}
+.A .add{background:var(--acc);color:var(--onacc);border-radius:4px;width:52px;height:48px;display:grid;place-items:center;margin-top:-18px}
+
+/* B · Línea de subte */
+.B{font-family:'Archivo',system-ui,sans-serif}
+.B .band{background:var(--band);color:var(--onband);border-radius:10px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:2px}
+.B .band .lbl{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85;font-stretch:80%;display:flex;gap:8px;align-items:center}
+.B .big{font-size:40px;font-weight:700;letter-spacing:-.015em;font-variant-numeric:tabular-nums;line-height:1.1}
+.B .line{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;margin-top:8px}
+.B .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:10px;font-size:13px;color:var(--ink2)}
+.B .legend span{display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.B .rd{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-weight:800;font-size:13px;flex:none;font-stretch:90%}
+.B .rd.lg{width:40px;height:40px;font-size:19px}
+.B .btn{background:var(--acc);color:var(--onacc);border-radius:10px}
+.B .btn2{background:var(--chip);color:var(--ink);border-radius:10px}
+.B .sect>h4{font-size:14px;font-weight:800;font-stretch:85%;letter-spacing:.04em;text-transform:uppercase}
+.B .card{background:var(--surf);border:1px solid var(--rule);border-radius:12px;padding:4px 12px}
+.B .card .row+.row{border-top:1px solid var(--rule)}
+.B .pay{background:var(--acc);color:var(--onacc);border-radius:8px}
+.B .track{border-radius:4px}
+.B .nav{background:var(--band);color:var(--onband)}
+.B .nav div{color:#C9D3E3}.B .nav .on{color:#fff}.B .nav .add{color:#2A2100}
+.B .add{width:56px;height:56px;border-radius:50%;background:#F4C20D;color:#2A2100;display:grid;place-items:center;margin-top:-26px;border:3px solid var(--band)}
+
+/* C · Estándar de la categoría */
+.C{font-family:'Geist',system-ui,sans-serif}
+.C .hero{background:var(--surf);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.C .lbl{font-size:13px;color:var(--ink2);font-weight:500}
+.C .big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.C .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.C .two>div{background:var(--bg);border-radius:16px;padding:10px 12px}
+.C .btn{background:var(--acc);color:var(--onacc);border-radius:16px}
+.C .btn2{background:var(--surf);color:var(--ink);border-radius:16px}
+.C .sect>h4{font-size:17px;font-weight:700}
+.C .card{background:var(--surf);border-radius:20px;padding:4px 14px}
+.C .card .row+.row{border-top:1px solid var(--rule)}
+.C .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--cc,var(--ink2)) 18%,var(--surf))}
+.C .pay{background:var(--acc);color:var(--onacc);border-radius:12px}
+.C .track{border-radius:99px}.C .track b{background:var(--acc)}
+.C .nav{background:var(--surf);border-radius:24px 24px 0 0}
+.C .add{width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--onacc);display:grid;place-items:center;margin-top:-30px;box-shadow:0 6px 16px rgb(0 0 0/.18)}
+/* Tanda 2: temas comunes de D, E y F */
+.D.light{--bg:#F5F5EF;--surf:#fff;--ink:#141414;--ink2:#4D4D48;--rule:#D9D9D0;--acc:#141414;--onacc:#FFD400;--in:#0A7A3F;--bad:#C8161D;--warn:#8A5300;--chip:#ECECE3}
+.D.dark{--bg:#101010;--surf:#1A1A1A;--ink:#F4F4EE;--ink2:#A8A8A0;--rule:#2E2E2A;--acc:#FFD400;--onacc:#141414;--in:#4FD18B;--bad:#FF6B6B;--warn:#FFB84D;--chip:#242422}
+.E.light{--bg:#F2F2F4;--surf:#fff;--ink:#15161A;--ink2:#53555E;--rule:#DDDDE2;--acc:#15161A;--onacc:#fff;--in:#08723A;--bad:#C62828;--warn:#8A5300;--chip:#E8E8EC}
+.E.dark{--bg:#121316;--surf:#1B1C21;--ink:#F2F2F5;--ink2:#A2A4AE;--rule:#2C2D34;--acc:#F2F2F5;--onacc:#121316;--in:#4FD18B;--bad:#FF8A80;--warn:#F5B94A;--chip:#25262C}
+.F.light{--bg:#EFEEF6;--surf:#FAFAFD;--ink:#1B1633;--ink2:#50496A;--rule:#D3D0E4;--acc:#4B2A86;--onacc:#fff;--in:#0A6B44;--bad:#B3261E;--warn:#7A4F00;--chip:#E3E1F0;--band:#4B2A86}
+.F.dark{--bg:#12101C;--surf:#1B1830;--ink:#EEEBFA;--ink2:#A9A3C4;--rule:#2D2948;--acc:#B9A4FF;--onacc:#170F2E;--in:#5ED3A2;--bad:#FF8F86;--warn:#F2B84B;--chip:#25213D;--band:#2A1F57}
+.D .rd,.E .rd,.F .rd{width:24px;height:24px;display:inline-grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.D .rd.lg,.E .rd.lg,.F .rd.lg{width:40px;height:40px;font-size:19px}
+.D .card,.E .card,.F .card{background:var(--surf);padding:4px 14px}
+.D .card .row+.row,.E .card .row+.row,.F .card .row+.row{border-top:1px solid var(--rule)}
+.D .btn2,.E .btn2,.F .btn2{background:var(--chip);color:var(--ink)}
+.D .nav div,.E .nav div,.F .nav div{color:var(--ink2)}
+.D .nav .on,.E .nav .on,.F .nav .on{color:var(--ink)}
+
+/* D · Cartel de góndola */
+.D{font-family:'Hanken Grotesk',system-ui,sans-serif}
+.D .tag,.D .big,.D .sect>h4,.D .lbl{font-family:'Big Shoulders Display','Arial Narrow',sans-serif}
+.D .tag{background:#FFD400;color:#141414;border-radius:8px;padding:16px 16px 14px;position:relative;overflow:hidden}
+.D .tag::before{content:"";position:absolute;right:14px;top:14px;width:14px;height:14px;border-radius:50%;background:var(--bg);box-shadow:inset 0 1px 2px rgb(0 0 0/.3)}
+.D .lbl{font-size:17px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.D .big{font-size:58px;font-weight:800;line-height:1;letter-spacing:-.005em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.D .big small{font-size:.5em;vertical-align:.55em;margin-right:4px}
+.D .tags{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.D .tags>div{background:#141414;color:#F4F4EE;border-radius:6px;padding:8px 12px;display:flex;flex-direction:column}
+.D .tags span{font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em}
+.D .tags b{font-size:17px;font-variant-numeric:tabular-nums}.D .tags .g{color:#4FD18B}
+.D .btn{background:var(--acc);color:var(--onacc);border-radius:6px;font-size:16px}
+.D .btn2{border-radius:6px;font-weight:700}
+.D .sect>h4{font-size:20px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.D .card,.D .rd{border-radius:6px}.D .rd.lg{border-radius:6px}
+.D .pay{background:var(--acc);color:var(--onacc);border-radius:6px}
+.D .pill{border-radius:4px;background:var(--bad);color:#fff}.D .pill.warn{background:#FFD400;color:#141414}
+.D .track{border-radius:0;height:10px}
+.D .nav{background:#141414;color:#F4F4EE}.D .nav div{color:#C9C9C0}.D .nav .on{color:#FFD400}.D .nav .add{color:#141414}
+.D .add{width:56px;height:56px;border-radius:6px;background:#FFD400;display:grid;place-items:center;margin-top:-26px;border:3px solid #141414}
+
+/* E · Sobres */
+.E{font-family:'Onest',system-ui,sans-serif}
+.E .hero{background:var(--surf);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.E .lbl{font-size:13px;color:var(--ink2);font-weight:500}
+.E .big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.E .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.E .two>div{background:var(--bg);border-radius:14px;padding:10px 12px}
+.E .btn{background:var(--acc);color:var(--onacc);border-radius:14px}.E .btn2{border-radius:14px}
+.E .sect>h4{font-size:17px;font-weight:700}.E .card{border-radius:18px}
+.E .rd{border-radius:50%}
+.E .pay{background:var(--acc);color:var(--onacc);border-radius:12px}
+.E .nav{background:var(--surf);border-radius:22px 22px 0 0}
+.E .add{width:56px;height:56px;border-radius:18px;background:var(--acc);color:var(--onacc);display:grid;place-items:center;margin-top:-30px}
+.E .nav .add{color:var(--onacc)}
+.envs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.env{border-radius:14px;padding:34px 12px 12px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;min-height:136px}
+.env .flap{position:absolute;inset:0 0 auto 0;height:26px;background:rgb(0 0 0/.14);clip-path:polygon(0 0,100% 0,50% 100%)}
+.env .lvl{height:6px;border-radius:3px;background:rgb(0 0 0/.22)}.env .lvl b{display:block;height:100%;border-radius:3px;background:currentColor}
+.env .stat{align-self:flex-start;background:#fff;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;display:inline-flex;gap:4px;align-items:center;line-height:1.3}
+
+/* F · Billete */
+.F{font-family:'Libre Franklin',system-ui,sans-serif}
+.F .band{background:var(--band);color:#fff;border-radius:8px;padding:16px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 3px var(--band),inset 0 0 0 4px rgb(255 255 255/.45);display:flex;flex-direction:column;gap:2px}
+.F .band>*:not(.gu){position:relative}
+.F .gu{position:absolute;inset:0;width:100%;height:100%}
+.F .lbl{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;display:flex;justify-content:space-between;opacity:.92}
+.F .ars{border:1px solid rgb(255 255 255/.6);border-radius:4px;padding:0 6px;font-size:11px}
+.F .big{font-family:'Barlow Condensed',sans-serif;font-size:58px;font-weight:600;line-height:1.05;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.F .btn{background:var(--acc);color:var(--onacc);border-radius:8px}.F .btn2{border-radius:8px}
+.F .sect>h4{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.F .card{border-radius:10px;border:1px solid var(--rule)}
+.F .rd{border-radius:50%}.F .rd.ring{border:2px solid;background:transparent}
+.F .pay{background:var(--acc);color:var(--onacc);border-radius:8px}
+.F .track{border-radius:2px}.F .track b{background:var(--acc)}
+.F .nav{background:var(--band);color:#fff}.F .nav div{color:#D9D2F2}.F .nav .on{color:#fff}.F .nav .add{color:#1B1633}
+.F .add{width:56px;height:56px;border-radius:50%;background:#E8C4FF;display:grid;place-items:center;margin-top:-26px;border:3px solid var(--band)}
+.group{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.group>em{font-style:normal;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pg-mute)}
+/* Tanda 3: G, H, I y J */
+.G.light{--bg:#F4ECE4;--surf:#fff;--ink:#231B16;--ink2:#5E5148;--rule:#E6DACB;--acc:#007A8A;--onacc:#fff;--in:#0A6B44;--bad:#B3261E;--warn:#7A4F00;--chip:#F0E6DA}
+.G.dark{--bg:#1C1713;--surf:#272019;--ink:#F6EEE6;--ink2:#BBAA9B;--rule:#3A3027;--acc:#4DD0E1;--onacc:#06252A;--in:#5ED3A2;--bad:#FF8F86;--warn:#F2B84B;--chip:#322A22}
+.H.light{--bg:#fff;--surf:#fff;--ink:#0A0A12;--ink2:#4A4A58;--rule:#AEB7FF;--acc:#2B3FFF;--onacc:#fff;--in:#0A6B44;--bad:#C1121F;--warn:#7A4F00;--chip:#EEF0FF;--gl:rgb(43 63 255/.12)}
+.H.dark{--bg:#0A0B14;--surf:#0A0B14;--ink:#F4F5FF;--ink2:#A9ADCB;--rule:#3A4180;--acc:#7C8CFF;--onacc:#0A0B14;--in:#5ED3A2;--bad:#FF8F86;--warn:#F2B84B;--chip:#161833;--gl:rgb(124 140 255/.14)}
+.I.light{--bg:#F4F7FB;--surf:#fff;--ink:#0B1630;--ink2:#4A5873;--rule:#D3DBEA;--acc:#0B1630;--onacc:#fff;--in:#0A7A3F;--bad:#C62828;--warn:#8A5300;--chip:#E6ECF5;--panel:#0B1630}
+.I.dark{--bg:#0B1630;--surf:#12213F;--ink:#F2F6FF;--ink2:#A9B8D6;--rule:#243456;--acc:#F2F6FF;--onacc:#0B1630;--in:#5ED3A2;--bad:#FF8F86;--warn:#F2B84B;--chip:#1A2B4E;--panel:#16294D}
+.J.light{--bg:#ECEDEF;--surf:#fff;--ink:#111317;--ink2:#4A4F59;--rule:#CDD0D6;--acc:#111317;--onacc:#fff;--in:#0A7A3F;--bad:#C62828;--warn:#8A5300;--chip:#F1F2F5}
+.J.dark{--bg:#101216;--surf:#181B21;--ink:#F1F3F6;--ink2:#A3A9B5;--rule:#2B2F38;--acc:#F1F3F6;--onacc:#101216;--in:#4FD18B;--bad:#FF8A80;--warn:#F5B94A;--chip:#22262D}
+.G .btn2,.H .btn2,.I .btn2,.J .btn2{min-height:48px}
+
+/* G · Consumo cálido */
+.G{font-family:'Figtree',system-ui,sans-serif}
+.G .hero{background:var(--surf);border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.G .lbl{font-size:14px;color:var(--ink2);font-weight:600}
+.G .big{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.G .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.G .two>div{background:var(--bg);border-radius:18px;padding:10px 12px}
+.G .btn{background:var(--acc);color:var(--onacc);border-radius:20px}.G .btn2{border-radius:20px;background:var(--surf);color:var(--ink)}
+.G .sect>h4{font-size:18px;font-weight:800}
+.G .card{background:var(--surf);border-radius:24px;padding:4px 16px}.G .card .row+.row{border-top:1px solid var(--rule)}
+.G .ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--cc,var(--ink2)) 20%,var(--surf))}
+.G .pay{background:var(--acc);color:var(--onacc);border-radius:16px}
+.G .track{border-radius:99px}.G .track b{background:var(--ink2)}
+.G .nav{background:var(--surf);border-radius:28px 28px 0 0}.G .nav .on{color:var(--acc)}
+.G .add{width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--onacc);display:grid;place-items:center;margin-top:-30px}
+
+/* H · Cuadrícula */
+.H{font-family:'Hanken Grotesk',system-ui,sans-serif;background-image:linear-gradient(var(--gl) 1px,transparent 1px),linear-gradient(90deg,var(--gl) 1px,transparent 1px);background-size:8px 8px}
+.H .plane{background-color:#2B3FFF;color:#fff;padding:16px;background-image:linear-gradient(rgb(255 255 255/.25) 1px,transparent 1px),linear-gradient(90deg,rgb(255 255 255/.25) 1px,transparent 1px);background-size:8px 8px}
+.H .plane .lbl{height:24px;line-height:24px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.H .plane svg{display:block}
+.H .btn{background:var(--acc);color:var(--onacc);border-radius:0}.H .btn2{border:1px solid var(--ink);border-radius:0;background:transparent;color:var(--ink)}
+.H .sect>h4{font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.H .card{background:transparent;border:1px solid var(--ink);border-radius:0;padding:0 12px}.H .card .row+.row{border-top:1px solid var(--rule)}
+.H .rd{border-radius:0;width:24px;height:24px;display:inline-grid;place-items:center;flex:none}.H .rd.lg{width:40px;height:40px}.H .rd.ring{border:2px solid;background:transparent}
+.H .pay{background:var(--acc);color:var(--onacc);border-radius:0}
+.H .track{border-radius:0}.H .track b{background:var(--acc)}
+.H .nav{border-top:1px solid var(--ink);background:var(--bg)}.H .nav .add{color:var(--onacc)}
+.H .add{width:56px;height:56px;background:var(--acc);display:grid;place-items:center;margin-top:-26px}
+
+/* I · Mapa de red */
+.I{font-family:'Source Sans 3',system-ui,sans-serif}
+.I .panel{background:var(--panel);color:#fff;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.I .lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.I .big{font-size:42px;font-weight:700;line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.I .btn{background:var(--acc);color:var(--onacc);border-radius:999px}.I .btn2{border-radius:999px;background:var(--chip);color:var(--ink)}
+.I .sect>h4{font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.I .card{background:var(--surf);border:1px solid var(--rule);border-radius:12px;padding:4px 14px}.I .card .row+.row{border-top:1px solid var(--rule)}
+.I .ln{width:8px;height:34px;border-radius:4px;background:var(--lc);flex:none;position:relative;margin:0 6px 0 3px}
+.I .ln::after{content:"";position:absolute;left:-4px;bottom:-4px;width:16px;height:16px;border-radius:50%;background:var(--surf);border:3px solid var(--lc)}
+.I .mv{display:flex;gap:12px;align-items:stretch;min-height:64px}
+.I .rail{width:8px;flex:none;background:linear-gradient(var(--lc),var(--lc2,var(--lc)));position:relative;margin:0 6px}
+.I .rail::after{content:"";position:absolute;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:var(--surf);border:3px solid var(--ink)}
+.I .rail.x::after{box-shadow:0 0 0 3px var(--surf),0 0 0 5px var(--ink)}
+.I .mv>.grow{display:flex;flex-direction:column;justify-content:center;padding:8px 0}
+.I .mv>.amt{align-self:center}
+.I .pay{background:var(--acc);color:var(--onacc);border-radius:999px}
+.I .track{border-radius:4px}.I .track b{background:var(--ink)}
+.I .nav{background:var(--panel)}.I .nav div{color:#B7C4DF}.I .nav .on{color:#fff}.I .nav .add{color:#0B1630}
+.I .add{width:56px;height:56px;border-radius:50%;background:#fff;display:grid;place-items:center;margin-top:-26px;border:3px solid var(--panel)}
+
+/* J · Pase de abordar */
+.J{font-family:'Geist',system-ui,sans-serif}.J .mono,.J .amt,.J .big,.J .lbl,.J .when{font-family:'Geist Mono',ui-monospace,monospace}
+.J .pass{background:var(--surf);border:1px solid var(--rule);border-radius:16px;position:relative;overflow:hidden}
+.J .pass .a{padding:16px;display:flex;flex-direction:column;gap:10px}
+.J .pass .lbl{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.J .big{font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.J .segs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.J .segs b{display:block;font-size:13px;font-weight:600}
+.J .perf{border-top:2px dashed var(--rule);position:relative}
+.J .perf::before,.J .perf::after{content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:1px solid var(--rule)}
+.J .perf::before{left:-11px}.J .perf::after{right:-11px}
+.J .bc{height:30px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px)}
+.J .btn{background:var(--acc);color:var(--onacc);border-radius:12px}.J .btn2{border-radius:12px}
+.J .sect>h4{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-family:'Geist Mono',monospace}
+.J .card{background:var(--surf);border:1px solid var(--rule);border-radius:14px;padding:4px 14px}.J .card .row+.row,.J .card .gate+.gate{border-top:1px solid var(--rule)}
+.J .rd{border-radius:8px}
+.J .gate{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;min-height:76px;padding:8px 0}
+.J .when{font-size:13px;font-weight:700;text-align:center;border:1px solid var(--rule);border-radius:8px;padding:8px 0}
+.J .when.late{border-color:var(--bad);color:var(--bad)}
+.J .pay{background:var(--acc);color:var(--onacc);border-radius:10px}
+.J .track{border-radius:2px}.J .track b{background:var(--ink)}
+.J .nav{background:var(--surf);border-top:1px solid var(--rule)}.J .nav .add{color:var(--onacc)}
+.J .add{width:56px;height:56px;border-radius:16px;background:var(--acc);display:grid;place-items:center;margin-top:-30px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Direcciones de Diseño</h1>
+    <p class="lead">Diez formas de ver el Dashboard con los mismos datos de demostración (los de tu app local), en tres tandas; la última es la más arriesgada. El esqueleto es el mismo en todas: saldo total primero, anotar un gasto a un toque y el resto debajo. Cambia el mundo visual, no la estructura. La B (subte) es tu favorita hasta ahora.</p>
+  </header>
+  <div class="bar">
+    <div class="group" id="dirs">
+      <div class="group"><em>Tanda 1</em>
+      <div class="seg" role="group" aria-label="Dirección, tanda 1">
+        <button data-d="A" aria-pressed="false">A · Libro mayor</button>
+        <button data-d="B" aria-pressed="false">B · Línea de subte ★</button>
+        <button data-d="C" aria-pressed="false">C · Estándar</button>
+      </div></div>
+      <div class="group"><em>Tanda 2</em>
+      <div class="seg" role="group" aria-label="Dirección, tanda 2">
+        <button data-d="D" aria-pressed="false">D · Cartel de góndola</button>
+        <button data-d="E" aria-pressed="false">E · Sobres</button>
+        <button data-d="F" aria-pressed="false">F · Billete</button>
+      </div></div>
+      <div class="group"><em>Tanda 3 · más arriesgadas</em>
+      <div class="seg" role="group" aria-label="Dirección, tanda 3">
+        <button data-d="I" aria-pressed="true">I · Mapa de red</button>
+        <button data-d="J" aria-pressed="false">J · Pase de abordar</button>
+        <button data-d="H" aria-pressed="false">H · Cuadrícula</button>
+        <button data-d="G" aria-pressed="false">G · Consumo cálido</button>
+      </div></div>
+    </div>
+    <div class="seg" role="group" aria-label="Tema" id="modes">
+      <button data-m="both" aria-pressed="true">Claro y oscuro</button>
+      <button data-m="light" aria-pressed="false">Claro</button>
+      <button data-m="dark" aria-pressed="false">Oscuro</button>
+    </div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <section class="info" id="info"></section>
+  <p class="note">Datos de demostración. Las pantallas son maquetas: no se toca nada. Elegí una, pedí una mezcla (por ejemplo, la estructura de A con los colores de categoría de B) o pedí otra tanda.</p>
+</div>
+
+<script>
+(function(){
+var P={
+ plus:'M5 12h14M12 5v14',home:'m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10',pie:'M21.2 15.9A10 10 0 1 1 8 2.8M22 12A10 10 0 0 0 12 2v10z',
+ user:'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',chevL:'m15 18-6-6 6-6',chevR:'m9 18 6-6-6-6',
+ moon:'M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z',sun:'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4',
+ swap:'M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3',alert:'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+ clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2',bank:'M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-7 10 7',wallet:'M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4',
+ cash:'M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',card:'M2 5h20v14H2zM2 10h20',cup:'M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM6 2v2M10 2v2M14 2v2',
+ bag:'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0',car:'M5 17h14M3 13l2-6h14l2 6v4H3zM7 17v2M17 17v2',zap:'M13 2 3 14h9l-1 8 10-12h-9z',more:'M5 12h.01M12 12h.01M19 12h.01',inc:'M12 19V5M5 12l7-7 7 7'
+};
+function ic(n,s,w){s=s||20;return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(w||2)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+P[n]+'"/></svg>'}
+function m(n){return (n<0?'−':'')+'$ '+Math.abs(n).toLocaleString('es-AR')}
+function sg(n){return (n>0?'+':n<0?'−':'')+'$ '+Math.abs(n).toLocaleString('es-AR')}
+var CAT={Comida:{l:'A',c:'#1CB5E0',t:'#04202B',i:'cup'},Compras:{l:'B',c:'#C42B7E',t:'#fff',i:'bag'},Hogar:{l:'C',c:'#2D5BD0',t:'#fff',i:'home'},Transporte:{l:'D',c:'#1DA38C',t:'#02221D',i:'car'},Servicios:{l:'E',c:'#7B45B5',t:'#fff',i:'zap'},Otros:{l:'H',c:'#F4C20D',t:'#2A2100',i:'more'}};
+var CUR=CAT;
+function clone(base,f){var o={};Object.keys(base).forEach(function(k){o[k]=f(base[k],k)});return o}
+var CATS={B:CAT,
+ D:clone(CAT,function(v,k){return {l:String(['Comida','Compras','Hogar','Transporte','Servicios','Otros'].indexOf(k)+1),c:v.c,t:v.t,i:v.i}}),
+ E:{Comida:{c:'#FF7A59',t:'#2B0E06',i:'cup'},Compras:{c:'#B04DB0',t:'#fff',i:'bag'},Hogar:{c:'#00A3A3',t:'#02201F',i:'home'},Transporte:{c:'#F4B400',t:'#2A1F00',i:'car'},Servicios:{c:'#3FA0FF',t:'#06182B',i:'zap'},Otros:{c:'#8FA3AD',t:'#0B1317',i:'more'}},
+ J:clone(CAT,function(v){return {c:'var(--chip)',t:'var(--ink)',i:v.i}}),
+ H:{Comida:{c:'#1F7A68',t:'#fff',i:'cup'},Compras:{c:'#9E3A63',t:'#fff',i:'bag'},Hogar:{c:'#3B58A8',t:'#fff',i:'home'},Transporte:{c:'#A8741A',t:'#1B1200',i:'car'},Servicios:{c:'#6B3FA0',t:'#fff',i:'zap'},Otros:{c:'#5B6770',t:'#fff',i:'more'}},
+ F:{Comida:{c:'#1F7A68',t:'#fff',i:'cup'},Compras:{c:'#9E3A63',t:'#fff',i:'bag'},Hogar:{c:'#3B58A8',t:'#fff',i:'home'},Transporte:{c:'#A8741A',t:'#1B1200',i:'car'},Servicios:{c:'#6B3FA0',t:'#fff',i:'zap'},Otros:{c:'#5B6770',t:'#fff',i:'more'}}};
+var ACC=[['Ahorros USD (en pesos)','bank',13050000],['Efectivo','cash',86500],['Mercado Pago','wallet',2624720],['Visa Santander Platinum Internacional','card',-387499]];
+var FIJ=[['Expensas',145000,'bad','Venció hace 3 días'],['Netflix',13999,'bad','Venció hace 2 días'],['Spotify',3299,'warn','Vence en 2 días']];
+var BUD=[['Compras',387499,300000],['Servicios',46830,40000],['Hogar',372300,400000],['Comida',138581,180000]];
+var SPEND=[['Comida',138581],['Compras',387499],['Hogar',372300],['Transporte',25500],['Servicios',46830],['Otros',33000]];
+var MOV=[['Supermercado Día','Comida',-29800,'13 nov'],['Auriculares','Compras',-133000,'12 nov'],['Nafta','Transporte',-7400,'12 nov'],['Ahorro del mes','Transferencia',200000,'8 nov','Mercado Pago → Ahorros USD'],['Sueldo','Ingreso',1850000,'1 nov']];
+function status(k,t){return '<span class="pill '+k+'">'+ic(k==='bad'?'alert':'clock',12,2.5)+t+'</span>'}
+function budState(u,l){var p=u/l;if(p>1)return ['bad','Superado por '+m(u-l)];if(p>=.9)return ['warn','Al '+Math.round(p*100)+'% del límite'];return ['','Quedan '+m(l-u)]}
+function top(mode){return '<div class="top"><div class="month"><span class="b44">'+ic('chevL')+'</span><span>Noviembre 2026</span><span class="b44">'+ic('chevR')+'</span></div><span class="b44">'+ic(mode==='dark'?'sun':'moon')+'</span></div>'}
+function nav(d,mode){var add=d==='A'?'<div class="add">'+ic('plus',24,2.4)+'</div>':'<div class="add">'+ic('plus',26,2.6)+'</div>';
+ return '<div class="nav"><div class="on">'+ic('home')+'Inicio</div><div>'+ic('pie')+'Reportes</div><div style="min-height:0;justify-content:flex-start">'+add+'</div><div>'+ic('user')+'Perfil</div></div>'}
+function quick(){return '<div class="quick"><div class="btn">'+ic('plus',20,2.6)+'Anotar gasto</div><div class="btn2">Ingreso</div><div class="btn2">'+ic('swap',18)+'</div></div>'}
+function accRow(a,d){var neg=a[2]<0;var inner='<div class="grow"><div class="t1">'+a[0]+'</div>'+(neg?'<div class="t2">Deuda de tarjeta</div>':'')+'</div><div class="amt num">'+m(a[2])+'</div>';
+ if(d==='C'||d==='G')return '<div class="row"><span class="ico">'+ic(a[1],20)+'</span>'+inner+'</div>';
+ return '<div class="row"><span style="color:var(--ink2)">'+ic(a[1],20)+'</span>'+inner+'</div>'}
+function fijRow(f,d){return '<div class="row" style="align-items:center"><div class="grow"><div class="t1">'+f[0]+'</div><div class="amt num" style="font-weight:500;font-size:14px">'+m(f[1])+'</div><div style="margin-top:2px">'+status(f[2],f[3])+'</div></div><div class="pay">Pagar</div></div>'}
+function budRow(b,d){var p=Math.min(1,b[1]/b[2]),s=budState(b[1],b[2]),cc=CUR[b[0]],fill=(d==='B'||d==='D')?cc.c:'';
+ return '<div style="padding:8px 0;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;gap:8px">'+((d==='B'||d==='D')?'<span class="rd" style="background:'+cc.c+';color:'+cc.t+'">'+cc.l+'</span>':'')+'<span class="t1 grow">'+b[0]+'</span><span class="amt num" style="font-size:13px;font-weight:500">'+m(b[1])+' / '+m(b[2])+'</span></div>'+
+ '<div class="track"><b style="width:'+(p*100)+'%;'+(fill?'background:'+fill:'')+'"></b>'+(b[1]>b[2]?'<u></u>':'')+'</div>'+
+ '<div style="font-size:12px;font-weight:600;color:'+(s[0]==='bad'?'var(--bad)':s[0]==='warn'?'var(--warn)':'var(--ink2)')+'">'+(s[0]?ic(s[0]==='bad'?'alert':'clock',12,2.5)+' ':'')+s[1]+'</div></div>'}
+function budSect(d){var rows=BUD.map(function(b){return budRow(b,d)}).join('');var h='<h4>Presupuestos <small>2 superados</small></h4>';
+ return '<div class="sect">'+h+(d==='A'?rows:'<div class="'+(d==='B'?'card':'card')+'" style="padding:4px 14px">'+rows+'</div>')+'</div>'}
+
+function heroA(){return '<div><div class="lbl">Saldo total</div><div class="big num">'+m(15373721)+'</div><div class="close" role="presentation"></div>'+
+ '<div class="cols"><div><div class="lbl" style="font-size:11px">Entró</div><div class="amt num in">'+sg(1970000)+'</div></div><div><div class="lbl" style="font-size:11px">Salió</div><div class="amt num neg">'+sg(-1003710)+'</div></div></div>'+
+ '<div style="display:flex;justify-content:space-between;padding-top:8px;font-size:13px;color:var(--ink2)"><span>Neto del mes</span><span class="amt num in">'+sg(966290)+'</span></div></div>'}
+function heroB(){var tot=1003710,segs=SPEND.map(function(s){return '<i style="flex:'+s[1]/tot+';background:'+CUR[s[0]].c+'"></i>'}).join('');
+ var leg=SPEND.map(function(s){var c=CUR[s[0]];return '<span><i class="rd" style="width:18px;height:18px;font-size:11px;background:'+c.c+';color:'+c.t+'">'+c.l+'</i>'+s[0]+' '+Math.round(s[1]/tot*100)+'%</span>'}).join('');
+ return '<div><div class="band"><div class="lbl">Saldo total</div><div class="big">'+m(15373721)+'</div></div>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 2px 0"><div><div class="t2">Entró</div><div class="amt in" style="font-size:18px">'+sg(1970000)+'</div></div><div><div class="t2">Salió</div><div class="amt neg" style="font-size:18px">'+sg(-1003710)+'</div></div></div>'+
+ '<div class="line" role="presentation" style="display:flex">'+segs.replace(/<i /g,'<i style="display:block" ').replace(/style="display:block" style="/g,'style="display:block;')+'</div><div class="legend">'+leg+'</div></div>'}
+function heroC(){return '<div class="hero"><div><div class="lbl">Saldo total</div><div class="big">'+m(15373721)+'</div></div><div class="two"><div><div class="lbl" style="font-size:12px">Entró</div><div class="amt in">'+sg(1970000)+'</div></div><div><div class="lbl" style="font-size:12px">Salió</div><div class="amt neg">'+sg(-1003710)+'</div></div></div></div>'}
+
+function heroD(){return '<div><div class="tag"><div class="lbl">Saldo total</div><div class="big"><small>$</small>15.373.721</div></div><div class="tags"><div><span>ENTRÓ</span><b class="g">'+sg(1970000)+'</b></div><div><span>SALIÓ</span><b>'+sg(-1003710)+'</b></div></div></div>'}
+function guil(){var s='';for(var k=0;k<11;k++){var p='';for(var x=0;x<=360;x+=6){var y=10+k*7+9*Math.sin(x/22+k*.55)+5*Math.sin(x/9-k*.3);p+=(x?'L':'M')+x+' '+y.toFixed(1)}s+='<path d="'+p+'"/>'}
+ return '<svg class="gu" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1">'+s+'</svg>'}
+function heroF(){return '<div><div class="band">'+guil()+'<div class="lbl"><span>Saldo total</span><span class="ars">ARS</span></div><div class="big">'+m(15373721)+'</div></div>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 2px 0"><div><div class="t2">Entró</div><div class="amt in" style="font-size:18px">'+sg(1970000)+'</div></div><div><div class="t2">Salió</div><div class="amt neg" style="font-size:18px">'+sg(-1003710)+'</div></div></div></div>'}
+function budSectE(){var c=BUD.map(function(b){var cc=CUR[b[0]],s=budState(b[1],b[2]),p=Math.min(1,b[1]/b[2]),col=s[0]==='bad'?'#B3261E':s[0]==='warn'?'#7A4F00':'#33343A';
+ return '<div class="env" style="background:'+cc.c+';color:'+cc.t+'"><div class="flap"></div><div class="t1" style="font-size:16px">'+b[0]+'</div><div class="amt" style="font-size:15px">'+m(b[1])+'</div><div style="font-size:13px;margin-top:-4px">de '+m(b[2])+'</div><div class="lvl"><b style="width:'+(p*100)+'%"></b></div><span class="stat" style="color:'+col+'">'+(s[0]?ic(s[0]==='bad'?'alert':'clock',12,2.5):'')+s[1]+'</span></div>'}).join('');
+ return '<div class="sect"><h4>Sobres del mes <small>2 superados</small></h4><div class="envs">'+c+'</div></div>'}
+function movG(d){var rows=MOV.map(function(r){var c=CUR[r[1]],tr=r[4],inc=r[1]==='Ingreso',b;
+  if(tr)b='<span class="rd lg" style="background:var(--chip);color:var(--ink)">'+ic('swap',20)+'</span>';
+  else if(inc)b='<span class="rd lg" style="background:var(--in);color:var(--bg)">'+ic('inc',20,2.6)+'</span>';
+  else if(d==='D')b='<span class="rd lg" style="background:'+c.c+';color:'+c.t+'">'+c.l+'</span>';
+  else if(d==='E'||d==='J')b='<span class="rd lg" style="background:'+c.c+';color:'+c.t+'">'+ic(c.i,20)+'</span>';
+  else b='<span class="rd lg ring" style="border-color:'+c.c+';color:var(--ink)">'+ic(c.i,20)+'</span>';
+  return '<div class="row">'+b+'<div class="grow"><div class="t1">'+r[0]+'</div><div class="t2">'+(tr?r[4]:r[1])+' · '+r[3]+'</div></div><div class="amt '+(r[2]>0&&!tr?'in':'neg')+'">'+(tr?'⇄ '+m(r[2]):sg(r[2]))+'</div></div>'}).join('');
+ return '<div class="sect"><h4>Movimientos <small>5 de 21</small></h4><div class="card">'+rows+'</div></div>'}
+var BM={'0':'111101101101111','1':'010110010010111','2':'111001111100111','3':'111001111001111','4':'101101111001001','5':'111100111001111','6':'111100111101111','7':'111001001001001','8':'111101111101111','9':'111101111001111'};
+function bits(s,c){var x=0,o='';for(var i=0;i<s.length;i++){var ch=s.charAt(i);if(ch==='.'){o+='<rect x="'+x*c+'" y="'+4*c+'" width="'+c+'" height="'+c+'"/>';x+=2;continue}var b=BM[ch];for(var k=0;k<15;k++)if(b.charAt(k)==='1')o+='<rect x="'+(x+k%3)*c+'" y="'+Math.floor(k/3)*c+'" width="'+c+'" height="'+c+'"/>';x+=4}return {s:o,w:(x-1)*c}}
+function heroH(){var c=8,g=bits('15.373.721',c);
+ return '<div><div class="plane"><div class="lbl">Saldo total · $ ARS</div><svg role="img" aria-label="$ 15.373.721" width="'+g.w+'" height="'+5*c+'" viewBox="0 0 '+g.w+' '+5*c+'" fill="#fff" shape-rendering="crispEdges">'+g.s+'</svg><div style="height:16px"></div></div>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);border-top:0"><div style="padding:8px 12px;border-right:1px solid var(--ink)"><div class="t2">Entró</div><div class="amt in" style="font-size:17px">'+sg(1970000)+'</div></div><div style="padding:8px 12px"><div class="t2">Salió</div><div class="amt neg" style="font-size:17px">'+sg(-1003710)+'</div></div></div></div>'}
+function heroI(){var L=function(d,c){return '<path d="'+d+'" stroke="'+c+'" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'};
+ var map='<svg viewBox="0 0 343 120" width="100%" aria-hidden="true" style="margin-top:6px">'+L('M20 104H127L171 60L215 16H323','#8F6BFF')+L('M20 16H127L171 60L215 104H323','#FF8A3D')+L('M171 6V114','#E04C9B')+L('M8 60H335','#1CB5E0')+'<circle cx="171" cy="60" r="11" fill="#fff" stroke="#0B1630" stroke-width="4"/><circle cx="171" cy="60" r="4" fill="#0B1630"/></svg>';
+ return '<div><div class="panel"><div class="lbl">Saldo total</div><div class="big">'+m(15373721)+'</div>'+map+'<div style="font-size:12px;opacity:.9">Esquema de tus 4 cuentas. El cruce es donde pasan las transferencias.</div></div>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 2px 0"><div><div class="t2">Entró</div><div class="amt in" style="font-size:18px">'+sg(1970000)+'</div></div><div><div class="t2">Salió</div><div class="amt neg" style="font-size:18px">'+sg(-1003710)+'</div></div></div></div>'}
+function heroJ(){return '<div class="pass"><div class="a"><div style="display:flex;justify-content:space-between"><span class="lbl">Pase · Noviembre 2026</span><span class="lbl">ARS</span></div><div><div class="lbl">Saldo total</div><div class="big">'+m(15373721)+'</div></div></div>'+
+ '<div class="perf"></div><div class="a"><div class="segs"><div><span class="lbl">Entró</span><b class="in">'+sg(1970000)+'</b></div><div><span class="lbl">Salió</span><b>'+sg(-1003710)+'</b></div><div><span class="lbl">Neto</span><b class="in">'+sg(966290)+'</b></div></div><div class="bc" role="presentation"></div><div class="lbl" style="display:flex;justify-content:space-between"><span>SEQ 0021</span><span>5 DE 21</span></div></div></div>'}
+var LC={'Ahorros USD (en pesos)':'#8F6BFF','Efectivo':'#FF8A3D','Mercado Pago':'#1CB5E0','Visa Santander Platinum Internacional':'#E04C9B'};
+function cuentasI(){var rows=ACC.map(function(a){var neg=a[2]<0;return '<div class="row"><span class="ln" style="--lc:'+LC[a[0]]+'"></span><div class="grow"><div class="t1">'+a[0]+'</div>'+(neg?'<div class="t2">Deuda de tarjeta</div>':'')+'</div><div class="amt num">'+m(a[2])+'</div></div>'}).join('');
+ return '<div class="sect"><h4>Cuentas <small>4 líneas</small></h4><div class="card">'+rows+'</div></div>'}
+function movI(){var AC={'Supermercado Día':'Mercado Pago','Auriculares':'Visa','Nafta':'Mercado Pago','Sueldo':'Mercado Pago'};
+ var rows=MOV.map(function(r){var tr=r[4],lc=tr?LC['Mercado Pago']:AC[r[0]]==='Visa'?LC['Visa Santander Platinum Internacional']:LC['Mercado Pago'],lc2=tr?LC['Ahorros USD (en pesos)']:lc;
+  return '<div class="mv"><span class="rail'+(tr?' x':'')+'" style="--lc:'+lc+';--lc2:'+lc2+'"></span><div class="grow"><div class="t1">'+r[0]+'</div><div class="t2">'+(tr?r[4]:r[1]+' · '+(AC[r[0]]||''))+' · '+r[3]+'</div></div><div class="amt '+(r[2]>0&&!tr?'in':'neg')+'">'+(tr?'⇄ '+m(r[2]):sg(r[2]))+'</div></div>'}).join('');
+ return '<div class="sect"><h4>Movimientos <small>5 de 21</small></h4><div class="card" style="padding-top:0;padding-bottom:0">'+rows+'</div></div>'}
+function fijosJ(){var W=[-3,-2,2];var rows=FIJ.map(function(f,i){return '<div class="gate"><div class="when'+(W[i]<0?' late':'')+'">'+(W[i]>0?'+':'−')+Math.abs(W[i])+' d</div><div class="grow"><div class="t1">'+f[0]+'</div><div class="amt" style="font-size:14px;font-weight:500">'+m(f[1])+'</div><div style="margin-top:2px">'+status(f[2],f[3])+'</div></div><div class="pay">Pagar</div></div>'}).join('');
+ return '<div class="sect"><h4>Para pagar <small>por fecha</small></h4><div class="card">'+rows+'</div></div>'}
+function movA(){var h='<div class="led head"><span>Movimiento</span><span>Salió</span><span>Entró</span></div>';
+ var rows=MOV.map(function(r){var tr=r[4],out=r[2]<0,inn=r[2]>0&&!tr;
+  return '<div class="row led"><div class="grow"><div class="t1">'+r[0]+'</div><div class="t2">'+(tr?'⇄ '+r[4]:r[1])+' · '+r[3]+'</div></div>'+
+  '<span class="amt neg num">'+(out?m(-r[2]).replace('$','').trim():'')+'</span><span class="amt num '+(inn?'in':'')+'">'+(inn?'+'+m(r[2]).replace('$','').trim():tr?'⇄ '+m(r[2]).replace('$','').trim():'')+'</span></div>'}).join('');
+ return '<div class="sect"><h4>Movimientos <small>5 de 21</small></h4>'+h+rows+'</div>'}
+function movB(){var rows=MOV.map(function(r){var c=CUR[r[1]],tr=r[4];
+  var badge=tr?'<span class="rd lg" style="background:var(--chip);color:var(--ink)">'+ic('swap',20)+'</span>':r[1]==='Ingreso'?'<span class="rd lg" style="background:var(--in);color:var(--bg)">'+ic('inc',20,2.6)+'</span>':'<span class="rd lg" style="background:'+c.c+';color:'+c.t+'">'+c.l+'</span>';
+  return '<div class="row">'+badge+'<div class="grow"><div class="t1">'+r[0]+'</div><div class="t2">'+(tr?r[4]:r[1])+' · '+r[3]+'</div></div><div class="amt '+(r[2]>0&&!tr?'in':'neg')+'">'+(tr?'⇄ '+m(r[2]):sg(r[2]))+'</div></div>'}).join('');
+ return '<div class="sect"><h4>Movimientos <small>5 de 21</small></h4><div class="card">'+rows+'</div></div>'}
+function movC(){var rows=MOV.map(function(r){var c=CUR[r[1]],tr=r[4],ik=tr?'swap':r[1]==='Ingreso'?'inc':c.i;
+  return '<div class="row"><span class="ico" style="--cc:'+(c?c.c:'var(--in)')+'">'+ic(ik,20)+'</span><div class="grow"><div class="t1">'+r[0]+'</div><div class="t2">'+(tr?r[4]:r[1])+' · '+r[3]+'</div></div><div class="amt '+(r[2]>0&&!tr?'in':'neg')+'">'+(tr?'⇄ '+m(r[2]):sg(r[2]))+'</div></div>'}).join('');
+ return '<div class="sect"><h4>Movimientos <small>5 de 21</small></h4><div class="card">'+rows+'</div></div>'}
+
+function phone(d,mode){
+ CUR=CATS[d]||CAT;
+ var hero={A:heroA,B:heroB,C:heroC,D:heroD,E:heroC,F:heroF,G:heroC,H:heroH,I:heroI,J:heroJ}[d](), wrapCard=function(inner,t,small){return '<div class="sect"><h4>'+t+(small?' <small>'+small+'</small>':'')+'</h4>'+(d==='A'?inner:'<div class="card">'+inner+'</div>')+'</div>'};
+ var cuentas=d==='I'?cuentasI():wrapCard(ACC.map(function(a){return accRow(a,d)}).join(''),'Cuentas','4');
+ var fijos=d==='J'?fijosJ():wrapCard(FIJ.map(function(f){return fijRow(f,d)}).join(''),'Para pagar','$ 162.298 pendientes');
+ var mov={A:movA,B:movB,C:movC,G:movC,I:movI}[d];mov=mov?mov():movG(d);
+ return '<section class="phone '+d+' '+mode+'" aria-label="Dirección '+d+', tema '+(mode==='light'?'claro':'oscuro')+'"><div class="pad">'+top(mode)+hero+quick()+cuentas+fijos+(d==='E'?budSectE():budSect(d))+mov+'</div>'+nav(d,mode)+'</section>'}
+
+var INFO={
+A:{n:'A · Libro mayor',p:'La app es un libro contable inmutable, así que se ve como uno: renglones, cifras en columnas y un cierre. Sobrio y preciso, con la tinta azul del cuaderno como único color de acción.',
+ s:'La doble raya de cierre bajo el saldo total y las columnas Salió / Entró: cada movimiento cae en su columna, así que ingreso y gasto se distinguen por posición, signo y color.',
+ r:'Mejora tomada del tablero de estación (split-flap): las cifras van en celdas fijas, tabulares, y al cambiar el saldo los dígitos se actualizan de a uno.',
+ k:'Es la opción más seria y menos amistosa. Los renglones densos piden cuidar el tamaño táctil en cada fila. Las categorías se distinguen solo por nombre (sin color propio).',
+ t:'Schibsted Grotesk para texto y Spline Sans Mono para cifras',c:[['Papel','#EEF1EC'],['Tinta','#14241D'],['Azul de acción','#2540B8'],['Entró','#0A6B44'],['Superado','#B3261E']],
+ d:'Renglones con filetes finos, esquinas casi rectas, botones rectangulares con borde o relleno azul.'},
+B:{n:'B · Línea de subte',p:'Cada categoría es una línea del subte, con su letra y su color. Se entiende de un vistazo en qué se va la plata, con la rotulación clara de una estación.',
+ s:'La barra de línea bajo el saldo: el gasto del mes dibujado como tramos de color por categoría. Los mismos colores y letras identifican cada movimiento y cada presupuesto.',
+ r:'Los colores de categoría nunca se usan para estados. Vencido, superado y "al límite" llevan ícono y texto, y los gastos van en tinta neutra con signo menos, para que el rojo siempre signifique alerta.',
+ k:'Seis colores de categoría suman ruido visual. El verde de Transporte queda cerca del verde de "entró", por eso el ingreso siempre lleva signo + y ícono propio.',
+ t:'Archivo, en ancho normal y condensado para rótulos',c:[['Fondo','#F2F4F8'],['Azul noche','#0A1A33'],['Comida','#1CB5E0'],['Compras','#C42B7E'],['Hogar','#2D5BD0'],['Transporte','#1DA38C'],['Servicios','#7B45B5'],['Otros','#F4C20D']],
+ d:'Franja azul noche para el saldo, rótulos en mayúsculas, círculos con letra y botón central amarillo.'},
+C:{n:'C · Estándar de la categoría',p:'La app de finanzas como la conocés: tarjeta de saldo grande, esquinas redondeadas, un acento azul y barra de pestañas con botón flotante. Sin adornos y bien ejecutada.',
+ s:'Ninguna. Es el estándar de la categoría, a propósito, para que tengas una referencia contra la cual comparar A y B.',
+ r:'Mismo esqueleto y las mismas correcciones de accesibilidad que A y B: 44 px o más, contraste AA, estados con texto e ícono.',
+ k:'Es la más parecida a otras apps, así que tiene la menor identidad propia. Las categorías se distinguen por forma de ícono y un tinte suave.',
+ t:'Geist',c:[['Fondo','#F4F5F7'],['Tarjeta','#FFFFFF'],['Azul','#2F5BFF'],['Entró','#0A7A3F'],['Superado','#C62828']],
+ d:'Tarjetas de 20 a 24 px de radio, íconos en cuadrados tintados, botón principal relleno y barra inferior con círculo flotante.'},
+D:{n:'D · Cartel de góndola',p:'Como la etiqueta de precio del supermercado: se lee de lejos y no deja dudas. Amarillo y negro para lo que importa, rojo solo para lo que urge. Es la más enérgica de las seis.',
+ s:'El saldo total como etiqueta de precio amarilla, con su agujerito para colgar. Cada categoría es un número de pasillo (1 a 6) en un cuadrado de color.',
+ r:'Disciplina tomada del mosaico Metro: un solo color es dueño de lo "vivo". El amarillo es solo el saldo y la acción principal, y ninguna otra cosa lo usa. Los vencidos van en rojo con ícono y texto.',
+ k:'Alto contraste y tipografía condensada: en pantallas llenas puede cansar, y los montos chicos piden cuidar el tamaño mínimo. Gusta o no gusta, sin término medio.',
+ t:'Big Shoulders Display para cifras y rótulos, Hanken Grotesk para el texto',c:[['Papel','#F5F5EF'],['Tinta','#141414'],['Amarillo etiqueta','#FFD400'],['Entró','#0A7A3F'],['Vencido','#C8161D'],['Pasillo 1','#F58220'],['Pasillo 2','#E5398B']],
+ d:'Etiquetas de esquinas casi rectas, botones negros con texto amarillo, barra inferior negra con botón central amarillo.'},
+E:{n:'E · Sobres',p:'Tu plata repartida en sobres de colores, como se hace en la vida real: cada categoría es un sobre con su tope y se ve cuánto queda en cada uno. Amable y concreta.',
+ s:'Los presupuestos son sobres con solapa y nivel de relleno, en una grilla de dos. El color de cada sobre identifica la categoría en toda la app.',
+ r:'El estado vive dentro del objeto: un sobre superado no cambia de color, muestra una etiqueta "Superado por $ 87.499" con ícono. Los colores de categoría no se usan nunca para estados.',
+ k:'Solo la sección de presupuestos cuenta la idea; el resto de la pantalla queda cerca del estándar (C). Si no usás presupuestos, pierde gracia.',
+ t:'Onest',c:[['Fondo','#F2F2F4'],['Tinta','#15161A'],['Comida','#FF7A59'],['Compras','#B04DB0'],['Hogar','#00A3A3'],['Transporte','#F4B400'],['Servicios','#3FA0FF'],['Otros','#8FA3AD']],
+ d:'Tarjetas redondeadas, sobres con solapa triangular, íconos en círculos de color y botón central cuadrado redondeado.'},
+F:{n:'F · Billete',p:'El saldo total como un billete: franja de color con las líneas finas de seguridad, cifras en tipografía condensada. Sobria y reconocible, con algo de nuestra plata.',
+ s:'La franja violeta con guilloché (las líneas finas de los billetes) detrás del saldo y sellos redondos con ícono para cada categoría.',
+ r:'El adorno vive solo en el saldo: el resto de la pantalla es limpio. Las categorías usan seis tintas apagadas, como las de un billete, con contraste AA.',
+ k:'El guilloché es adorno puro y puede sentirse disfrazado si se extiende. Las tintas apagadas distinguen menos a simple vista que los colores de B.',
+ t:'Barlow Condensed para cifras y títulos, Libre Franklin para el texto',c:[['Fondo','#EFEEF6'],['Tinta','#1B1633'],['Violeta billete','#4B2A86'],['Comida','#1F7A68'],['Compras','#9E3A63'],['Hogar','#3B58A8'],['Transporte','#A8741A'],['Servicios','#6B3FA0']],
+ d:'Franja con doble filete, tarjetas con borde fino, sellos circulares y barra inferior violeta con botón central lila.'},
+I:{n:'I · Mapa de red',p:'La idea del subte llevada más lejos: tus cuentas son las líneas de una red, y las transferencias son las estaciones de combinación. Esmalte azul medianoche y tintas de línea.',
+ s:'Un esquema con líneas a 45° y 90° detrás del saldo, con un cruce donde se juntan las cuentas. Cada movimiento es una estación sobre la línea de su cuenta; una transferencia es una combinación con dos anillos y cambio de color.',
+ r:'Cambia el eje de color respecto de B: acá el color es la cuenta, no la categoría. La categoría va escrita. Los estados (vencido, superado) siguen con ícono y texto, nunca solo con color.',
+ k:'Es la que más se parece a una app de transporte: el esquema es ilustrativo y no mide plata. Las categorías pierden su color. Con muchas cuentas la red pide recortar.',
+ t:'Source Sans 3',c:[['Esmalte','#0B1630'],['Porcelana','#F4F7FB'],['Mercado Pago','#1CB5E0'],['Ahorros','#8F6BFF'],['Efectivo','#FF8A3D'],['Visa','#E04C9B']],
+ d:'Panel de esmalte para el saldo, líneas con terminal, rieles con estaciones, botones en píldora y botón central blanco.'},
+J:{n:'J · Pase de abordar',p:'El saldo como un pase de abordar con su perforación y su código, y los gastos fijos como un tablero de salidas ordenado por vencimiento. Neutra, tabular y muy legible.',
+ s:'El pase con perforación y código de barras (SEQ = cantidad de movimientos) y el tablero de "Para pagar": ordenado por días a vencer, el vencido queda marcado y fijo en rojo hasta que lo pagás.',
+ r:'Un solo color de alerta, reservado para lo que cambia o vence. Las categorías se distinguen por ícono, no por color. Todas las cifras en tipografía monoespaciada para leer columnas.',
+ k:'Se siente "viaje" más que "plata". Sin color de categoría, la lista de movimientos es más uniforme. El código de barras es adorno (aquí no escanea nada).',
+ t:'Geist para el texto, Geist Mono para cifras y rótulos',c:[['Fondo','#ECEDEF'],['Tinta','#111317'],['Alerta','#C62828'],['Entró','#0A7A3F']],
+ d:'Pase con muescas de perforación, tablero de filas con chip de días, botones oscuros de 12 px de radio.'},
+H:{n:'H · Cuadrícula',p:'Un cartel tipográfico de la escuela holandesa: la cuadrícula de construcción queda visible y los números gigantes se arman celda por celda. Es la más rara y la más distinta de las diez.',
+ s:'El saldo total dibujado con celdas sobre un plano azul con su cuadrícula a la vista; toda la pantalla descansa sobre esa misma retícula de 8 px.',
+ r:'Una sola superficie de color por pantalla (el plano azul del saldo); el resto es hilos finos y texto. Los números son un SVG con texto accesible para lector de pantalla.',
+ k:'Es la de mayor riesgo: los dígitos de celdas se leen peor que una tipografía normal y las otras cifras no los usan. La retícula de fondo reduce el contraste efectivo del texto chico.',
+ t:'Hanken Grotesk, con cifras construidas en celdas',c:[['Fondo','#FFFFFF'],['Tinta','#0A0A12'],['Plano azul','#2B3FFF'],['Retícula','#AEB7FF'],['Entró','#0A6B44']],
+ d:'Esquinas rectas, bordes de 1 px, tarjetas transparentes sobre la retícula y botón central cuadrado.'},
+G:{n:'G · Consumo cálido',p:'La salida más amable del sorteo: tarjetas blandas sobre un fondo cálido, y un único color de acción que solo aparece donde se puede tocar algo. Es la menos arriesgada de esta tanda.',
+ s:'El color de acción (verde azulado) aparece únicamente en lo que se puede tocar: botones, "Pagar" y la pestaña activa. Las barras y los estados no lo usan.',
+ r:'Mismas correcciones de accesibilidad que el resto. Las etiquetas están escritas como las diría una persona.',
+ k:'Es parecida al estándar (C) con otro tono. Quedó primera por el sorteo, no por ser la más audaz.',
+ t:'Figtree',c:[['Fondo cálido','#F4ECE4'],['Tarjeta','#FFFFFF'],['Tinta','#231B16'],['Acción','#007A8A'],['Entró','#0A6B44']],
+ d:'Tarjetas de 24 a 28 px de radio, íconos en círculos tintados y barra inferior con botón central redondo.'}};
+function info(d){var i=INFO[d];return '<div class="full"><h2>'+i.n+'</h2><p>'+i.p+'</p></div>'+
+ '<div><h3>Movimiento firma</h3><p>'+i.s+'</p></div><div><h3>Mejora incorporada</h3><p>'+i.r+'</p></div>'+
+ '<div><h3>Tipografía</h3><p>'+i.t+'</p><h3 style="margin-top:12px">Componentes</h3><p>'+i.d+'</p></div><div><h3>Riesgo</h3><p>'+i.k+'</p></div>'+
+ '<div class="full"><h3>Paleta (claro)</h3><div class="chips">'+i.c.map(function(c){return '<span class="sw"><i style="background:'+c[1]+'"></i>'+c[0]+'</span>'}).join('')+'</div></div>'}
+
+var st={d:'I',m:'both'};
+try{var h=(location.hash||'').replace('#','').toUpperCase();if(INFO[h])st.d=h}catch(e){}
+function render(){var modes=st.m==='both'?['light','dark']:[st.m];
+ document.getElementById('stage').innerHTML=modes.map(function(md){return '<div class="slot"><span>'+(md==='light'?'Tema claro':'Tema oscuro')+'</span>'+phone(st.d,md)+'</div>'}).join('');
+ document.getElementById('info').innerHTML=info(st.d);
+ [].forEach.call(document.querySelectorAll('#dirs button'),function(b){b.setAttribute('aria-pressed',b.dataset.d===st.d)});
+ [].forEach.call(document.querySelectorAll('#modes button'),function(b){b.setAttribute('aria-pressed',b.dataset.m===st.m)})}
+document.getElementById('dirs').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.d=b.dataset.d;try{history.replaceState(null,'','#'+st.d.toLowerCase())}catch(x){}render()});
+document.getElementById('modes').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.m=b.dataset.m;render()});
+render();
+})();
+</script>
