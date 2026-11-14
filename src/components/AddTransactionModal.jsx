@@ -7,8 +7,10 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import Sheet from './ui/Sheet';
 import { useToast } from './ui/ToastContext';
+import { useDialog } from '../contexts/DialogContext';
 import { useRequestId } from '../hooks/useRequestId';
 import { localDateString } from '../utils/frequentExpenses';
+import { parseAmountInput, formatAmountInput } from '../utils/amountInput';
 import styles from './FormSheet.module.css';
 
 const CATEGORIES = ['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros'];
@@ -30,15 +32,16 @@ const dateSummary = (value) => {
  * Formulario de movimiento. Se monta solo mientras la hoja está abierta, así que el estado inicial sale de las props
  * y no hace falta sincronizarlo con efectos.
  */
-const TransactionForm = ({ onClose, onAdd, onEdit, initialData, accounts }) => {
+const TransactionForm = ({ onClose, onAdd, onEdit, onDelete, initialData, accounts }) => {
   const { showToast } = useToast();
+  const { confirm } = useDialog();
   const { getId, reset: resetRequestId } = useRequestId();
   const isEdit = Boolean(initialData && initialData.id);
   const firstAccount = accounts[0]?.id || '';
   const amountRef = useRef(null);
 
   const [type, setType] = useState(initialData?.type || 'expense');
-  const [amount, setAmount] = useState(initialData?.amount ?? '');
+  const [amount, setAmount] = useState(formatAmountInput(initialData?.amount));
   const [category, setCategory] = useState(initialData?.category && CATEGORIES.includes(initialData.category) ? initialData.category : CATEGORIES[0]);
   const [accountId, setAccountId] = useState(initialData?.accountId || firstAccount);
   const [transferToAccountId, setTransferToAccountId] = useState(initialData?.transferToAccountId || accounts[1]?.id || '');
@@ -54,7 +57,9 @@ const TransactionForm = ({ onClose, onAdd, onEdit, initialData, accounts }) => {
     if (saving) return;
 
     const next = {};
-    if (!amount || Number.isNaN(Number(amount)) || Number(amount) <= 0) next.amount = 'Ingresá un monto mayor a cero.';
+    // Acepta 3500, 3,5 y 1.500 (miles): un type="number" leería "1.500" como 1,5.
+    const parsedAmount = parseAmountInput(amount);
+    if (parsedAmount === null || parsedAmount <= 0) next.amount = 'Ingresá un monto mayor a cero.';
     if (type === 'transfer' && accountId === transferToAccountId) next.accounts = 'La cuenta de origen y la de destino tienen que ser distintas.';
     if (!date) next.date = 'Elegí una fecha.';
     setErrors(next);
@@ -63,7 +68,7 @@ const TransactionForm = ({ onClose, onAdd, onEdit, initialData, accounts }) => {
       return;
     }
 
-    const data = { type, amount: parseFloat(amount), accountId, description, date };
+    const data = { type, amount: parsedAmount, accountId, description, date };
     if (type === 'expense') {
       data.category = category;
     } else if (type === 'income') {
@@ -91,6 +96,19 @@ const TransactionForm = ({ onClose, onAdd, onEdit, initialData, accounts }) => {
       showToast('Error al guardar el movimiento: ' + error.message, 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isEdit || !onDelete) return;
+    const ok = await confirm('Se elimina este movimiento y el saldo de la cuenta vuelve a como estaba. No se puede deshacer.', 'Eliminar movimiento', { confirmText: 'Eliminar' });
+    if (!ok) return;
+    try {
+      await onDelete(initialData.id);
+      showToast('Movimiento eliminado', 'success');
+      onClose();
+    } catch (error) {
+      showToast('Error al eliminar: ' + error.message, 'error');
     }
   };
 
@@ -127,10 +145,9 @@ const TransactionForm = ({ onClose, onAdd, onEdit, initialData, accounts }) => {
           <Input
             {...p}
             ref={amountRef}
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="0.01"
-            min="0.01"
+            autoComplete="off"
             fullWidth
             className={styles.amount}
             value={amount}
@@ -199,15 +216,20 @@ const TransactionForm = ({ onClose, onAdd, onEdit, initialData, accounts }) => {
         <Button type="submit" variant="primary" size="lg" disabled={saving}>
           {saving ? 'Guardando…' : typeInfo.save}
         </Button>
+        {isEdit && onDelete && (
+          <Button type="button" variant="danger" size="lg" onClick={handleDelete} disabled={saving}>
+            Eliminar
+          </Button>
+        )}
       </div>
     </form>
   );
 };
 
 /** Hoja para anotar o editar un movimiento. Props sin cambios respecto de la versión anterior. */
-const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, initialData, accounts = [] }) => (
+const AddTransactionModal = ({ isOpen, onClose, onAdd, onEdit, onDelete, initialData, accounts = [] }) => (
   <Sheet open={isOpen} onClose={onClose} title={initialData && initialData.id ? 'Editar movimiento' : 'Nuevo movimiento'}>
-    <TransactionForm onClose={onClose} onAdd={onAdd} onEdit={onEdit} initialData={initialData} accounts={accounts} />
+    <TransactionForm onClose={onClose} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} initialData={initialData} accounts={accounts} />
   </Sheet>
 );
 

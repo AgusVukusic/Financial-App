@@ -8,6 +8,7 @@ import Sheet from '../ui/Sheet';
 import { useToast } from '../ui/ToastContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { useRequestId } from '../../hooks/useRequestId';
+import { parseAmountInput, formatAmountInput } from '../../utils/amountInput';
 import styles from '../FormSheet.module.css';
 
 export const ACCOUNT_TYPES = [
@@ -27,9 +28,10 @@ const AccountForm = ({ onClose, onAdd, onEdit, onDelete, initialData }) => {
 
   const [name, setName] = useState(initialData?.name || '');
   const [type, setType] = useState(initialData?.type || 'bank');
-  const [initialBalance, setInitialBalance] = useState(initialData ? initialData.initialBalance?.toString() || '0' : '');
+  const [initialBalance, setInitialBalance] = useState(initialData ? formatAmountInput(initialData.initialBalance ?? 0) : '');
   const [saving, setSaving] = useState(false);
   const [nameError, setNameError] = useState('');
+  const [balanceError, setBalanceError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +43,15 @@ const AccountForm = ({ onClose, onAdd, onEdit, onDelete, initialData }) => {
     }
     setNameError('');
 
-    const data = { name, type, initialBalance: parseFloat(initialBalance || 0) };
+    // Vacío vale 0; si escribió algo tiene que ser un monto (acepta 1.500 y 1.500,50).
+    const parsedBalance = initialBalance.trim() === '' ? 0 : parseAmountInput(initialBalance);
+    if (parsedBalance === null) {
+      setBalanceError('Escribí un monto válido, por ejemplo 15000 o 1.500,50.');
+      return;
+    }
+    setBalanceError('');
+
+    const data = { name, type, initialBalance: parsedBalance };
 
     setSaving(true);
     try {
@@ -63,7 +73,7 @@ const AccountForm = ({ onClose, onAdd, onEdit, onDelete, initialData }) => {
 
   const handleDelete = async () => {
     if (!isEdit) return;
-    const isConfirmed = await confirm(`¿Eliminar la cuenta "${initialData.name}"?`);
+    const isConfirmed = await confirm(`¿Eliminar la cuenta "${initialData.name}"?`, 'Eliminar cuenta', { confirmText: 'Eliminar' });
     if (!isConfirmed) return;
     try {
       await onDelete(initialData.id);
@@ -105,13 +115,12 @@ const AccountForm = ({ onClose, onAdd, onEdit, onDelete, initialData }) => {
         </div>
       </div>
 
-      <Field label="Saldo inicial ($)" hint={isEdit ? 'El saldo inicial de una cuenta existente no se puede editar.' : undefined}>
+      <Field label="Saldo inicial ($)" error={balanceError} hint={isEdit ? 'El saldo inicial de una cuenta existente no se puede editar.' : 'Para una deuda, escribilo con signo menos.'}>
         {(p) => (
           <Input
             {...p}
-            type="number"
-            inputMode="decimal"
-            step="0.01"
+            type="text"
+            autoComplete="off"
             fullWidth
             value={initialBalance}
             onChange={(e) => setInitialBalance(e.target.value)}

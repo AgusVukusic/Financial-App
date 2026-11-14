@@ -37,3 +37,4 @@ firebase-export/
 
 
 !.env.example
+.playwright-mcp/

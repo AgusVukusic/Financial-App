@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ToastProvider } from './ui/ToastContext';
 import { DialogProvider } from '../contexts/DialogContext';
@@ -54,6 +54,27 @@ describe('AddTransactionModal (hoja)', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
+  it.each([
+    ['1.500', 1500],
+    ['3,5', 3.5],
+    ['2.500,50', 2500.5],
+    ['$ 12.000', 12000],
+  ])('el monto %s se guarda como %s (miles con punto, centavos con coma)', async (typed, expected) => {
+    const { onAdd } = setup();
+    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: typed } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
+    expect(onAdd.mock.calls[0][0].amount).toBe(expected);
+  });
+
+  it('un monto que no es un número se rechaza con el mismo mensaje', async () => {
+    const { onAdd } = setup();
+    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '12abc' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
+    expect(await screen.findByText('Ingresá un monto mayor a cero.')).toBeInTheDocument();
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
   it('no guarda un monto vacío y lo explica junto al campo', async () => {
     const { onAdd } = setup();
     fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
@@ -96,7 +117,7 @@ describe('AddTransactionModal (hoja)', () => {
     const initialData = { id: 'tx1', type: 'expense', amount: 1200, category: 'Hogar', accountId: 'a2', description: 'Ferretería', date: '2026-11-10T12:00:00.000Z' };
     const { onEdit, onAdd } = setup({ initialData });
     expect(screen.getByRole('dialog', { name: 'Editar movimiento' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Monto ($)')).toHaveValue(1200);
+    expect(screen.getByLabelText('Monto ($)')).toHaveValue('1200');
     expect(screen.getByText(/Fecha y descripción/).closest('details')).toHaveAttribute('open');
     fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '1500' } });
     fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
@@ -104,6 +125,34 @@ describe('AddTransactionModal (hoja)', () => {
     expect(onEdit.mock.calls[0][0]).toBe('tx1');
     expect(onEdit.mock.calls[0][1]).toMatchObject({ amount: 1500, category: 'Hogar', accountId: 'a2' });
     expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  it('al editar ofrece Eliminar, pide confirmación y borra por id; al crear no lo ofrece', async () => {
+    const initialData = { id: 'tx9', type: 'expense', amount: 800, category: 'Comida', accountId: 'a1', description: 'Café', date: '2026-11-10T12:00:00.000Z' };
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+    const { onClose } = setup({ initialData, onDelete });
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+    const confirmDialog = await screen.findByRole('alertdialog');
+    expect(onDelete).not.toHaveBeenCalled();
+    fireEvent.click(within(confirmDialog).getByRole('button', { name: 'Eliminar' }));
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith('tx9'));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('cancelar la confirmación no borra', async () => {
+    const initialData = { id: 'tx9', type: 'expense', amount: 800, category: 'Comida', accountId: 'a1', description: 'Café', date: '2026-11-10T12:00:00.000Z' };
+    const onDelete = vi.fn();
+    setup({ initialData, onDelete });
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+    const confirmDialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(confirmDialog).getByRole('button', { name: 'Cancelar' }));
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  it('un movimiento nuevo no tiene botón Eliminar', () => {
+    setup({ onDelete: vi.fn() });
+    expect(screen.queryByRole('button', { name: 'Eliminar' })).toBeNull();
   });
 
   it('si el servidor falla, avisa y no cierra', async () => {
@@ -145,7 +194,7 @@ describe('AddAccountModal (hoja)', () => {
     expect(screen.getByRole('dialog', { name: 'Nueva cuenta' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Nombre de la cuenta'), { target: { value: 'Ualá' } });
     fireEvent.click(screen.getByRole('button', { name: 'Billetera virtual' }));
-    fireEvent.change(screen.getByLabelText('Saldo inicial ($)'), { target: { value: '1500.5' } });
+    fireEvent.change(screen.getByLabelText('Saldo inicial ($)'), { target: { value: '1.500,5' } });
     fireEvent.click(screen.getByRole('button', { name: 'Guardar cuenta' }));
     await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
     expect(onAdd.mock.calls[0][0]).toMatchObject({ name: 'Ualá', type: 'wallet', initialBalance: 1500.5 });
@@ -173,7 +222,7 @@ describe('AddAccountModal (hoja)', () => {
     const confirmDialog = await screen.findByRole('alertdialog');
     expect(confirmDialog).toHaveTextContent('Efectivo');
     expect(onDelete).not.toHaveBeenCalled();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Confirmar' })[0]);
+    fireEvent.click(within(confirmDialog).getByRole('button', { name: 'Eliminar' }));
     await waitFor(() => expect(onDelete).toHaveBeenCalledWith('c1'));
   });
 
