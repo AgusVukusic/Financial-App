@@ -44,17 +44,24 @@ const csvDate = (value) => {
   return isNaN(date.getTime()) ? '' : date.toLocaleDateString('es-AR');
 };
 
-/** Arma el contenido del CSV (con BOM para que Excel lea los acentos). */
+// Excel en español (Argentina) separa las columnas con ";" y usa la coma como decimal: con "," y "." abría todo en una sola columna
+// y leía los montos como texto. El BOM hace que lea bien los acentos. Google Sheets también lo abre bien.
+const csvAmount = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? String(n).replace('.', ',') : '';
+};
+
+/** Arma el contenido del CSV para Excel en español: columnas con ";", monto con coma decimal, fecha dd/mm/aaaa. */
 export const buildCSV = (transactions) => {
-  const headers = ['Fecha', 'Tipo', 'Categoria', 'Monto', 'Descripcion'];
+  const headers = ['Fecha', 'Tipo', 'Categoría', 'Monto', 'Descripción'];
   const rows = (transactions || []).map((t) => [
     csvText(csvDate(t.date)),
     csvText(typeLabel(t)),
     csvText(t.category),
-    t.amount,
+    csvAmount(t.amount),
     csvText(t.description),
   ]);
-  return '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  return '\uFEFF' + [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\r\n');
 };
 
 /** Descarga el CSV y devuelve el nombre del archivo. */

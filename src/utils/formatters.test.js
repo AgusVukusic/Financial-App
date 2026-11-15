@@ -13,7 +13,7 @@ vi.mock('jspdf', () => ({
 vi.mock('jspdf-autotable', () => ({ default: pdf.table }));
 
 const T = (over) => ({ date: '2026-07-08T12:00:00Z', type: 'expense', category: 'Comida', amount: 1500, description: 'Super', ...over });
-const lines = (csv) => csv.replace('﻿', '').split('\n');
+const lines = (csv) => csv.replace('﻿', '').split('\r\n');
 
 describe('Formatters Utils', () => {
   describe('formatCurrency', () => {
@@ -56,8 +56,8 @@ describe('Formatters Utils', () => {
     it('empieza con BOM y tiene las 5 columnas', () => {
       const csv = buildCSV([T()]);
       expect(csv.charCodeAt(0)).toBe(0xfeff);
-      expect(lines(csv)[0]).toBe('Fecha,Tipo,Categoria,Monto,Descripcion');
-      expect(lines(csv)[1]).toMatch(/^".+","Gasto","Comida",1500,"Super"$/);
+      expect(lines(csv)[0]).toBe('Fecha;Tipo;Categoría;Monto;Descripción');
+      expect(lines(csv)[1]).toMatch(/^".+";"Gasto";"Comida";1500;"Super"$/);
     });
 
     it('rotula las transferencias', () => {
@@ -84,13 +84,29 @@ describe('Formatters Utils', () => {
       expect(buildCSV([T({ description: 'Café' })])).toContain('"Café"');
     });
 
+    it('para Excel en español: columnas con ";", monto con coma decimal y renglones con CRLF', () => {
+      const csv = buildCSV([T({ amount: 1250000.75 }), T({ amount: 0.5 }), T({ amount: 300 })]);
+      const rows = lines(csv);
+      expect(rows).toHaveLength(4);
+      expect(rows[1]).toContain(';1250000,75;');
+      expect(rows[2]).toContain(';0,5;');
+      expect(rows[3]).toContain(';300;');
+      expect(csv).not.toMatch(/\d\.\d/); // ningún monto con punto decimal
+    });
+
+    it('un ";" dentro de la descripción no parte la columna (va entre comillas)', () => {
+      const row = lines(buildCSV([T({ description: 'Pan; leche' })]))[1];
+      expect(row.endsWith('"Pan; leche"')).toBe(true);
+      expect(row.split(';').length).toBeGreaterThan(5); // el ";" interno se ve al contar sin respetar comillas
+    });
+
     it('lista vacía: solo el encabezado', () => {
-      expect(lines(buildCSV([]))).toEqual(['Fecha,Tipo,Categoria,Monto,Descripcion']);
+      expect(lines(buildCSV([]))).toEqual(['Fecha;Tipo;Categoría;Monto;Descripción']);
     });
 
     it('fecha inválida o ausente da celda vacía', () => {
-      expect(lines(buildCSV([T({ date: 'nope' })]))[1]).toMatch(/^"","Gasto"/);
-      expect(lines(buildCSV([T({ date: undefined })]))[1]).toMatch(/^"","Gasto"/);
+      expect(lines(buildCSV([T({ date: 'nope' })]))[1]).toMatch(/^"";"Gasto"/);
+      expect(lines(buildCSV([T({ date: undefined })]))[1]).toMatch(/^"";"Gasto"/);
       expect(buildCSV([T({ date: 'nope' })])).not.toContain('Invalid');
     });
   });
