@@ -210,6 +210,11 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - Decisiones del usuario (2026-11-15): se dejan como están las descripciones de 31 a 200 caracteres en un campo de un renglón y los centavos redondeados a pesos enteros en las listas.
   - Pruebas 328 → 331. Lint 0 errores (9 avisos).
 
+- **Fase 5 · C · PWA** (rama `feature/ui-pwa`, 2026-11-15; cuerpo del PR en `pr-pwa.md`, opciones de ícono en `pwa/`): ícono propio (opción A del usuario: "$" de puntos naranja sobre oscuro) en
+  tres PNG (192, 512 y maskable aparte), `apple-touch-icon` de 180 px, favicon nuevo (era el rayo violeta de Vite), metas de iOS (barra de estado `black`), `lang`/`start_url`/`scope` en el manifest y
+  fuentes de Google en caché sin conexión (`runtimeCaching`). Aprobado por el usuario el cambio de `vite.config.js`. Verificado en Chrome con el build servido (sin errores de manifest, instalable, fuentes
+  desde la caché sin conexión). No probado: instalación real en iPhone y Android. Sin uso: `public/icons.svg` (plantilla de Vite).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
@@ -220,6 +225,6 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 - Fase 4: Reportes, Gastos fijos (confirmar pagar con `destructive: false`, sin segundo aviso), Perfil, Landing/Login/Activación
   (hallazgo 7: login sin verificar; errores técnicos de Firebase en texto humano).
-- Fase 5: A limpieza (mergeada, #13), B accesibilidad y movimiento (rama subida, PR por abrir), C PWA, D `DESIGN.md` y resumen.
+- Fase 5: A limpieza (mergeada, #13), B accesibilidad y movimiento (mergeada, #14), C PWA (rama subida, PR por abrir), D `DESIGN.md` y resumen.
 - Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
 - Preguntas abiertas para el usuario: ver `handoff.md` sección 12.
