@@ -1,5 +1,8 @@
 # Sistema de diseño: Panel de taller
 
+> Versión de trabajo del sistema (reglas, tokens y guía de componentes). La versión legible por herramientas, con los valores
+> exactos y las reglas con nombre, está en `DESIGN.md` en la raíz del repo. Si difieren, manda `src/styles/tokens.css`.
+
 Fase 3 del rediseño. Base elegida: el concepto 3 de `docs/ui-redesign/concepts/` (estética de instrumento: teclas con
 relieve, rótulos de panel, un solo color vivo). Para verlo: `npm run dev` y abrir `http://localhost:5173/showcase.html`
 (solo desarrollo, no entra al build). Capturas en `docs/ui-redesign/system/`.
@@ -30,9 +33,9 @@ relieve, rótulos de panel, un solo color vivo). Para verlo: `npm run dev` y abr
 
 Tema: `body.light-theme` (lo pone `useTheme`) o `data-theme="light|dark"` en cualquier subárbol.
 
-**Alias de la versión anterior** (`--bg-base`, `--text-primary`, `--accent-primary`, `--spacing-*`, `--radius-*`, etc.): siguen
-definidos en `tokens.css` para que las pantallas que aún no se rehicieron lean el sistema nuevo. No usarlos en código nuevo;
-se borran cuando se rehaga la última pantalla.
+**Alias de la versión anterior** (`--bg-base`, `--bg-surface`, `--text-primary`, `--text-secondary`, `--accent-primary`, `--success`,
+`--danger`, `--warning`, `--border-color`, `--spacing-sm/md/lg/xl`): quedan 13 al final de `tokens.css` y solo los lee Grupos
+(fuera de la Beta, sin rediseñar). No usarlos en código nuevo; se borran junto con Grupos o cuando vuelva rediseñado.
 
 ### Contraste (calculado)
 
@@ -57,14 +60,22 @@ control (inputs, teclas, chips) usan `--ink2` (6,4:1 o más).
 | `Input`, `Select` | 48 px de alto, 16 px de fuente | Foco con anillo de acento |
 | `Sheet` | Hoja inferior modal | `role="dialog"`, foco atrapado, Escape, botón Cerrar visible |
 | `ConfirmDialog` | Confirmación centrada (`alertdialog`) | Foco inicial en "Cancelar"; `hideCancel` para avisos |
-| `ToastProvider` / `useToast` | Avisos abajo. `showToast(msg, tipo, ms, { action })` | `role="status"`/`alert`; con acción dura 8 s o más |
+| `ToastProvider` / `useToast` | Avisos abajo. `showToast(msg, tipo, ms, { action })` | `role="status"`/`alert`; con acción dura 8 s o más. Con una hoja o un diálogo abierto, los de éxito se ocultan y los errores suben arriba |
 
 `useDialogA11y` (hook) encapsula foco, Tab, Escape y bloqueo de scroll; lo usan `Sheet` y `ConfirmDialog`.
 
-## Lo que queda para las pantallas
+## Estado
 
-- Reemplazar los `style={{...}}` y los CSS por pantalla por tokens y componentes (fases 4 y siguientes).
-- Mover el modal de transacción y el de cuenta a `Sheet`.
-- Ícono de la PWA propio (hoy es una URL externa en `vite.config.js`) y `apple-touch-icon`.
-- Fuentes de Google en `index.html`: con `display=swap`; sin cache offline propia (la PWA no las precachea todavía).
+Todas las pantallas de la Beta usan tokens y componentes (el rediseño terminó en noviembre de 2026). Quedan `style` solo con valores calculados
+(`Dither`, `Odometer`, medidores, cifras en Doto) y los de Grupos, que no se toca. El ícono de la PWA, el `apple-touch-icon` y la caché sin
+conexión de las fuentes de Google están hechos (`public/`, `vite.config.js`).
+
+## Reglas de tamaño y texto grande
+
+- Con el texto al 200 % nada puede ensanchar la pantalla: lo que no entra baja de renglón; las grillas de frecuentes y de Entró/Salió se
+  adaptan (`auto-fill` con mínimo en `rem`); las cifras grandes pueden achicarse hasta 12 px (piso en `px`, no en `rem`); los rótulos de la
+  barra inferior se limitan a 3,4 % del ancho.
+- Las cifras nunca se cortan con puntos suspensivos: se acortan los nombres.
+- Toda pantalla nueva se prueba en claro y oscuro, a 320, 393 y ~1100 px, con texto al 200 % y con los usuarios `ana` (demo) y `peor` (peor
+  caso) de `scripts/seed-*.js`.
 

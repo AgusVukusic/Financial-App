@@ -12,6 +12,7 @@
   min-height: 60px;
   padding: 6px var(--sp-1);
   min-width: 0;
+  container-type: inline-size; /* el monto se achica con el ancho de la tecla en vez de cortarse */
 }
 
 .name {
@@ -27,7 +28,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: clamp(0.625rem, calc(100cqw / (var(--chars, 10) * 0.62)), 0.75rem); /* una cifra larga se achica, nunca se corta */
   font-weight: 600;
   color: var(--ink2);
 }

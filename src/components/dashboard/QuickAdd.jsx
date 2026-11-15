@@ -78,7 +78,9 @@ const QuickAdd = ({ items, enabled, onAddTransaction, onDeleteTransaction, onOpe
               aria-label={`Registrar ${item.label} por ${formatCurrency(item.amount)}`}
             >
               <span className={styles.name}>{item.label}</span>
-              <span className={styles.amount}>{formatCurrency(item.amount)}</span>
+              <span className={styles.amount} style={{ '--chars': formatCurrency(item.amount).length }}>
+                {formatCurrency(item.amount)}
+              </span>
             </Button>
           ))}
         </div>
