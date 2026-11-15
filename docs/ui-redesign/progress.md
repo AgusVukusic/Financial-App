@@ -171,11 +171,20 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - Sin uso tras este PR (limpiar en fase 5 con OK): reglas `.budget-alert` de `src/index.css`; `recharts` solo lo importa `ExpenseChart.jsx` (huérfano).
   - No hecho: "termómetro de ritmo" (gastado vs esperado a la fecha); queda como idea.
 
+- **Gastos fijos** (rama `feature/ui-subscriptions`, 2026-11-15; ejecutó un agente Sonnet, revisión y verificación aparte): pagar con una sola
+  confirmación no destructiva y aviso con **Deshacer** (`voidTransaction` con el `requestId` del pago; verificado en el emulador leyendo Firestore:
+  saldo y `lastPaidAt` vuelven exactos). Lista por vencimiento con estado en texto + ícono, renglón-botón + "Pagar" aparte, alta/edición en `Sheet`,
+  eliminar dentro de la hoja con confirmación destructiva. Componentes en `src/components/subscriptions/`. Capturas en `docs/ui-redesign/subscriptions/`.
+  - "Pagado este mes" se afirma solo si `lastPaidDate` cae en el mes en curso (el estado `paid` de `getSubscriptionStatus` significa "faltan más de 5 días").
+  - Sin uso tras este PR (borrar con OK): `src/components/SubscriptionsManager.css`.
+  - **Pregunta abierta:** las categorías de Gastos fijos no coinciden con las 6 de la app (sus pagos quedan fuera de los topes y caen en "Otros" en Reportes).
+  - Heredado, no tocado: los gastos anuales calculan el vencimiento como mensuales (`subscriptionUtils`).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
-- Reportes: rama `feature/ui-reports` subida, PR por abrir.
-- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Gastos fijos → Perfil → Landing/Login/Activación.
+- #9 Reportes (mergeado, CI verde). Gastos fijos: rama `feature/ui-subscriptions` subida, PR por abrir. **Parada ✋ después de este PR** (dos pantallas).
+- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Perfil → Landing/Login/Activación.
 
 ## Pendiente
 
