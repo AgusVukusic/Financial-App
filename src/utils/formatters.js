@@ -81,7 +81,7 @@ export const exportToCSV = (transactions) => {
  */
 export const pdfText = (value) =>
   String(value ?? '')
-    .replace(/[\p{Extended_Pictographic}\p{Emoji_Modifier}\u200d\ufe0f\u20e3]/gu, '')
+    .replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u200d|\ufe0f|\u20e3/gu, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
 
