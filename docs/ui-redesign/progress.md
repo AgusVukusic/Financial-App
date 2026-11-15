@@ -221,7 +221,7 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 - **Después del cierre · PR 1** (rama `feature/ui-categories-csv`, 2026-11-15; `pr-categories-csv.md`): decisiones 3 y 4 del usuario. Gastos fijos usa las 6 categorías de la app (los viejos se muestran como "Otros" con aviso)
   y el CSV usa `;` y coma decimal para Excel en español. Pruebas 331 → 333. Siguen, en este orden y un PR por vez: texto natural al anotar (6), termómetro de ritmo (8), dos columnas en escritorio (7);
-  los frecuentes de varios meses (5) esperan la explicación al usuario.
+  los frecuentes de los últimos 3 meses (5) están autorizados por el usuario (tocar la capa de datos solo para leer) y van al final.
 
 ## Pantallas terminadas / PRs
 
