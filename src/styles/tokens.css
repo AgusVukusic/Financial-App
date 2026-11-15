@@ -124,43 +124,19 @@ body.light-theme,
 :root,
 [data-theme],
 body.light-theme {
-  /* Alias de la versión anterior. Las pantallas que todavía no se rehicieron siguen leyendo estos nombres;
-     se borran cuando se rehaga la última. No usarlos en código nuevo. */
+  /* Alias de la versión anterior que solo lee Grupos (fuera de la Beta, sin rediseñar). No usarlos en código nuevo;
+     se borran junto con Grupos o cuando vuelva rediseñado. */
   --bg-base: var(--bg);
   --bg-surface: var(--surf);
-  --bg-glass: var(--chip);
-  --bg-glass-hover: var(--chip);
   --text-primary: var(--ink);
   --text-secondary: var(--ink2);
-  --text-muted: var(--ink2);
   --accent-primary: var(--acc);
-  --accent-primary-hover: color-mix(in srgb, var(--acc) 85%, var(--ink));
-  --accent-gradient: linear-gradient(var(--acc), var(--acc));
   --success: var(--in);
-  --success-bg: color-mix(in srgb, var(--in) 14%, transparent);
-  --success-glow: transparent;
   --danger: var(--bad);
-  --danger-bg: color-mix(in srgb, var(--bad) 14%, transparent);
-  --danger-glow: transparent;
   --warning: var(--warn);
-  --warning-bg: color-mix(in srgb, var(--warn) 16%, transparent);
   --border-color: var(--rule);
-  --border-light: color-mix(in srgb, var(--rule) 50%, transparent);
-  --spacing-xs: var(--sp-1);
   --spacing-sm: var(--sp-2);
   --spacing-md: var(--sp-4);
   --spacing-lg: var(--sp-5);
   --spacing-xl: var(--sp-6);
-  --spacing-xxl: var(--sp-7);
-  --radius-sm: var(--r-md);
-  --radius-md: var(--r-lg);
-  --radius-lg: var(--r-xl);
-  --radius-xl: 16px;
-  --radius-full: var(--r-pill);
-  --shadow-sm: 0 1px 0 var(--rule);
-  --shadow-md: 0 var(--key-depth) 0 var(--rule);
-  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.3);
-  --shadow-glass: none;
-  --shadow-accent: 0 var(--key-depth) 0 var(--ink);
-  --glow-color: transparent;
 }
