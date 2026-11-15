@@ -88,16 +88,3 @@ button {
   outline: 2px solid var(--acc);
   outline-offset: 2px;
 }
-
-/* Alertas de presupuesto (pantalla pendiente de rehacer): solo tokens, ícono y texto llevan el estado. */
-.budget-alert.alert-danger {
-  background-color: var(--danger-bg);
-  border: var(--bw) solid var(--bad);
-  color: var(--bad);
-}
-
-.budget-alert.alert-warning {
-  background-color: var(--warning-bg);
-  border: var(--bw) solid var(--warn);
-  color: var(--warn);
-}
