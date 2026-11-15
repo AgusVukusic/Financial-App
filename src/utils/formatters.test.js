@@ -125,6 +125,8 @@ describe('Formatters Utils', () => {
       expect(pdfText('Empanadas 🥟🥟 para la cena')).toBe('Empanadas para la cena');
       expect(pdfText('Café con leche · año 2026')).toBe('Café con leche · año 2026');
       expect(pdfText('Efectivo 👍🏽')).toBe('Efectivo');
+      expect(pdfText('María’s “cena” — 3 pizzas… € ¿Qué? © ® ™ «ok»')).toBe('María’s “cena” — 3 pizzas… € ¿Qué? © ® ™ «ok»'); // teclado del iPhone
+      expect(pdfText('50% ≥ 2 → 3 ✓')).toBe('50% 2 3');
       expect(pdfText(undefined)).toBe('');
       exportToPDF([T({ description: 'Pizza 🍕 del viernes' })]);
       const opts = pdf.table.mock.calls.at(-1)[1];

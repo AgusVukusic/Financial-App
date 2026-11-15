@@ -76,12 +76,15 @@ export const exportToCSV = (transactions) => {
 };
 
 /**
- * jsPDF escribe con Helvetica (Latin-1): un emoji sale como basura ("Ø>Ý") y se sale de la celda. Se quitan solo en el PDF;
- * el CSV es UTF-8 y los conserva.
+ * jsPDF escribe con Helvetica (WinAnsi): lo que esa fuente no tiene (emoji, flechas, ✓, ≥) sale como basura ("Ø>Ý") y se
+ * sale de la celda. En el PDF se dejan solo los caracteres que sí tiene (letras con tilde y eñe, ¿ ¡, comillas y rayas
+ * tipográficas del teclado del iPhone, €, ©, ®, ™, …); el CSV es UTF-8 y conserva todo.
  */
+const PDF_SAFE = /[\u0020-\u007e\u00a0-\u00ff\u0152\u0153\u0160\u0161\u0178\u017d\u017e\u0192\u02c6\u02dc\u2013\u2014\u2018-\u201a\u201c-\u201e\u2020-\u2022\u2026\u2030\u2039\u203a\u20ac\u2122]/;
 export const pdfText = (value) =>
-  String(value ?? '')
-    .replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u200d|\ufe0f|\u20e3/gu, '')
+  Array.from(String(value ?? ''))
+    .filter((ch) => PDF_SAFE.test(ch))
+    .join('')
     .replace(/\s{2,}/g, ' ')
     .trim();
 
