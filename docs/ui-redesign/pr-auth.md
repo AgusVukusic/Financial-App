@@ -6,7 +6,8 @@
   - Causa (reproducida en el emulador): con el correo sin verificar la sesión de Firebase quedaba abierta; el segundo ingreso devolvía el usuario ya verificado, pero como el uid no cambiaba, `onAuthStateChanged` no volvía a dispararse y la app nunca lo recibía. No era `user.reload()`, como suponía el traspaso.
   - Arreglo, solo en `WelcomeScreen.jsx`: si el correo no está verificado se cierra esa sesión. "Reenviar correo" vuelve a ingresar con lo que está en el formulario, manda el correo y cierra; si en ese momento ya está verificado, entra directo. `useUser` no se tocó.
 - **Errores en texto humano (hallazgo 16):** `utils/authErrors.js` traduce los códigos de Firebase ("El correo o la contraseña no coinciden.", "Sin conexión. Revisá internet y probá de nuevo."…). Ya no se muestra "Firebase: Error (auth/…)".
-- **Landing (hallazgo 25):** "Ingresar" es la acción principal; "Instalar la app" es secundaria y solo aparece si no está instalada. Las instrucciones de instalación van en una `Sheet` accesible (antes un `div` con `onClick`). Copy corto, sin marketing.
+- **Landing:** por decisión del dueño del producto, **"Instalar la app" es la acción principal** e "Ingresar" la secundaria (si ya está instalada, solo se ve "Ingresar"). Copy corto, sin marketing.
+- **Guía de instalación para gente no técnica:** si el navegador ofrece el aviso nativo, se instala en un toque. Si no, se abre una hoja con los pasos **del dispositivo detectado** (iPhone/iPad en Safari o en Chrome, Android en Chrome, Samsung, Firefox, computadora, o "dentro de otra app" como Instagram). Cada paso muestra el dibujo que hay que buscar, dónde está en la pantalla y qué tocar ("Tocá los tres puntitos que están arriba a la derecha"); nunca dice "menú del navegador". Abajo, "Tengo otro celular o navegador" despliega las demás guías. Detección y textos en `utils/installGuide.js`.
 - **Ingreso / registro:** campos con `Field`/`Input` (16 px, sin zoom en iOS), `autocomplete` correcto, mostrar/ocultar contraseña, validación inline con foco en el primer error, avisos dentro de la pantalla ("Te enviamos un correo a…", "Tu correo todavía no está verificado…") con "Reenviar correo". En el registro se aclara que la Beta es por invitación.
 - **Activación:** mismos estados y lógica; el caso denegado muestra el correo y a quién pedirle la invitación.
 - **Título de la pestaña:** "Finanzas Personales" antes de ingresar (decía "Dashboard - Financial App") y "Inicio · Finanzas Personales", "Reportes · …" adentro.
@@ -19,7 +20,8 @@ No se tocaron `functions/`, `api/`, reglas, `firebase.js`, `services/api.js` ni 
 
 | | Antes | Después |
 |---|---|---|
-| Landing | `audit/01-landing-375.jpg` | `auth/01-landing-claro-393.jpg`, `auth/06-instalar-oscuro-320.jpg` |
+| Landing | `audit/01-landing-375.jpg` | `auth/08-landing-instalar-principal.jpg` |
+| Cómo instalar | (modal: "Abre el menú de opciones de tu navegador") | `auth/09-guia-android.jpg`, `auth/10-guia-iphone-claro.jpg` |
 | Error de ingreso | `audit/02-registro-error-crudo.jpg` | `auth/02-login-errores.jpg` |
 | Sin verificar | `audit/03-login-sin-verificar.jpg` | `auth/03-registro-ok-aviso.jpg`, `auth/04-sin-verificar.jpg` |
 | Activación rechazada | `audit/04-activacion-rechazada.jpg` | `auth/05-activacion-denegada.jpg` |
@@ -36,7 +38,7 @@ No se tocaron `functions/`, `api/`, reglas, `firebase.js`, `services/api.js` ni 
 
 ## Verificación
 
-- `npm run lint` (0 errores, 9 avisos conocidos), `npm test` (300 pruebas; 27 nuevas) y `npm run build`: pasan. `ActivationScreen.test.jsx` quedó intacta; en `ErrorBoundary.test.jsx` cambió el nombre del botón ("Recargar").
+- `npm run lint` (0 errores, 9 avisos conocidos), `npm test` (328 pruebas; 55 nuevas) y `npm run build`: pasan. `ActivationScreen.test.jsx` quedó intacta; en `ErrorBoundary.test.jsx` cambió el nombre del botón ("Recargar").
 - **Bug reproducido y arreglado en el emulador:** antes del cambio, registro → ingreso sin verificar → verificación → "Ingresar" se quedaba en el login. Después del cambio, el mismo recorrido con un usuario nuevo entra a Inicio sin recargar (pasando por la activación).
 - También en el emulador: contraseña incorrecta, registro con aviso, activación denegada para un correo sin invitación, cierre de sesión.
 - Navegador integrado a 393 px (claro) y 320 px (oscuro): sin scroll horizontal, ningún control de menos de 44 px, la hoja de instalación cierra con Escape, mostrar/ocultar contraseña cambia el tipo del campo.
@@ -44,7 +46,8 @@ No se tocaron `functions/`, `api/`, reglas, `firebase.js`, `services/api.js` ni 
 ## No probado / límites
 
 - **"Reenviar correo" no se probó en el navegador** (sí en pruebas con Firebase simulado). Tampoco el error "sin conexión" real.
-- La instalación real de la PWA (el aviso de Chrome/Android y los pasos en Safari de iOS): solo vi la hoja de instrucciones genérica.
+- **La instalación real en un celular**: vi la guía de Android (Chrome) y la de computadora tal como las detecta el navegador integrado, y las demás desde el desplegable. La detección por dispositivo está cubierta con 15 user agents en pruebas, no en aparatos reales. Los nombres exactos de las opciones ("Agregar a inicio", "Instalar app") cambian entre versiones de iOS, Android y cada navegador: conviene que alguien siga los pasos en un iPhone y en un Android reales.
+- `installGuide.js` repite a mano el nombre corto de la app ("Finanzas", del manifest).
 - Escritorio (1100 px) no se revisó en estas pantallas; ErrorBoundary solo en pruebas.
 - Safari, iPhone real y lector de pantalla.
 - Después de registrarse la contraseña se vacía: para "Reenviar correo" hay que volver a escribirla.
