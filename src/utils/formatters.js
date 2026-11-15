@@ -22,48 +22,74 @@ export const formatDate = (dateString) => {
   }).format(date);
 };
 
-export const exportToCSV = (transactions) => {
-  const headers = ['Fecha', 'Tipo', 'Categoria', 'Monto', 'Descripcion'];
-  const rows = transactions.map(t => [
-    new Date(t.date).toLocaleDateString('es-AR'),
-    t.type === 'income' ? 'Ingreso' : 'Gasto',
-    t.category,
-    t.amount,
-    `"${t.description || ''}"`
-  ]);
-  
-  const csvContent = "data:text/csv;charset=utf-8," 
-    + headers.join(",") + "\n" 
-    + rows.map(e => e.join(",")).join("\n");
-    
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "mis_finanzas.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+/** Rótulo del tipo de movimiento para las exportaciones. */
+export const typeLabel = (t) => {
+  if (t?.type === 'income') return 'Ingreso';
+  if (t?.type === 'transfer') return 'Transferencia';
+  return 'Gasto';
 };
 
+const isoDay = () => new Date().toISOString().split('T')[0];
+
+// Texto de CSV: entre comillas, con " duplicadas; si arranca con = + - @ se antepone ' para que la planilla no lo ejecute.
+const csvText = (value) => {
+  let text = value == null ? '' : String(value);
+  if (/^[=+\-@]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+};
+
+const csvDate = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? '' : date.toLocaleDateString('es-AR');
+};
+
+/** Arma el contenido del CSV (con BOM para que Excel lea los acentos). */
+export const buildCSV = (transactions) => {
+  const headers = ['Fecha', 'Tipo', 'Categoria', 'Monto', 'Descripcion'];
+  const rows = (transactions || []).map((t) => [
+    csvText(csvDate(t.date)),
+    csvText(typeLabel(t)),
+    csvText(t.category),
+    t.amount,
+    csvText(t.description),
+  ]);
+  return '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+};
+
+/** Descarga el CSV y devuelve el nombre del archivo. */
+export const exportToCSV = (transactions) => {
+  const fileName = `mis_finanzas_${isoDay()}.csv`;
+  const blob = new Blob([buildCSV(transactions)], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  try {
+    link.click();
+  } finally {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+  return fileName;
+};
+
+/** Genera y descarga el PDF; devuelve el nombre del archivo. */
 export const exportToPDF = (transactions) => {
   const doc = new jsPDF();
-  
-  doc.setFontSize(18);
-  doc.text('Reporte de Finanzas', 14, 22);
-  
-  const tableColumn = ["Fecha", "Tipo", "Categoría", "Monto", "Descripción"];
-  const tableRows = [];
 
-  transactions.forEach(t => {
-    const transactionData = [
-      formatDate(t.date),
-      t.type === 'income' ? 'Ingreso' : 'Gasto',
-      t.category,
-      formatCurrency(t.amount),
-      t.description || ''
-    ];
-    tableRows.push(transactionData);
-  });
+  doc.setFontSize(18);
+  doc.text('Movimientos · Finanzas Personales', 14, 22);
+
+  const tableColumn = ['Fecha', 'Tipo', 'Categoría', 'Monto', 'Descripción'];
+  const tableRows = (transactions || []).map((t) => [
+    formatDate(t.date),
+    typeLabel(t),
+    t.category,
+    formatCurrency(t.amount),
+    t.description || '',
+  ]);
 
   autoTable(doc, {
     head: [tableColumn],
@@ -71,8 +97,11 @@ export const exportToPDF = (transactions) => {
     startY: 30,
     theme: 'grid',
     styles: { fontSize: 10 },
-    headStyles: { fillColor: [59, 130, 246] }
+    // jsPDF necesita RGB numérico: tinta neutra del sistema con texto claro.
+    headStyles: { fillColor: [19, 19, 17], textColor: [255, 255, 255] },
   });
 
-  doc.save(`mis_finanzas_${new Date().toISOString().split('T')[0]}.pdf`);
+  const fileName = `mis_finanzas_${isoDay()}.pdf`;
+  doc.save(fileName);
+  return fileName;
 };
