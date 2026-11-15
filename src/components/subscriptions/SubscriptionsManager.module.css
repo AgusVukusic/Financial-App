@@ -1,0 +1,61 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
+}
+
+/* Cifras de más de 12 dígitos: letra más chica para que entren en un renglón a 320 px. */
+.totalLong {
+  font-size: var(--fs-lead);
+}
+
+.count {
+  font-size: var(--fs-small);
+  color: var(--ink2);
+}
+
+.add {
+  margin-top: var(--sp-3);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  list-style: none;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  color: var(--ink2);
+  font-size: var(--fs-small);
+}

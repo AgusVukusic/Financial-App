@@ -1,254 +1,145 @@
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { PlusCircle, Calendar, Edit2, X, Trash2, CreditCard, Clock } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { formatCurrency } from '../utils/formatters';
-import { useDialog } from '../contexts/DialogContext';
-import { useToast } from './ui/ToastContext';
-import { useRequestId } from '../hooks/useRequestId';
-import { newRequestId } from '../services/api';
 import { getSubscriptionStatus, calculateTotalMonthlySubscriptions } from '../utils/subscriptionUtils';
-import Card from './ui/Card';
+import { newRequestId } from '../services/api';
+import { useDialog } from '../contexts/DialogContext';
 import Button from './ui/Button';
-import Input from './ui/Input';
-import Select from './ui/Select';
-import './SubscriptionsManager.css';
+import Card from './ui/Card';
+import SectionHeader from './ui/SectionHeader';
+import { useToast } from './ui/ToastContext';
+import SubscriptionRow from './subscriptions/SubscriptionRow';
+import SubscriptionSheet from './subscriptions/SubscriptionSheet';
+import styles from './subscriptions/SubscriptionsManager.module.css';
 
-const SubscriptionsManager = ({ subscriptions, addSubscription, deleteSubscription, editSubscription, paySubscription, accounts = [] }) => {
-  const { confirm, alert } = useDialog();
+/**
+ * Gastos fijos: resumen del gasto mensual, lista por vencimiento y hoja de alta/edición.
+ * Pagar crea el gasto en el servidor con un requestId por gasto fijo; el aviso trae Deshacer, que anula ese
+ * mismo movimiento (el id del documento es el requestId) y el servidor devuelve lastPaidAt a como estaba.
+ */
+const SubscriptionsManager = ({
+  subscriptions,
+  addSubscription,
+  deleteSubscription,
+  editSubscription,
+  paySubscription,
+  onDeleteTransaction,
+  onAddAccountClick,
+  accounts = [],
+}) => {
+  const { confirm } = useDialog();
   const { showToast } = useToast();
-  const { getId, reset: resetRequestId } = useRequestId();
   const payRequestIds = useRef({}); // un requestId por gasto fijo hasta que el pago se confirma
-  const [saving, setSaving] = useState(false);
-  const [isAddingSub, setIsAddingSub] = useState(false);
-  const [editingSubId, setEditingSubId] = useState(null);
-  const [subForm, setSubForm] = useState({ 
-    description: '', 
-    amount: '', 
-    category: 'Entretenimiento',
-    dueDate: '1',
-    cycle: 'monthly',
-    accountId: ''
-  });
-
-  const categories = ['Entretenimiento', 'Servicios', 'Software', 'Hogar', 'Transporte', 'Otros'];
+  const payingRef = useRef(false); // guarda síncrona: dos toques en el mismo tick no pagan dos veces
+  const [payingId, setPayingId] = useState(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
 
   const totalMonthly = calculateTotalMonthlySubscriptions(subscriptions);
+  const sorted = [...subscriptions].sort((a, b) => getSubscriptionStatus(a).nextPayment - getSubscriptionStatus(b).nextPayment);
 
-  const handleAddOrEditSub = async (e) => {
-    e.preventDefault();
-    if (!subForm.amount || !subForm.description || saving) return;
-    if (!subForm.accountId) {
-      showToast('Elegí la cuenta desde la que se paga.', 'error');
-      return;
-    }
+  const openNew = () => {
+    setEditing(null);
+    setSheetOpen(true);
+  };
 
-    const subData = {
-      description: subForm.description,
-      amount: parseFloat(subForm.amount),
-      category: subForm.category,
-      dueDate: parseInt(subForm.dueDate, 10),
-      cycle: subForm.cycle,
-      accountId: subForm.accountId,
-    };
+  const openEdit = (sub) => {
+    setEditing(sub);
+    setSheetOpen(true);
+  };
 
-    setSaving(true);
+  const handlePay = async (sub) => {
+    if (payingRef.current) return;
+    payingRef.current = true;
+    setPayingId(sub.id);
     try {
-      if (editingSubId) {
-        await editSubscription(editingSubId, subData);
-        setEditingSubId(null);
-      } else {
-        await addSubscription({ ...subData, requestId: getId(subData) });
+      const accountName = accounts.find((a) => a.id === sub.accountId)?.name || 'la cuenta asociada';
+      const ok = await confirm(
+        `¿Pagar ${sub.description} por ${formatCurrency(sub.amount)} desde ${accountName}?`,
+        'Pagar gasto fijo',
+        { confirmText: 'Pagar', destructive: false },
+      );
+      if (!ok) return;
+
+      // El servidor crea el gasto, descuenta la cuenta y marca el pago en una sola operación.
+      // Si el pago falla, el reintento reutiliza el requestId: no cobra dos veces.
+      const requestId = payRequestIds.current[sub.id] ?? (payRequestIds.current[sub.id] = newRequestId());
+      try {
+        await paySubscription(sub.id, requestId);
+      } catch (error) {
+        showToast(error.message, 'error');
+        return;
       }
-      resetRequestId();
-      setIsAddingSub(false);
-      resetForm();
-    } catch (error) {
-      showToast(error.message, 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const resetForm = () => {
-    setSubForm({ description: '', amount: '', category: 'Entretenimiento', dueDate: '1', cycle: 'monthly', accountId: accounts[0]?.id || '' });
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteSubscription(id);
-    } catch (error) {
-      showToast(error.message, 'error');
-    }
-  };
-
-  const startEditing = (sub) => {
-    setEditingSubId(sub.id);
-    setSubForm({ 
-      description: sub.description, 
-      amount: sub.amount, 
-      category: sub.category || 'Entretenimiento',
-      dueDate: sub.dueDate || 1,
-      cycle: sub.cycle || 'monthly',
-      accountId: sub.accountId || ''
-    });
-    setIsAddingSub(true);
-  };
-
-  const handleManualPayment = async (sub) => {
-    const accountName = accounts.find(a => a.id === sub.accountId)?.name || 'la cuenta asociada';
-    const isConfirmed = await confirm(`¿Registrar pago de ${sub.description} por ${formatCurrency(sub.amount)} desde ${accountName}?`);
-    if (!isConfirmed) return;
-
-    // El servidor crea el gasto, descuenta la cuenta y marca el pago en una sola operación.
-    // Se reutiliza el requestId si el usuario reintenta tras un error (no cobra dos veces).
-    const requestId = payRequestIds.current[sub.id] ?? (payRequestIds.current[sub.id] = newRequestId());
-    try {
-      await paySubscription(sub.id, requestId);
+      // Pago hecho: el próximo pago (o uno tras Deshacer) necesita un id nuevo, porque este ya es un documento.
       delete payRequestIds.current[sub.id];
-      await alert('Pago registrado correctamente.');
-    } catch (error) {
-      showToast(error.message, 'error');
+
+      const options = onDeleteTransaction
+        ? {
+            action: {
+              label: 'Deshacer',
+              onClick: async () => {
+                try {
+                  await onDeleteTransaction(requestId);
+                  showToast('Pago deshecho', 'info');
+                } catch (error) {
+                  showToast(`No se pudo deshacer: ${error.message}`, 'error', 6000);
+                }
+              },
+            },
+          }
+        : {};
+      showToast(`Pagado: ${sub.description} ${formatCurrency(sub.amount)}`, 'success', 8000, options);
+    } finally {
+      payingRef.current = false;
+      setPayingId(null);
     }
   };
 
-  const renderStatusBadge = (statusObj) => {
-    if (statusObj.status === 'overdue') {
-      return <span className="status-badge overdue">Vencido hace {statusObj.days} días</span>;
-    } else if (statusObj.status === 'due_soon') {
-      return <span className="status-badge due-soon">Vence en {statusObj.days} días</span>;
-    } else {
-      return <span className="status-badge paid">Al día</span>;
-    }
-  };
+  const count = subscriptions.length;
+  const totalText = formatCurrency(totalMonthly);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="subscriptions-manager">
-      <header className="subscriptions-header">
-        <div>
-          <h2>Gastos Fijos</h2>
-          <p className="text-secondary">Tus cobros recurrentes y fijos</p>
-        </div>
-        <Button variant="primary" onClick={() => { setIsAddingSub(!isAddingSub); setEditingSubId(null); resetForm(); }}>
-          {isAddingSub ? <X size={20} /> : <PlusCircle size={20} />}
-          {!isAddingSub && <span style={{ marginLeft: '8px' }}>Añadir</span>}
-        </Button>
-      </header>
-
-      <div className="subscriptions-stats">
-        <Card className="stat-card">
-          <div className="stat-icon"><CreditCard size={24} color="var(--accent-primary)" /></div>
-          <div>
-            <p className="stat-label">Gasto Mensual Estimado</p>
-            <h3 className="stat-value text-gradient">{formatCurrency(totalMonthly)}</h3>
-          </div>
+    <div className={styles.screen}>
+      <section aria-label="Resumen">
+        <SectionHeader index="00" title="Resumen" />
+        <Card variant="dotted" className={styles.summary}>
+          <p className={styles.label}>Gasto mensual estimado</p>
+          <p className={`${styles.total} ${totalText.length > 15 ? styles.totalLong : ''}`.trim()}>{totalText}</p>
+          <p className={styles.count}>{count === 1 ? '1 gasto fijo' : `${count} gastos fijos`}</p>
         </Card>
-      </div>
+        <Button variant="primary" size="lg" block className={styles.add} onClick={openNew}>
+          Nuevo gasto fijo
+        </Button>
+      </section>
 
-      <AnimatePresence>
-        {isAddingSub && (
-          <motion.form 
-            initial={{ opacity: 0, height: 0 }} 
-            animate={{ opacity: 1, height: 'auto' }} 
-            exit={{ opacity: 0, height: 0 }} 
-            onSubmit={handleAddOrEditSub} 
-            className="subscription-form glass-panel"
-          >
-            <h3>{editingSubId ? 'Editar Gasto Fijo' : 'Nuevo Gasto Fijo'}</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>Descripción</label>
-                <Input type="text" placeholder="Ej. Netflix" required value={subForm.description} onChange={e => setSubForm({...subForm, description: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label>Monto</label>
-                <Input type="number" placeholder="0.00" required value={subForm.amount} onChange={e => setSubForm({...subForm, amount: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label>Día de cobro</label>
-                <Input type="number" min="1" max="31" required value={subForm.dueDate} onChange={e => setSubForm({...subForm, dueDate: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label>Frecuencia</label>
-                <Select value={subForm.cycle} onChange={e => setSubForm({...subForm, cycle: e.target.value})}>
-                  <option value="monthly">Mensual</option>
-                  <option value="yearly">Anual</option>
-                </Select>
-              </div>
-              <div className="form-group">
-                <label>Categoría</label>
-                <Select value={subForm.category} onChange={e => setSubForm({...subForm, category: e.target.value})}>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                </Select>
-              </div>
-              <div className="form-group">
-                <label>Cuenta de pago</label>
-                <Select value={subForm.accountId} required onChange={e => setSubForm({...subForm, accountId: e.target.value})}>
-                  <option value="" disabled>Elegí una cuenta</option>
-                  {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                </Select>
-              </div>
-            </div>
-            <div className="form-actions">
-              <Button type="button" variant="ghost" onClick={() => setIsAddingSub(false)}>Cancelar</Button>
-              <Button type="submit" variant="primary" disabled={saving}>
-                {saving ? 'Guardando...' : (editingSubId ? 'Actualizar' : 'Guardar')}
-              </Button>
-            </div>
-          </motion.form>
-        )}
-      </AnimatePresence>
-
-      <div className="subscriptions-list">
-        {subscriptions.length === 0 && !isAddingSub ? (
-          <div className="empty-state">
-            <Calendar size={48} color="var(--text-muted)" />
-            <p>No tienes gastos fijos registrados.</p>
-            <Button variant="ghost" onClick={() => setIsAddingSub(true)}>Añadir mi primer gasto fijo</Button>
-          </div>
+      <section aria-label="Vencimientos">
+        <SectionHeader index="01" title="Vencimientos" meta={count > 0 ? 'Por fecha' : undefined} />
+        {count === 0 ? (
+          <Card variant="dashed" className={styles.empty}>
+            <span>Todavía no anotaste ningún gasto fijo. Sumá alquiler, servicios o suscripciones para ver qué vence y pagarlos desde acá.</span>
+            <Button variant="key" onClick={openNew}>
+              Anotá tu primer gasto fijo
+            </Button>
+          </Card>
         ) : (
-          // Sort by due date
-          [...subscriptions].sort((a, b) => {
-            const statusA = getSubscriptionStatus(a);
-            const statusB = getSubscriptionStatus(b);
-            return statusA.nextPayment - statusB.nextPayment;
-          }).map(sub => {
-            const statusObj = getSubscriptionStatus(sub);
-            
-            return (
-              <Card key={sub.id} className={`subscription-item ${statusObj.status}`}>
-                <div className="sub-info">
-                  <div className="sub-header">
-                    <h4>{sub.description}</h4>
-                    {renderStatusBadge(statusObj)}
-                  </div>
-                  <div className="sub-details">
-                    <span className="sub-amount">{formatCurrency(sub.amount)} <small>/{sub.cycle === 'monthly' ? 'mes' : 'año'}</small></span>
-                    <span className="sub-date">
-                      <Clock size={14} /> 
-                      Vence el {statusObj.nextPayment.getDate()}/{statusObj.nextPayment.getMonth() + 1}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="sub-actions">
-                  {(statusObj.status === 'due_soon' || statusObj.status === 'overdue') && (
-                    <Button variant="primary" onClick={() => handleManualPayment(sub)} title="Registrar Pago">
-                      Pagar
-                    </Button>
-                  )}
-                  <Button variant="ghost" isIcon onClick={() => startEditing(sub)} title="Editar">
-                    <Edit2 size={18} />
-                  </Button>
-                  <Button variant="ghost" isIcon onClick={() => handleDelete(sub.id)} style={{ color: 'var(--danger)' }} title="Eliminar">
-                    <Trash2 size={18} />
-                  </Button>
-                </div>
-              </Card>
-            );
-          })
+          <ul className={styles.list}>
+            {sorted.map((sub) => (
+              <SubscriptionRow key={sub.id} sub={sub} paying={payingId === sub.id} onEdit={openEdit} onPay={handlePay} />
+            ))}
+          </ul>
         )}
-      </div>
-    </motion.div>
+      </section>
+
+      <SubscriptionSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        sub={editing}
+        accounts={accounts}
+        onAdd={addSubscription}
+        onEdit={editSubscription}
+        onDelete={deleteSubscription}
+        onAddAccountClick={onAddAccountClick}
+      />
+    </div>
   );
 };
 
