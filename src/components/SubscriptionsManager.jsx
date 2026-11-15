@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { formatCurrency } from '../utils/formatters';
+import { splitBalance } from '../utils/dashboardFormat';
 import { getSubscriptionStatus, calculateTotalMonthlySubscriptions } from '../utils/subscriptionUtils';
 import { newRequestId } from '../services/api';
 import { useDialog } from '../contexts/DialogContext';
@@ -96,6 +97,9 @@ const SubscriptionsManager = ({
 
   const count = subscriptions.length;
   const totalText = formatCurrency(totalMonthly);
+  // Misma cifra de puntos (Doto) que el saldo del Inicio; pasados los 12 caracteres, mono nítida.
+  const totalDigits = splitBalance(totalMonthly).digits;
+  const totalLong = totalDigits.length > 12;
 
   return (
     <div className={styles.screen}>
@@ -103,7 +107,14 @@ const SubscriptionsManager = ({
         <SectionHeader index="00" title="Resumen" />
         <Card variant="dotted" className={styles.summary}>
           <p className={styles.label}>Gasto mensual estimado</p>
-          <p className={`${styles.total} ${totalText.length > 15 ? styles.totalLong : ''}`.trim()}>{totalText}</p>
+          <div className={styles.total} role="img" aria-label={totalText} style={{ '--chars': totalDigits.length }}>
+            <span className={styles.currency} aria-hidden="true">
+              $
+            </span>
+            <span className={totalLong ? styles.valueMono : styles.value} aria-hidden="true">
+              {totalDigits}
+            </span>
+          </div>
           <p className={styles.count}>{count === 1 ? '1 gasto fijo' : `${count} gastos fijos`}</p>
         </Card>
         <Button variant="primary" size="lg" block className={styles.add} onClick={openNew}>

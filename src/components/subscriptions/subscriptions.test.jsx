@@ -79,7 +79,7 @@ describe('Gastos fijos: lista', () => {
     setup();
     expect(screen.getByText('Gasto mensual estimado')).toBeInTheDocument();
     // 1.500 + 100.000 + 12.000 + 30.000 + 24.000 / 12 (anual) = 145.500
-    expect(screen.getByText(/^\$\s*145\.500$/)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /^\$\s*145\.500$/ })).toBeInTheDocument();
     expect(screen.getByText('5 gastos fijos')).toBeInTheDocument();
   });
 
