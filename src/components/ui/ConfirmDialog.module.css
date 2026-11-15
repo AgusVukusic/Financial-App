@@ -38,3 +38,7 @@
   display: flex;
   gap: var(--sp-3);
 }
+
+.actions > button {
+  flex: 1;
+}

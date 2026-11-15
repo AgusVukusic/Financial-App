@@ -34,14 +34,13 @@ const DialogPanel = ({ title, message, onConfirm, onCancel, confirmText, cancelT
         </p>
         <div className={styles.actions}>
           {!hideCancel && (
-            <Button variant="key" onClick={onCancel} style={{ flex: 1 }} data-autofocus>
+            <Button variant="key" onClick={onCancel} data-autofocus>
               {cancelText}
             </Button>
           )}
           <Button
             variant={confirmVariant}
             onClick={onConfirm}
-            style={{ flex: 1 }}
             {...(hideCancel ? { 'data-autofocus': true } : {})}
           >
             {confirmText}
