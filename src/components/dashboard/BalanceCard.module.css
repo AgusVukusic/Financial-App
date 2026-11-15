@@ -40,7 +40,7 @@
  */
 .value,
 .valueMono {
-  font-size: clamp(1.5rem, calc((100cqw - 30px) / (var(--chars, 10) * 0.6)), var(--fs-display));
+  font-size: clamp(1rem, calc((100cqw - 30px) / (var(--chars, 10) * 0.6)), var(--fs-display));
   color: var(--ink);
 }
 
