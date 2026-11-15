@@ -7,6 +7,7 @@
 
 .row {
   display: flex;
+  flex-wrap: wrap; /* un saldo muy largo baja de renglón en vez de cortarse */
   align-items: center;
   gap: var(--sp-3);
   width: 100%;
@@ -42,7 +43,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  flex: 1;
+  flex: 1 1 6rem;
   min-width: 0;
 }
 
@@ -56,14 +57,14 @@
 
 .amount {
   flex: none;
-  max-width: 48%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 100%;
+  margin-left: auto;
+  overflow-wrap: anywhere;
+  text-align: right;
   font-family: var(--font-mono);
   font-size: var(--fs-body);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 .empty {
