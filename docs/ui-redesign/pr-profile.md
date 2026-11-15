@@ -33,7 +33,7 @@ No se tocó la capa de datos. `App.jsx` solo pasa `email`.
 
 ## Verificación
 
-- `npm run lint` (0 errores, 9 avisos conocidos), `npm test` (273 pruebas; 16 nuevas de Perfil y 10 de exportación) y `npm run build`: pasan.
+- `npm run lint` (0 errores, 9 avisos conocidos), `npm test` (273 pruebas; 23 nuevas: 16 de Perfil y 7 de exportación) y `npm run build`: pasan.
 - Navegador integrado contra el emulador, 393 px claro y oscuro, 320 px y 1100 px: sin scroll horizontal, ningún control de menos de 44 px, email de 75 caracteres visible entero a 320 px.
 - Exportaciones reales en el navegador, leyendo los archivos generados: el CSV tiene BOM, 26 filas, las transferencias dicen "Transferencia"; el PDF es un PDF válido de 2 páginas con el título nuevo y las transferencias rotuladas.
 - Confirmación de cierre: botón primario (no rojo), foco inicial en "Cancelar", cancelar no cierra la sesión.
