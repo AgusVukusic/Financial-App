@@ -94,7 +94,7 @@ const TransactionList = ({ transactions, accounts = [], onEdit, onOpenAdd }) => 
 
       {hidden > 0 && (
         <Button variant="key" block className={styles.more} onClick={() => setExpanded(true)}>
-          Ver los {hidden} restantes
+          {hidden === 1 ? 'Ver el movimiento restante' : `Ver los ${hidden} restantes`}
         </Button>
       )}
     </section>
