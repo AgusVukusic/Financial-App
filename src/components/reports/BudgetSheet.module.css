@@ -1,0 +1,23 @@
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.serverError {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  color: var(--bad);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  border: var(--bw) solid var(--bad);
+  border-radius: var(--r-md);
+  overflow-wrap: anywhere;
+}
+
+.serverError > svg {
+  flex: none;
+  margin-top: 2px;
+}

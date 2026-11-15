@@ -1,0 +1,10 @@
+.swatch {
+  display: block;
+  flex: none;
+  width: 28px;
+  height: 20px;
+  overflow: hidden;
+  background: var(--surf);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-xs);
+}

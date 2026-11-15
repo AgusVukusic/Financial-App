@@ -1,0 +1,191 @@
+.empty {
+  color: var(--ink2);
+  font-size: var(--fs-small);
+}
+
+.legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  margin-bottom: var(--sp-3);
+  font-size: var(--fs-small);
+}
+
+.legend > li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.key {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-xs);
+}
+
+/* Entró: sólida. Salió: tinta con trama rayada, así se distingue sin depender del color. */
+.in {
+  background: var(--in);
+  border: var(--bw) solid var(--in);
+}
+
+.out {
+  background: repeating-linear-gradient(45deg, var(--ink) 0 2px, var(--surf) 2px 5px);
+  border: var(--bw) solid var(--ink);
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: 168px auto;
+  column-gap: var(--sp-2);
+  row-gap: var(--sp-1);
+}
+
+.yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: 1;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.plot {
+  position: relative;
+  border-bottom: var(--bw-strong) solid var(--ink);
+}
+
+.grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: var(--bw) dashed var(--rule);
+}
+
+.gridTop {
+  top: 0;
+}
+
+.gridMid {
+  top: 50%;
+}
+
+.groups {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--sp-1);
+  height: 100%;
+}
+
+.group {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+}
+
+.bar {
+  box-sizing: border-box;
+  flex: 1 1 0;
+  max-width: 16px;
+  height: calc(var(--h, 0) * 100%);
+  border-radius: var(--r-xs) var(--r-xs) 0 0;
+}
+
+.xaxis {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--sp-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  text-align: center;
+  color: var(--ink2);
+}
+
+.details {
+  margin-top: var(--sp-3);
+  border: var(--bw) solid var(--rule);
+  border-radius: var(--r-lg);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap);
+  padding: 0 var(--sp-3);
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary::after {
+  content: '+';
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.details[open] > .summary::after {
+  content: '\2212';
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+
+.caption {
+  padding: var(--sp-1) var(--sp-3);
+  text-align: left;
+  color: var(--ink2);
+}
+
+.table th,
+.table td {
+  padding: var(--sp-2) var(--sp-3);
+  text-align: right;
+  border-top: var(--bw) solid var(--rule);
+  overflow-wrap: anywhere;
+}
+
+.table th:first-child {
+  width: 3.5rem;
+  text-align: left;
+}
+
+.table thead th {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.table td,
+.table tbody th {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.table tbody th {
+  font-weight: 600;
+}

@@ -177,7 +177,8 @@ function App() {
           uid={user?.uid} 
           expensesByCategory={expensesByCategory}
           budgets={budgets} 
-          updateBudget={updateBudget} 
+          updateBudget={updateBudget}
+          monthLabel={`${monthNames[selectedMonth]} ${selectedYear}`}
         />
       )}
 
