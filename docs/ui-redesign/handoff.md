@@ -1,9 +1,10 @@
 # Traspaso de sesión: rediseño de UI de Financial App
 
 Documento de continuidad. Está escrito para que una sesión nueva siga el trabajo como si fuera la misma. Leelo completo antes de
-tocar nada; después leé `progress.md` (registro cronológico) y `design-system.md` (reglas y componentes). Última actualización: 2026-11-15,
-con `main` en `38c7f0d` (PR #12 mergeado). **Fase 4 completa: todas las pantallas están rehechas y en producción. Falta solo la fase 5 (cierre).**
-El CI de `main` tras el merge de #12 no se comprobó (el usuario dijo que no hacía falta): verificarlo al retomar.
+tocar nada; después leé `progress.md` (registro cronológico), `design-system.md` (reglas y componentes) y `DESIGN.md` (raíz: el sistema visual en formato
+legible por herramientas). Última actualización: 2026-11-15, con las cuatro unidades de la fase 5 hechas (PRs #13 a #15 mergeados; la D, `docs/ui-closing`, en su PR).
+**El rediseño está terminado: todas las pantallas están rehechas, accesibles y en producción.** Lo que queda son decisiones abiertas del usuario (sección 12) y
+las pruebas en aparatos reales (sección 7). Las secciones 0 y 6 describen cómo se llegó hasta acá; ya no son pasos pendientes.
 
 ---
 
@@ -183,9 +184,12 @@ ADR 001); `voidTransaction(requestId)` lo anula con un movimiento compensatorio 
   (sin sesión) o "<Sección> · Finanzas Personales".
 - Pruebas por pantalla: `reports/reports.test.jsx`, `subscriptions/subscriptions.test.jsx`, `profile/profile.test.jsx`, `auth/auth.test.jsx`, más las de cada utilidad.
 
-## 6. Lo que falta: fase 5 (cierre)
+## 6. Fase 5 (cierre): HECHA
 
-Las pantallas están todas hechas. La fase 5 se agrupa en pocas unidades, cada una en su rama y su PR, sin apilar (esperar el merge de una antes de la siguiente).
+Histórico del plan, ya cumplido: A limpieza (#13), B accesibilidad y movimiento (#14), C PWA (#15), D documentación (`docs/ui-closing`). Lo que
+quedó sin poder verificarse (aparatos reales, lector de pantalla) está en la sección 7 y en los `pr-*.md`.
+
+Las pantallas están todas hechas. La fase 5 se agrupaba en pocas unidades, cada una en su rama y su PR, sin apilar (esperar el merge de una antes de la siguiente).
 Orden sugerido:
 
 ### 6.1 Limpieza (`feature/ui-cleanup`) — depende de la decisión 1 de la sección 12
@@ -343,10 +347,10 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 
 ## 12. Preguntas abiertas para el usuario
 
-Las dos primeras ya se le hicieron sin respuesta y traban parte de la fase 5: volver a preguntarlas al empezar.
+Las dos primeras están respondidas. Las demás (3 a 8) siguen abiertas: no resolverlas por cuenta propia.
 
 1. ~~Borrados~~: respondida y aplicada en `feature/ui-cleanup` (sección 11).
-2. ~~Ícono propio de la PWA~~: respondida: que lo proponga yo (sección 11). Falta hacerlo en la unidad C.
+2. ~~Ícono propio de la PWA~~: respondida y hecha (opción A, sección 11).
 3. ¿Unificar las categorías de Gastos fijos (Entretenimiento, Servicios, Software, Hogar, Transporte, Otros) con las 6 de la app? Hoy esos pagos quedan fuera de los
    topes y caen en "Otros" en Reportes.
 4. ¿CSV con `;` y coma decimal para Excel en español? Hoy usa coma y punto.

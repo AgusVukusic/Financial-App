@@ -215,6 +215,10 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   fuentes de Google en caché sin conexión (`runtimeCaching`). Aprobado por el usuario el cambio de `vite.config.js`. Verificado en Chrome con el build servido (sin errores de manifest, instalable, fuentes
   desde la caché sin conexión). No probado: instalación real en iPhone y Android. Borrado `public/icons.svg` (plantilla de Vite sin uso) con OK del usuario.
 
+- **Fase 5 · D · Documentación** (rama `docs/ui-closing`, 2026-11-15; cuerpo del PR en `pr-closing.md`): `DESIGN.md` en la raíz (frontmatter con tokens, 8 secciones canónicas, reglas con nombre) y
+  sidecar `.impeccable/design.json` (sin commitear a propósito), sección de UI de `CLAUDE.md` y `design-system.md` al día, handoff y progress cerrados. Al escribirla se encontró y corrigió un hueco de la
+  unidad B: a 320 px el monto de los frecuentes y el saldo de las cuentas se cortaban con puntos suspensivos con las cifras de `peor`.
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
@@ -225,6 +229,6 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 - Fase 4: Reportes, Gastos fijos (confirmar pagar con `destructive: false`, sin segundo aviso), Perfil, Landing/Login/Activación
   (hallazgo 7: login sin verificar; errores técnicos de Firebase en texto humano).
-- Fase 5: A limpieza (mergeada, #13), B accesibilidad y movimiento (mergeada, #14), C PWA (rama subida, PR por abrir), D `DESIGN.md` y resumen.
+- Fase 5 completa: A limpieza (#13), B accesibilidad y movimiento (#14), C PWA (#15) mergeadas; D documentación en su PR. Queda lo de la sección 12 del handoff (preguntas 3 a 8) y las pruebas en aparatos reales.
 - Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
 - Preguntas abiertas para el usuario: ver `handoff.md` sección 12.
