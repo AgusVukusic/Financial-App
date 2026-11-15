@@ -33,18 +33,35 @@ describe('LandingPage', () => {
     pwa.value = { isInstallable: false, isIOS: false, isStandalone: false, installPWA: vi.fn() };
   });
 
-  it('Ingresar llama onLoginClick', () => {
+  const withUserAgent = (userAgent, maxTouchPoints = 0) => {
+    vi.stubGlobal('navigator', { userAgent, maxTouchPoints });
+    return () => vi.unstubAllGlobals();
+  };
+
+  it('"Instalar la app" es la acción principal y "Ingresar" llama onLoginClick', () => {
     const onLoginClick = vi.fn();
     render(<LandingPage onLoginClick={onLoginClick} />);
     expect(screen.getByRole('heading', { level: 1, name: 'Finanzas Personales' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+    const install = screen.getByRole('button', { name: 'Instalar la app' });
+    const login = screen.getByRole('button', { name: 'Ingresar' });
+    expect(install.className).toMatch(/btn-primary/);
+    expect(login.className).toMatch(/btn-key/);
+    expect(install.compareDocumentPosition(login) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText('Queda en tu pantalla de inicio, como cualquier otra app.')).toBeInTheDocument();
+    fireEvent.click(login);
     expect(onLoginClick).toHaveBeenCalled();
   });
 
-  it('oculta "Instalar la app" en modo standalone', () => {
+  it('en modo standalone solo está "Ingresar", como acción principal', () => {
     pwa.value.isStandalone = true;
-    render(<LandingPage onLoginClick={vi.fn()} />);
+    const onLoginClick = vi.fn();
+    render(<LandingPage onLoginClick={onLoginClick} />);
     expect(screen.queryByRole('button', { name: /Instalar la app/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/pantalla de inicio/i)).not.toBeInTheDocument();
+    const login = screen.getByRole('button', { name: 'Ingresar' });
+    expect(login.className).toMatch(/btn-primary/);
+    fireEvent.click(login);
+    expect(onLoginClick).toHaveBeenCalled();
   });
 
   it('si es instalable llama installPWA', () => {
@@ -55,13 +72,42 @@ describe('LandingPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('si no es instalable abre la hoja con los pasos', async () => {
-    render(<LandingPage onLoginClick={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: /Instalar la app/i }));
-    const dialog = await screen.findByRole('dialog');
-    expect(dialog).toBeInTheDocument();
-    expect(dialog.querySelectorAll('ol li').length).toBeGreaterThanOrEqual(2);
-    expect(pwa.value.installPWA).not.toHaveBeenCalled();
+  it('si no es instalable abre la hoja con la guía del dispositivo, otras guías y "Entendido"', async () => {
+    const restore = withUserAgent(
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+      5,
+    );
+    try {
+      render(<LandingPage onLoginClick={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Instalar la app/i }));
+      const dialog = await screen.findByRole('dialog');
+      expect(dialog).toHaveTextContent('iPhone o iPad (Safari)');
+      expect(dialog.querySelector('ol').querySelectorAll('li')).toHaveLength(3);
+      expect(dialog).not.toHaveTextContent(/menú del navegador/i);
+      expect(dialog.querySelector('details summary')).toHaveTextContent('Tengo otro celular o navegador');
+      expect(pwa.value.installPWA).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Entendido' }));
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    } finally {
+      restore();
+    }
+  });
+
+  it('en Android con Chrome muestra los tres puntitos', async () => {
+    const restore = withUserAgent(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.99 Mobile Safari/537.36',
+      5,
+    );
+    try {
+      render(<LandingPage onLoginClick={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Instalar la app/i }));
+      const dialog = await screen.findByRole('dialog');
+      expect(dialog).toHaveTextContent('Celular Android (Chrome)');
+      expect(dialog.querySelector('ol li')).toHaveTextContent('tres puntitos');
+    } finally {
+      restore();
+    }
   });
 });
 

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { usePWA } from '../hooks/usePWA';
+import { detectInstallPlatform } from '../utils/installGuide';
 import Button from './ui/Button';
 import Sheet from './ui/Sheet';
 import { DitherBar } from './ui/Dither';
 import AuthShell from './auth/AuthShell';
+import InstallGuide from './auth/InstallGuide';
 import shared from './auth/auth.module.css';
 import styles from './LandingPage.module.css';
 
@@ -15,16 +17,23 @@ const BAR = [
 ];
 
 const LandingPage = ({ onLoginClick }) => {
-  const { isInstallable, isIOS, isStandalone, installPWA } = usePWA();
-  const [showSteps, setShowSteps] = useState(false);
+  const { isInstallable, isStandalone, installPWA } = usePWA();
+  const [platform, setPlatform] = useState(null);
 
   const handleInstall = () => {
     if (isInstallable) {
       installPWA();
     } else {
-      setShowSteps(true);
+      setPlatform(
+        detectInstallPlatform({
+          userAgent: navigator.userAgent,
+          maxTouchPoints: navigator.maxTouchPoints,
+        }),
+      );
     }
   };
+
+  const closeGuide = () => setPlatform(null);
 
   return (
     <AuthShell>
@@ -41,30 +50,30 @@ const LandingPage = ({ onLoginClick }) => {
       </div>
 
       <div className={shared.actions}>
-        <Button variant="primary" size="lg" block onClick={onLoginClick}>
-          Ingresar
-        </Button>
-        {!isStandalone && (
-          <Button variant="key" block onClick={handleInstall}>
-            Instalar la app
+        {isStandalone ? (
+          <Button variant="primary" size="lg" block onClick={onLoginClick}>
+            Ingresar
           </Button>
+        ) : (
+          <>
+            <Button variant="primary" size="lg" block onClick={handleInstall}>
+              Instalar la app
+            </Button>
+            <p className={styles.hint}>Queda en tu pantalla de inicio, como cualquier otra app.</p>
+            <Button variant="key" block onClick={onLoginClick}>
+              Ingresar
+            </Button>
+          </>
         )}
       </div>
 
-      <Sheet open={showSteps} onClose={() => setShowSteps(false)} title="Instalar la app">
-        <ol className={styles.steps}>
-          {isIOS ? (
-            <>
-              <li>Tocá el botón Compartir en la barra de Safari.</li>
-              <li>Elegí &quot;Agregar a inicio&quot;.</li>
-            </>
-          ) : (
-            <>
-              <li>Abrí el menú del navegador.</li>
-              <li>Elegí &quot;Instalar aplicación&quot; o &quot;Agregar a pantalla de inicio&quot;.</li>
-            </>
-          )}
-        </ol>
+      <Sheet open={platform !== null} onClose={closeGuide} title="Instalar la app">
+        <div className={styles.sheetContent}>
+          {platform !== null && <InstallGuide platform={platform} />}
+          <Button variant="key" block onClick={closeGuide}>
+            Entendido
+          </Button>
+        </div>
       </Sheet>
     </AuthShell>
   );
