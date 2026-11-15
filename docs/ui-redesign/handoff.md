@@ -90,8 +90,8 @@ Todo esto **ya está en producción**.
 | Modal de movimiento + modal de cuenta | ✅ rehechos (hojas) |
 | TransactionList (Movimientos) | ✅ rehecha |
 | **Reportes** (`Reports.jsx`, `reports/*`, `dashboard/BudgetAlerts.jsx`) | ✅ rehecho (PR #9 mergeado) |
-| **Gastos fijos** (`SubscriptionsManager.jsx`, 255 líneas) | ✅ rehecho en `feature/ui-subscriptions` (PR pendiente de merge; ver `pr-subscriptions.md`) |
-| **Perfil** (`Profile.jsx`) | ⏳ **siguiente** (después de la parada ✋ y del merge de Gastos fijos) |
+| **Gastos fijos** (`SubscriptionsManager.jsx`, 255 líneas) | ✅ rehecho (PR #10 mergeado) |
+| **Perfil** (`Profile.jsx`) | ✅ rehecho en `feature/ui-profile` (PR pendiente de merge; ver `pr-profile.md`) |
 | **Landing / Login / Activación** (`LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`) | ⏳ pendiente |
 | Pasada final (fase 5) | ⏳ pendiente |
 
@@ -301,4 +301,5 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 4. ¿Borrar `profile/SubscriptionsCard.jsx` y `dashboard/ExpenseChart.jsx` (huérfanos)? Verificar y pedir OK.
 5. ¿Ícono propio para la PWA? Necesita un asset del usuario o autorización para proponer uno.
 6. ¿Unificar las categorías de Gastos fijos con las 6 de la app? Hoy "Entretenimiento" y "Software" quedan fuera de los topes y caen en "Otros" en Reportes.
+8. ¿CSV con `;` y coma decimal para Excel en español? Hoy usa coma y punto, como antes.
 7. ¿Borrar `SubscriptionsManager.css`, las reglas `.budget-alert` de `index.css` y la dependencia `recharts` (sin uso)?
