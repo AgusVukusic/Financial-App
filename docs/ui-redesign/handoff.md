@@ -358,7 +358,7 @@ Respuestas del usuario (2026-11-15, después de cerrar el rediseño; dejó el or
 5. Frecuentes de varios meses: se le explicó (hoy "Anotar rápido" solo mira los movimientos del mes que se está viendo: el día 1 de cada mes aparece vacío) y **dijo "Sí, 3 meses"**: los frecuentes salen
    de los últimos 3 meses. **Autorizó tocar la capa de datos para esto**, solo para leer (sin cambiar `functions/`, `api/`, reglas ni lo que devuelven los hooks existentes: lo razonable es un hook nuevo de solo lectura
    con la consulta `transactions(userId, occurredAt)` de los últimos 3 meses). Va al final de la cola (después de texto natural, termómetro y dos columnas).
-6. **Texto natural ("café 3500") para anotar un movimiento: sí, quiere volver a eso.** "A mí me gustaba mucho más el texto natural que como está armado ahora la pantalla de ingresar un movimiento": no es un
+6. ~~Texto natural~~ HECHO en `feature/ui-natural-entry` (`pr-natural-entry.md`; pendiente su veredicto sobre el diseño, y se le avisó que se construyó antes de mostrárselo). **Texto natural ("café 3500") para anotar un movimiento: sí, quiere volver a eso.** "A mí me gustaba mucho más el texto natural que como está armado ahora la pantalla de ingresar un movimiento": no es un
    agregado, reemplaza como camino principal al formulario de la hoja. Referencia del analizador: `docs/ui-redesign/concepts/common.js` (`CK.parse`).
 7. Dos columnas en escritorio: **preguntó cómo se arregla.** Propuesta del asistente: desde 1024 px, Inicio en dos columnas (saldo, anotar rápido, para pagar y cuentas a la izquierda; Movimientos a la derecha),
    Reportes y Gastos fijos igual, Perfil sigue en una columna.

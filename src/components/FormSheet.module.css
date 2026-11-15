@@ -21,6 +21,34 @@
   color: var(--ink2);
 }
 
+/* Cuentas como botones: el nombre largo se acorta, nunca ensancha la hoja */
+.accountChip {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.accountName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupError {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0 0;
+  color: var(--bad);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.groupError svg {
+  flex: none;
+  margin-top: 1px;
+}
+
 /* Tipo de movimiento: tres opciones del mismo ancho */
 .types {
   display: grid;
@@ -49,6 +77,60 @@
 
 .amount::placeholder {
   font-weight: 400;
+}
+
+/* Texto natural ("café 3500"): lo primero, grande */
+.entry {
+  min-height: var(--tap-lg);
+  padding: 0 var(--sp-4);
+  border-width: var(--bw-strong);
+  border-color: var(--ink);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.entry::placeholder {
+  font-weight: 400;
+}
+
+/* Lo que la app entendió, para corregirlo antes de guardar */
+.read {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+  font-size: var(--fs-small);
+}
+
+.read:empty {
+  display: none;
+}
+
+.read p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.echo {
+  font-family: var(--font-mono);
+  color: var(--ink2);
+}
+
+/* El monto detectado va en tinta invertida: se ve dónde lo leyó, sin usar el acento (que es solo "tocable") */
+.echo mark {
+  padding: 0 3px;
+  border-radius: var(--r-xs);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.readLine {
+  color: var(--ink);
+  font-size: var(--fs-body);
+}
+
+.readHint {
+  color: var(--ink2);
 }
 
 /* Fecha y descripción: plegados salvo al editar */
