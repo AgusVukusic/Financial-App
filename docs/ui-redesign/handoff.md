@@ -326,7 +326,7 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 
 - Dirección: Panel de taller (aprobada). Claro y oscuro con igual importancia. El saldo total va primero.
 - "Dejemos de inventar la rueda": investigar apps reales y construir sobre eso (hecho).
-- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó la lista de limpieza
+- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó también borrar `public/icons.svg` (plantilla de Vite) y la lista de limpieza
   (`SubscriptionsManager.css`, `LandingPage.css`, `SubscriptionsCard.jsx`, `ExpenseChart.jsx`, `.budget-alert`, dos capturas viejas, `recharts`). **No autorizó** ningún otro borrado.
 - **Unidad B (accesibilidad):** el aviso ("Listo: …") se oculta mientras hay una hoja o un diálogo abierto (`Toast.module.css`, con `:has`); la navegación va antes del contenido en el DOM.
   Dos hallazgos de `break-ui` los resolvió el usuario dejándolos como están (descripciones largas en un campo de un renglón; centavos redondeados a pesos enteros en las listas): no volver a plantearlos. Ver `pr-a11y.md`.

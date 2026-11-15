@@ -45,6 +45,6 @@ Pruebas: 331, sin cambios (no hay lógica nueva). Lint 0 errores (9 avisos conoc
 - **Doto** (la fuente de los puntos) se guarda recién cuando se abre Inicio por primera vez (es donde se usa). Quien instale la app y se quede sin conexión antes de ver el saldo no la tendrá en caché.
 - Los PNG se generaron desde el SVG con el propio navegador; no se probó otro tamaño que los de arriba, ni un ícono monocromo (Android 13 "ícono temático").
 - Sigue sin seguirse la guía de instalación (Landing) en un iPhone ni un Android reales.
-- Queda sin uso `public/icons.svg` (plantilla de Vite, con íconos de redes). No se borra sin tu OK.
+- Se borra `public/icons.svg` (plantilla de Vite con íconos de redes; ninguna pantalla lo usaba) con tu OK.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

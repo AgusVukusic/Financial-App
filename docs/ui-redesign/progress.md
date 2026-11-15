@@ -213,7 +213,7 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 - **Fase 5 · C · PWA** (rama `feature/ui-pwa`, 2026-11-15; cuerpo del PR en `pr-pwa.md`, opciones de ícono en `pwa/`): ícono propio (opción A del usuario: "$" de puntos naranja sobre oscuro) en
   tres PNG (192, 512 y maskable aparte), `apple-touch-icon` de 180 px, favicon nuevo (era el rayo violeta de Vite), metas de iOS (barra de estado `black`), `lang`/`start_url`/`scope` en el manifest y
   fuentes de Google en caché sin conexión (`runtimeCaching`). Aprobado por el usuario el cambio de `vite.config.js`. Verificado en Chrome con el build servido (sin errores de manifest, instalable, fuentes
-  desde la caché sin conexión). No probado: instalación real en iPhone y Android. Sin uso: `public/icons.svg` (plantilla de Vite).
+  desde la caché sin conexión). No probado: instalación real en iPhone y Android. Borrado `public/icons.svg` (plantilla de Vite sin uso) con OK del usuario.
 
 ## Pantallas terminadas / PRs
 
