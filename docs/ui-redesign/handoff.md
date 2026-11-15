@@ -91,9 +91,9 @@ Todo esto **ya está en producción**.
 | TransactionList (Movimientos) | ✅ rehecha |
 | **Reportes** (`Reports.jsx`, `reports/*`, `dashboard/BudgetAlerts.jsx`) | ✅ rehecho (PR #9 mergeado) |
 | **Gastos fijos** (`SubscriptionsManager.jsx`, 255 líneas) | ✅ rehecho (PR #10 mergeado) |
-| **Perfil** (`Profile.jsx`) | ✅ rehecho en `feature/ui-profile` (PR pendiente de merge; ver `pr-profile.md`) |
-| **Landing / Login / Activación** (`LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`) | ⏳ pendiente |
-| Pasada final (fase 5) | ⏳ pendiente |
+| **Perfil** (`Profile.jsx`) | ✅ rehecho (PR #11 mergeado) |
+| **Landing / Login / Activación** (`LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`, `auth/AuthShell`) | ✅ rehecho en `feature/ui-auth` (PR pendiente de merge; ver `pr-auth.md`). Hallazgo 7 resuelto: la causa era la sesión sin verificar que quedaba abierta, no `user.reload()` |
+| Pasada final (fase 5) | ⏳ **siguiente** (después de la parada ✋ y del merge de `feature/ui-auth`) |
 
 Archivos que parecen **huérfanos** (verificar con grep antes de proponer borrarlos; borrar solo con OK del usuario): `src/components/profile/SubscriptionsCard.jsx`
 (133 líneas, no se importa en ninguna parte) y `src/components/dashboard/ExpenseChart.jsx` (62 líneas, tampoco). También quedarán sin uso los CSS por pantalla de las

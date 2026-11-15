@@ -187,11 +187,20 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - **Pregunta abierta:** separador `;` y coma decimal para Excel en español (hoy coma y punto, como antes).
   - No verificado: CSV abierto en Excel y PDF renderizado (se leyó el contenido de los archivos generados).
 
+- **Landing / Login / Activación** (rama `feature/ui-auth`, 2026-11-15; ejecutó un agente Sonnet, revisión y verificación aparte): base común
+  `auth/AuthShell`, Landing con "Ingresar" como acción principal e instalación en `Sheet`, ingreso/registro con `Field`/`Input`, avisos dentro de la
+  pantalla, errores de Firebase en texto humano (`utils/authErrors.js`), Activación y ErrorBoundary con tokens, título de pestaña "Finanzas Personales".
+  - **Hallazgo 7 resuelto.** La causa no era `user.reload()`: con el correo sin verificar la sesión quedaba abierta y el segundo ingreso (mismo uid) no
+    disparaba `onAuthStateChanged`. Arreglo en `WelcomeScreen.jsx`: cerrar la sesión si no está verificado; "Reenviar" reingresa con el formulario.
+    Reproducido antes y verificado después en el emulador. `useUser` no se tocó.
+  - Sin uso tras este PR (borrar con OK): `src/components/LandingPage.css`.
+  - No probado en navegador: "Reenviar correo", sin conexión, instalación real de la PWA, escritorio.
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
-- #9 Reportes y #10 Gastos fijos (mergeados). Perfil: rama `feature/ui-profile` subida, PR por abrir.
-- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Landing/Login/Activación (después, **parada ✋**: Perfil + Landing).
+- #9 Reportes, #10 Gastos fijos y #11 Perfil (mergeados). Landing/Login/Activación: rama `feature/ui-auth` subida, PR por abrir. **Parada ✋** (Perfil + Landing).
+- Fase 4 completa cuando se mergee `feature/ui-auth`. Sigue la fase 5 (cierre).
 
 ## Pendiente
 
