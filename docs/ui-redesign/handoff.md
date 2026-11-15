@@ -329,7 +329,7 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 - Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó la lista de limpieza
   (`SubscriptionsManager.css`, `LandingPage.css`, `SubscriptionsCard.jsx`, `ExpenseChart.jsx`, `.budget-alert`, dos capturas viejas, `recharts`). **No autorizó** ningún otro borrado.
 - **Unidad B (accesibilidad):** el aviso ("Listo: …") se oculta mientras hay una hoja o un diálogo abierto (`Toast.module.css`, con `:has`); la navegación va antes del contenido en el DOM.
-  Dos hallazgos de `break-ui` quedaron como decisión suya (descripciones largas en un campo de un renglón; centavos redondeados): ver `pr-a11y.md`.
+  Dos hallazgos de `break-ui` los resolvió el usuario dejándolos como están (descripciones largas en un campo de un renglón; centavos redondeados a pesos enteros en las listas): no volver a plantearlos. Ver `pr-a11y.md`.
 - **Ícono de la PWA:** que lo proponga yo con el lenguaje de Panel de taller (Doto + naranja) y le muestre opciones antes de aplicarlo.
 - Mergeó él los PRs #5 a #12.
 - **Cifras protagonistas en Doto:** no le gustó la mono para el "gasto mensual estimado" de Gastos fijos; quedó en Doto con el "$" naranja, como el saldo del Inicio. Aprobado.

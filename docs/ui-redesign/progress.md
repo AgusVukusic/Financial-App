@@ -207,7 +207,7 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   deuda de los `pr-*.md` cerrada. Cada barrido llevó un control negativo.
   - Corregido: riel de escritorio al final del orden de Tab (`Layout.jsx`, ahora el `nav` va antes del `main`); scroll lateral con texto al 200 % a 320 px (saldo, `Tag`,
     `SectionHeader`, `ConfirmDialog`); el aviso tapaba el botón de abajo de una hoja (`Toast.module.css`); "Ver los 1 restantes"; PDF con montos partidos, fecha en dos renglones y emoji como basura.
-  - Decisiones del usuario pendientes: descripciones de 31 a 200 caracteres en un campo de un renglón; centavos redondeados a pesos enteros en las listas.
+  - Decisiones del usuario (2026-11-15): se dejan como están las descripciones de 31 a 200 caracteres en un campo de un renglón y los centavos redondeados a pesos enteros en las listas.
   - Pruebas 328 → 331. Lint 0 errores (9 avisos).
 
 ## Pantallas terminadas / PRs
