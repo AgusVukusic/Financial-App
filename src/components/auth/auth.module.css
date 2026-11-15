@@ -1,0 +1,62 @@
+/* Estilos compartidos por Landing, Login/Registro, Activación y ErrorBoundary. */
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.title {
+  font-size: 2rem; /* entre --fs-num y --fs-display: título de las pantallas previas al ingreso */
+  line-height: 1.1;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.heading {
+  font-size: var(--fs-title);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.muted {
+  font-size: var(--fs-body);
+  color: var(--ink2);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--ink2);
+  overflow-wrap: anywhere;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  background: var(--surf);
+  border: var(--bw) solid var(--rule);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4);
+}

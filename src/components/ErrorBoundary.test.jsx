@@ -29,6 +29,6 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
     expect(screen.getByText(/Algo salió mal/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Recargar página/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Recargar$/i })).toBeInTheDocument();
   });
 });

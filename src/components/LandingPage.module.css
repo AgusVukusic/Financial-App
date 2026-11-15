@@ -1,0 +1,17 @@
+.bar {
+  height: 12px;
+}
+
+.hint {
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  color: var(--ink2);
+  margin-bottom: var(--sp-2);
+}
+
+.sheetContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  min-width: 0;
+}
