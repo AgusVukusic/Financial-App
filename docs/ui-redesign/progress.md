@@ -163,10 +163,19 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 - CI de `main` verificado en verde (check-runs de #5 y #6).
 - Borrados con OK del usuario: `src/App.css`, `src/components/AddTransactionModal.css` y `src/components/TransactionList.css` (ya no se importaban). `GroupDetails.jsx` (fuera de la Beta, inalcanzable) usaba las clases `.modal-overlay`/`.modal-content` de ese CSS: si vuelve, necesita su propio rediseño.
 
+- **Reportes** (rama `feature/ui-reports`, 2026-11-15; ejecutó un agente Sonnet, revisión y verificación en navegador aparte): alertas en una línea,
+  "Topes del mes" (renglón-botón con trama, `Meter` y estado en texto; siempre visibles), tope en `Sheet` con `parseAmountInput` y "Quitar tope"
+  (`setBudget` acepta 0), "En qué se fue" (`DitherBar` + leyenda con %), "Últimos 6 meses" con barras propias en CSS y tabla. Sin recharts.
+  Datos puros en `utils/reportsData.js`. Capturas en `docs/ui-redesign/reports/`, cuerpo del PR en `pr-reports.md`.
+  - **Cambio de número a propósito:** el gráfico viejo sumaba las transferencias como gasto; ahora cada mes usa `calculateTotalsAndCategories`.
+  - Sin uso tras este PR (limpiar en fase 5 con OK): reglas `.budget-alert` de `src/index.css`; `recharts` solo lo importa `ExpenseChart.jsx` (huérfano).
+  - No hecho: "termómetro de ritmo" (gastado vs esperado a la fecha); queda como idea.
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
-- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Reportes → Gastos fijos → Perfil → Landing/Login/Activación.
+- Reportes: rama `feature/ui-reports` subida, PR por abrir.
+- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Gastos fijos → Perfil → Landing/Login/Activación.
 
 ## Pendiente
 
