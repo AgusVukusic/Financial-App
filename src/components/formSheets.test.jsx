@@ -4,6 +4,7 @@ import { ToastProvider } from './ui/ToastContext';
 import { DialogProvider } from '../contexts/DialogContext';
 import AddTransactionModal from './AddTransactionModal';
 import AddAccountModal from './Accounts/AddAccountModal';
+import { localDateString } from '../utils/frequentExpenses';
 
 // services/api inicializa Firebase al importarse; acá solo hace falta un generador de ids.
 vi.mock('../services/api', () => ({ newRequestId: () => crypto.randomUUID() }));
@@ -29,83 +30,196 @@ describe('AddTransactionModal (hoja)', () => {
     return { onClose, onAdd, onEdit };
   };
 
-  it('es un diálogo modal con el foco en el monto', () => {
+  const typeEntry = (value) => fireEvent.change(screen.getByLabelText('Qué y cuánto'), { target: { value } });
+  const yesterday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return localDateString(d);
+  };
+
+  it('es un diálogo modal con el foco en "Qué y cuánto"', () => {
     setup();
     const dialog = screen.getByRole('dialog', { name: 'Nuevo movimiento' });
     expect(dialog).toHaveAttribute('aria-modal', 'true');
-    expect(document.activeElement).toBe(screen.getByLabelText('Monto ($)'));
+    expect(document.activeElement).toBe(screen.getByLabelText('Qué y cuánto'));
   });
 
-  it('usa un teclado decimal y no pide cinco campos: fecha y descripción quedan plegadas', () => {
+  it('se anota escribiendo: no pide un monto aparte y la fecha queda plegada', () => {
     setup();
-    expect(screen.getByLabelText('Monto ($)')).toHaveAttribute('inputmode', 'decimal');
-    expect(screen.getByText(/Fecha y descripción/).closest('details')).not.toHaveAttribute('open');
+    expect(screen.queryByLabelText('Monto ($)')).toBeNull();
+    expect(screen.queryByLabelText('Descripción (opcional)')).toBeNull();
+    expect(screen.getByLabelText('Qué y cuánto')).toHaveAttribute('autocapitalize', 'off');
+    expect(screen.getByText(/Escribí qué y cuánto/)).toBeInTheDocument();
+    expect(screen.getByText(/^Fecha ·/).closest('details')).not.toHaveAttribute('open');
   });
 
-  it('guarda un gasto con monto, categoría elegida y un requestId', async () => {
+  it('"café 3500" guarda un gasto con monto, descripción, categoría y cuenta, y muestra lo que entendió', async () => {
     const { onAdd, onClose } = setup();
-    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '3500' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Transporte' }));
-    expect(screen.getByRole('button', { name: 'Transporte' })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
+    typeEntry('café 3500');
+    expect(screen.getByText(/Leí/).textContent).toMatch(/\$\s?3\.500 · Café · Comida/);
+    expect(screen.getByRole('button', { name: 'Comida' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto · \$\s?3\.500$/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
-    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'expense', amount: 3500, category: 'Transporte', accountId: 'a1' });
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'expense', amount: 3500, description: 'Café', category: 'Comida', accountId: 'a1' });
     expect(onAdd.mock.calls[0][0].requestId).toBeTruthy();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
-  it.each([
-    ['1.500', 1500],
-    ['3,5', 3.5],
-    ['2.500,50', 2500.5],
-    ['$ 12.000', 12000],
-  ])('el monto %s se guarda como %s (miles con punto, centavos con coma)', async (typed, expected) => {
+  it('con Enter en el campo también se guarda', async () => {
     const { onAdd } = setup();
-    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: typed } });
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
+    typeEntry('nafta 8000');
+    fireEvent.submit(screen.getByLabelText('Qué y cuánto').closest('form'));
+    await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ amount: 8000, category: 'Transporte' });
+  });
+
+  it('una categoría elegida a mano manda sobre la del texto, aunque se siga escribiendo', async () => {
+    const { onAdd } = setup();
+    typeEntry('café 3500');
+    fireEvent.click(screen.getByRole('button', { name: 'Hogar' }));
+    typeEntry('café con amigos 3500');
+    expect(screen.getByRole('button', { name: 'Hogar' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ category: 'Hogar', description: 'Café con amigos' });
+  });
+
+  it('sin pistas la categoría es "Otros"', async () => {
+    const { onAdd } = setup();
+    typeEntry('cosas 1000');
+    expect(screen.getByRole('button', { name: 'Otros' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0].category).toBe('Otros');
+  });
+
+  it.each([
+    ['café 1.500', 1500],
+    ['café 3,5', 3.5],
+    ['café 2.500,50', 2500.5],
+    ['café $ 12.000', 12000],
+    ['café 3k', 3000],
+    ['café 30 mil', 30000],
+  ])('"%s" se guarda como %s (miles con punto, centavos con coma, k y mil)', async (typed, expected) => {
+    const { onAdd } = setup();
+    typeEntry(typed);
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
     expect(onAdd.mock.calls[0][0].amount).toBe(expected);
   });
 
-  it('un monto que no es un número se rechaza con el mismo mensaje', async () => {
+  it('explica cómo leyó el monto cuando puede haber dudas ("1.500" son mil quinientos)', () => {
+    setup();
+    typeEntry('café 1.500');
+    expect(screen.getByText(/el punto separa miles/)).toBeInTheDocument();
+    typeEntry('nafta 3,5k');
+    expect(screen.getByText(/k o mil multiplica por 1\.000/)).toBeInTheDocument();
+  });
+
+  it('mientras se escribe la descripción solo orienta (sin rojo ni alerta); al guardar sin monto, avisa con ícono y texto', async () => {
     const { onAdd } = setup();
-    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '12abc' } });
+    typeEntry('café');
+    expect(screen.getByText(/Falta el monto/)).toBeInTheDocument();
+    expect(screen.queryByText(/No encuentro un monto/)).toBeNull();
+    expect(screen.getByLabelText('Qué y cuánto')).not.toHaveAttribute('aria-invalid', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
-    expect(await screen.findByText('Ingresá un monto mayor a cero.')).toBeInTheDocument();
+    expect(await screen.findByText(/No encuentro un monto/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Qué y cuánto')).toHaveAttribute('aria-invalid', 'true');
     expect(onAdd).not.toHaveBeenCalled();
   });
 
-  it('no guarda un monto vacío y lo explica junto al campo', async () => {
+  it('la confirmación muestra los centavos tal como se guardan ($ 3,5, no $ 4)', async () => {
     const { onAdd } = setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
-    expect(await screen.findByText('Ingresá un monto mayor a cero.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Monto ($)')).toHaveAttribute('aria-invalid', 'true');
-    expect(onAdd).not.toHaveBeenCalled();
-  });
-
-  it('un ingreso lleva la categoría Ingreso y no muestra categorías de gasto', async () => {
-    const { onAdd } = setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Ingreso' }));
-    expect(screen.queryByRole('button', { name: 'Comida' })).toBeNull();
-    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '1000' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar ingreso' }));
+    typeEntry('café 3,5');
+    expect(screen.getByText(/Leí/).textContent).toMatch(/\$\s?3,5\b/);
+    expect(screen.getByRole('button', { name: /^Guardar gasto · \$\s?3,5$/ })).toBeInTheDocument();
+    typeEntry('farmacia 1.250,75');
+    expect(screen.getByText(/Leí/).textContent).toMatch(/\$\s?1\.250,75/);
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto · \$\s?1\.250,75$/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalled());
-    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'income', category: 'Ingreso' });
+    expect(onAdd.mock.calls[0][0].amount).toBe(1250.75);
+  });
+
+  it('con el campo vacío no guarda y lo explica junto al campo', async () => {
+    const { onAdd } = setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
+    expect(await screen.findByText(/No encuentro un monto/)).toBeInTheDocument();
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  it('una palabra como "sueldo" lo pasa a ingreso, sin categorías de gasto; se puede volver a gasto', async () => {
+    const { onAdd } = setup();
+    typeEntry('sueldo 1.850.000');
+    expect(screen.getByRole('button', { name: 'Ingreso' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: 'Comida' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar ingreso/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'income', amount: 1850000, category: 'Ingreso', description: 'Sueldo' });
+  });
+
+  it('el tipo elegido a mano manda sobre el del texto', async () => {
+    const { onAdd } = setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Gasto' }));
+    typeEntry('sueldo 1000');
+    expect(screen.getByRole('button', { name: 'Gasto' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0].type).toBe('expense');
+  });
+
+  it('reconoce la cuenta y la fecha del texto y las saca de la descripción', async () => {
+    const { onAdd } = setup();
+    typeEntry('uber 4500 efectivo ayer');
+    expect(screen.getByLabelText('Cuenta')).toHaveValue('a2');
+    expect(screen.getByText(/Leí/).textContent).toMatch(/Uber · Transporte · Efectivo · /);
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ amount: 4500, description: 'Uber', category: 'Transporte', accountId: 'a2', date: yesterday() });
+  });
+
+  it('la cuenta elegida a mano manda sobre la del texto', async () => {
+    const { onAdd } = setup();
+    fireEvent.change(screen.getByLabelText('Cuenta'), { target: { value: 'a1' } });
+    typeEntry('uber 4500 efectivo');
+    expect(screen.getByLabelText('Cuenta')).toHaveValue('a1');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0].accountId).toBe('a1');
+  });
+
+  it('una descripción de más de 30 letras se recorta y lo avisa', async () => {
+    const { onAdd } = setup();
+    typeEntry('compra grande del mes en el mayorista de zona 45000');
+    expect(screen.getByText(/se recorta a 30 letras/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0].description.length).toBeLessThanOrEqual(30);
   });
 
   it('una transferencia pide origen y destino distintos', async () => {
     const { onAdd } = setup();
     fireEvent.click(screen.getByRole('button', { name: 'Transferencia' }));
-    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '500' } });
+    typeEntry('retiro 500');
     fireEvent.change(screen.getByLabelText('Hacia'), { target: { value: 'a1' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar transferencia' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar transferencia/ }));
     expect(await screen.findByText(/tienen que ser distintas/)).toBeInTheDocument();
     expect(onAdd).not.toHaveBeenCalled();
 
     fireEvent.change(screen.getByLabelText('Hacia'), { target: { value: 'a2' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar transferencia' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar transferencia/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalled());
-    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'transfer', accountId: 'a1', transferToAccountId: 'a2', category: 'Transferencia' });
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'transfer', amount: 500, accountId: 'a1', transferToAccountId: 'a2', category: 'Transferencia', description: 'Retiro' });
+  });
+
+  it('en una transferencia el texto no elige la cuenta (¿origen o destino?) y la palabra queda en la descripción', async () => {
+    const { onAdd } = setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Transferencia' }));
+    typeEntry('retiro 60000 efectivo');
+    expect(screen.getByLabelText('Desde')).toHaveValue('a1');
+    expect(screen.getByLabelText('Hacia')).toHaveValue('a2');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar transferencia/ }));
+    await waitFor(() => expect(onAdd).toHaveBeenCalled());
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'transfer', accountId: 'a1', transferToAccountId: 'a2', description: 'Retiro efectivo' });
   });
 
   it('la transferencia solo aparece si hay más de una cuenta', () => {
@@ -157,8 +271,8 @@ describe('AddTransactionModal (hoja)', () => {
 
   it('si el servidor falla, avisa y no cierra', async () => {
     const { onClose } = setup({ onAdd: vi.fn().mockRejectedValue(new Error('Sin conexión')) });
-    fireEvent.change(screen.getByLabelText('Monto ($)'), { target: { value: '10' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar gasto' }));
+    typeEntry('café 10');
+    fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Error al guardar el movimiento: Sin conexión');
     expect(onClose).not.toHaveBeenCalled();
   });
