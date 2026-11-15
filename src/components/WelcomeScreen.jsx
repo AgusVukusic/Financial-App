@@ -1,204 +1,249 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+  signOut,
+} from 'firebase/auth';
+import { AlertTriangle, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Input from './ui/Input';
 import { useToast } from './ui/ToastContext';
+import { authErrorMessage } from '../utils/authErrors';
+import AuthShell from './auth/AuthShell';
+import shared from './auth/auth.module.css';
+import styles from './WelcomeScreen.module.css';
 
 const WelcomeScreen = ({ onBack }) => {
   const { showToast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState(''); // Usado como Display Name en registro
+  const [username, setUsername] = useState(''); // Display name en el registro
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [needsVerification, setNeedsVerification] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState('');
+  // null | { kind: 'registered', email } | { kind: 'unverified' }
+  const [notice, setNotice] = useState(null);
+
+  const usernameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const validate = ({ withUsername }) => {
+    const next = {};
+    if (withUsername && !username.trim()) next.username = 'Ponete un nombre.';
+    if (!email.trim()) next.email = 'Ingresá tu correo.';
+    else if (!email.includes('@')) next.email = 'Revisá el correo: le falta la @.';
+    if (!password) next.password = 'Ingresá tu contraseña.';
+    else if (!isLogin && password.length < 6) next.password = 'Usá al menos 6 caracteres.';
+    setErrors(next);
+    if (next.username) usernameRef.current?.focus();
+    else if (next.email) emailRef.current?.focus();
+    else if (next.password) passwordRef.current?.focus();
+    return Object.keys(next).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNeedsVerification(false);
+    if (loading) return;
+    setFormError('');
+    setNotice(null);
+    if (!validate({ withUsername: !isLogin })) return;
+
     setLoading(true);
-
     try {
+      const cleanEmail = email.trim();
       if (isLogin) {
-        // Sign in directly with email
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-        // Verify if email is verified
-        if (!userCredential.user.emailVerified) {
-          setNeedsVerification(true);
-          showToast('Tu correo electrónico no está verificado.', 'error', 0); // Duración 0 = No se cierra solo
-          setLoading(false);
-          // No cerramos sesión aquí para poder reenviar el correo
-          return;
+        const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+        if (!cred.user.emailVerified) {
+          // Se cierra siempre: con la sesión abierta, un segundo ingreso no dispara onAuthStateChanged.
+          await signOut(auth);
+          setNotice({ kind: 'unverified' });
         }
-        
+        // Verificado: la sesión queda abierta y App muestra el resto.
       } else {
-        // Register flow
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, { displayName: username });
-
-        // Send verification email
-        await sendEmailVerification(userCredential.user);
-        await signOut(auth); // Sign them out until they verify
-
-        showToast('¡Registro exitoso! Revisa tu bandeja de entrada para verificar tu cuenta.', 'success', 5000);
-        setIsLogin(true); // Switch to login view
+        const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+        await updateProfile(cred.user, { displayName: username.trim() });
+        await sendEmailVerification(cred.user);
+        await signOut(auth); // Hasta que verifique el correo no entra
+        setIsLogin(true);
         setPassword('');
+        setShowPassword(false);
+        setNotice({ kind: 'registered', email: cleanEmail });
       }
     } catch (err) {
       console.error(err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        showToast('Correo o contraseña incorrectos.', 'error');
-      } else if (err.code === 'auth/email-already-in-use') {
-        showToast('El correo electrónico ya está registrado.', 'error');
-      } else if (err.code === 'auth/weak-password') {
-        showToast('La contraseña debe tener al menos 6 caracteres.', 'error');
-      } else {
-        showToast('Ocurrió un error: ' + err.message, 'error');
-      }
+      setFormError(authErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResendVerification = async () => {
-    if (auth.currentUser && !auth.currentUser.emailVerified) {
-      try {
-        setLoading(true);
-        await sendEmailVerification(auth.currentUser);
-        showToast('Se ha enviado un nuevo enlace de verificación a tu correo.', 'success');
-        setNeedsVerification(false);
-        await signOut(auth);
-      } catch (err) {
-        if (err.code === 'auth/too-many-requests') {
-          showToast('Has pedido demasiados correos. Espera un momento.', 'error');
-        } else {
-          showToast('Error al enviar el correo: ' + err.message, 'error');
-        }
-      } finally {
-        setLoading(false);
+  const handleResend = async () => {
+    if (loading) return;
+    setFormError('');
+    if (!validate({ withUsername: false })) return;
+
+    setLoading(true);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+      if (cred.user.emailVerified) {
+        // Ya verificó: no se manda nada y la sesión queda abierta, la persona entra sola.
+        setNotice(null);
+        return;
       }
+      try {
+        await sendEmailVerification(cred.user);
+      } finally {
+        await signOut(auth);
+      }
+      showToast('Te reenviamos el correo de verificación.', 'success');
+    } catch (err) {
+      console.error(err);
+      setFormError(authErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
   };
 
+  const switchMode = () => {
+    setIsLogin((v) => !v);
+    setErrors({});
+    setFormError('');
+    setNotice(null);
+    setShowPassword(false);
+  };
+
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'var(--bg-base)', display: 'flex',
-      alignItems: 'center', justifyContent: 'center',
-      zIndex: 9999, padding: 'var(--spacing-xl)'
-    }}>
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="glass-panel" 
-        style={{
-          padding: 'var(--spacing-xl)', maxWidth: '400px', width: '100%',
-          textAlign: 'center', display: 'flex', flexDirection: 'column',
-          gap: 'var(--spacing-lg)', position: 'relative'
-        }}
-      >
-        {onBack && (
-          <button 
-            onClick={onBack}
-            style={{ position: 'absolute', top: '24px', left: '24px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', padding: 0 }}
-          >
-            <ArrowLeft size={18} /> Volver
-          </button>
-        )}
-
-        <div style={{ fontSize: '3rem', marginTop: onBack ? '20px' : '0' }}>👋</div>
-        
+    <AuthShell>
+      {onBack && (
         <div>
-          <h1 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>
-            {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
-          </h1>
-          <p className="text-secondary" style={{ fontSize: '0.9rem' }}>
-            Controla tus gastos de forma sencilla y en la nube.
-          </p>
+          <Button type="button" variant="key" onClick={onBack}>
+            <ArrowLeft size={18} aria-hidden="true" /> Volver
+          </Button>
         </div>
+      )}
 
-        {needsVerification && (
-          <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', flexDirection: 'column' }}>
-            <button 
-              type="button"
-              onClick={handleResendVerification}
-              style={{ background: 'var(--danger)', color: 'var(--bg)', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-              Reenviar correo de verificación
-            </button>
+      <h1 className={shared.title}>{isLogin ? 'Ingresá' : 'Creá tu cuenta'}</h1>
+
+      {notice && (
+        <div
+          role="status"
+          className={`${styles.notice} ${notice.kind === 'unverified' ? styles.warn : ''}`.trim()}
+        >
+          {notice.kind === 'unverified' ? (
+            <AlertTriangle size={18} aria-hidden="true" className={styles.noticeIcon} />
+          ) : (
+            <Mail size={18} aria-hidden="true" className={styles.noticeIcon} />
+          )}
+          <div className={styles.noticeBody}>
+            <p>
+              {notice.kind === 'unverified'
+                ? 'Tu correo todavía no está verificado. Abrí el enlace que te mandamos (mirá también el spam) y volvé a ingresar.'
+                : `Te enviamos un correo a ${notice.email}. Abrí el enlace para verificar tu cuenta y después ingresá.`}
+            </p>
+            <Button type="button" variant="outline" onClick={handleResend} disabled={loading}>
+              Reenviar correo
+            </Button>
           </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} noValidate className={shared.stack}>
+        {!isLogin && (
+          <Field
+            label="Tu nombre"
+            error={errors.username}
+          >
+            {(p) => (
+              <Input
+                {...p}
+                ref={usernameRef}
+                type="text"
+                fullWidth
+                autoComplete="nickname"
+                maxLength={20}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            )}
+          </Field>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-          <AnimatePresence>
-            {!isLogin && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', overflow: 'hidden' }}
+        <Field
+          label="Correo"
+          error={errors.email}
+          hint={isLogin ? undefined : 'La Beta es por invitación: usá el correo con el que te invitaron.'}
+        >
+          {(p) => (
+            <Input
+              {...p}
+              ref={emailRef}
+              type="email"
+              fullWidth
+              autoComplete="email"
+              inputMode="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
+        </Field>
+
+        <Field
+          label="Contraseña"
+          error={errors.password}
+          hint={isLogin ? undefined : 'Mínimo 6 caracteres'}
+        >
+          {(p) => (
+            <div className={styles.passwordRow}>
+              <Input
+                {...p}
+                ref={passwordRef}
+                type={showPassword ? 'text' : 'password'}
+                fullWidth
+                className={styles.passwordInput}
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                autoCapitalize="none"
+                spellCheck={false}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className={styles.toggle}
+                aria-pressed={showPassword}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                onClick={() => setShowPassword((v) => !v)}
               >
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Usuario (Tu alias)</label>
-                <input 
-                  type="text" value={username} onChange={(e) => setUsername(e.target.value)} 
-                  placeholder="juan123" required={!isLogin} maxLength={20}
-                  style={{
-                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                    background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+              </button>
+            </div>
+          )}
+        </Field>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', marginTop: !isLogin ? '8px' : '0' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Correo Electrónico</label>
-            <input 
-              type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
-              placeholder="juan@ejemplo.com" required
-              style={{
-                padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
-              }}
-            />
-          </div>
+        {formError && (
+          <p role="alert" className={styles.formError}>
+            <AlertTriangle size={18} aria-hidden="true" className={styles.noticeIcon} />
+            <span>{formError}</span>
+          </p>
+        )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Contraseña</label>
-            <input 
-              type="password" value={password} onChange={(e) => setPassword(e.target.value)} 
-              placeholder="••••••••" required minLength={6}
-              style={{
-                padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none'
-              }}
-            />
-          </div>
-          
-          <button type="submit" disabled={loading} style={{
-            background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover))',
-            color: 'var(--onacc)', border: 'none', padding: '12px', borderRadius: '8px',
-            fontSize: '1rem', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1, transition: 'transform 0.2s ease', marginTop: '8px'
-          }}>
-            {loading ? 'Cargando...' : (isLogin ? 'Ingresar' : 'Registrarse')}
-          </button>
-        </form>
+        <Button type="submit" variant="primary" size="lg" block disabled={loading}>
+          {isLogin ? (loading ? 'Ingresando…' : 'Ingresar') : loading ? 'Creando…' : 'Crear cuenta'}
+        </Button>
+      </form>
 
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-          {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-          <button 
-            onClick={() => { setIsLogin(!isLogin); setNeedsVerification(false); }} 
-            style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
-          </button>
-        </p>
-      </motion.div>
-    </div>
+      <button type="button" className={styles.switch} onClick={switchMode}>
+        {isLogin ? '¿No tenés cuenta? Creá una' : '¿Ya tenés cuenta? Ingresá'}
+      </button>
+    </AuthShell>
   );
 };
 

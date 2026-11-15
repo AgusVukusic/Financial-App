@@ -1,0 +1,88 @@
+.notice {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  padding: var(--sp-3);
+  background: var(--surf);
+  border: var(--bw) solid var(--rule);
+  border-radius: var(--r-lg);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+}
+
+.warn {
+  border-color: var(--warn);
+}
+
+.warn .noticeIcon {
+  color: var(--warn);
+}
+
+.noticeIcon {
+  flex: none;
+  margin-top: 2px;
+}
+
+.noticeBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.formError {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-start;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--bad);
+}
+
+.passwordRow {
+  position: relative;
+}
+
+.passwordRow .passwordInput {
+  padding-right: var(--tap);
+}
+
+.toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--tap);
+  height: 100%;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  color: var(--ink2);
+  cursor: pointer;
+}
+
+.toggle:focus-visible,
+.switch:focus-visible {
+  outline: var(--bw-strong) solid var(--acc);
+  outline-offset: 2px;
+}
+
+.switch {
+  min-height: var(--tap);
+  padding: 0 var(--sp-2);
+  align-self: center;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
