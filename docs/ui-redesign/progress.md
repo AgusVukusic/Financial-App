@@ -180,11 +180,18 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - **Pregunta abierta:** las categorías de Gastos fijos no coinciden con las 6 de la app (sus pagos quedan fuera de los topes y caen en "Otros" en Reportes).
   - Heredado, no tocado: los gastos anuales calculan el vencimiento como mensuales (`subscriptionUtils`).
 
+- **Perfil** (rama `feature/ui-profile`, 2026-11-15; ejecutó un agente Sonnet, revisión y verificación aparte): secciones Cuenta (nombre + email),
+  Exportar movimientos (PDF/CSV rotulados, cantidad, toast de resultado) y Sesión (confirmación no destructiva). Estilos en `Profile.module.css`.
+  - **Exportaciones corregidas en `utils/formatters.js`** (no es capa de datos): transferencias rotuladas (antes "Gasto"), CSV por `Blob` con comillas
+    escapadas, BOM y guarda de fórmulas (antes un `#` en una descripción cortaba el archivo), PDF con encabezado neutro. Helpers `typeLabel` y `buildCSV`.
+  - **Pregunta abierta:** separador `;` y coma decimal para Excel en español (hoy coma y punto, como antes).
+  - No verificado: CSV abierto en Excel y PDF renderizado (se leyó el contenido de los archivos generados).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
-- #9 Reportes (mergeado, CI verde). Gastos fijos: rama `feature/ui-subscriptions` subida, PR por abrir. **Parada ✋ después de este PR** (dos pantallas).
-- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Perfil → Landing/Login/Activación.
+- #9 Reportes y #10 Gastos fijos (mergeados). Perfil: rama `feature/ui-profile` subida, PR por abrir.
+- Pendientes de fase 4, cada una en su rama `feature/ui-*` desde `main`: Landing/Login/Activación (después, **parada ✋**: Perfil + Landing).
 
 ## Pendiente
 

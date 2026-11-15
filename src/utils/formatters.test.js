@@ -1,5 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDate } from './formatters';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { formatCurrency, formatDate, typeLabel, buildCSV, exportToCSV, exportToPDF } from './formatters';
+
+// jsPDF no corre en jsdom: se reemplaza por un doble que registra las llamadas.
+const pdf = vi.hoisted(() => ({ save: vi.fn(), text: vi.fn(), setFontSize: vi.fn(), table: vi.fn() }));
+vi.mock('jspdf', () => ({
+  default: class {
+    save = pdf.save;
+    text = pdf.text;
+    setFontSize = pdf.setFontSize;
+  },
+}));
+vi.mock('jspdf-autotable', () => ({ default: pdf.table }));
+
+const T = (over) => ({ date: '2026-07-08T12:00:00Z', type: 'expense', category: 'Comida', amount: 1500, description: 'Super', ...over });
+const lines = (csv) => csv.replace('﻿', '').split('\n');
 
 describe('Formatters Utils', () => {
   describe('formatCurrency', () => {
@@ -27,6 +41,84 @@ describe('Formatters Utils', () => {
 
     it('debe manejar fechas inválidas', () => {
       expect(formatDate(null)).toBe('');
+    });
+  });
+
+  describe('typeLabel', () => {
+    it('rotula ingreso, gasto y transferencia', () => {
+      expect(typeLabel({ type: 'income' })).toBe('Ingreso');
+      expect(typeLabel({ type: 'expense' })).toBe('Gasto');
+      expect(typeLabel({ type: 'transfer' })).toBe('Transferencia');
+    });
+  });
+
+  describe('buildCSV', () => {
+    it('empieza con BOM y tiene las 5 columnas', () => {
+      const csv = buildCSV([T()]);
+      expect(csv.charCodeAt(0)).toBe(0xfeff);
+      expect(lines(csv)[0]).toBe('Fecha,Tipo,Categoria,Monto,Descripcion');
+      expect(lines(csv)[1]).toMatch(/^".+","Gasto","Comida",1500,"Super"$/);
+    });
+
+    it('rotula las transferencias', () => {
+      expect(lines(buildCSV([T({ type: 'transfer' })]))[1]).toContain('"Transferencia"');
+    });
+
+    it('no se trunca con # en la descripción', () => {
+      expect(buildCSV([T({ description: 'Cuota #3' })])).toContain('"Cuota #3"');
+    });
+
+    it('escapa comillas, comas y saltos de línea dentro de comillas', () => {
+      const csv = buildCSV([T({ description: 'Dijo "hola", chau\nfin' })]);
+      expect(csv).toContain('"Dijo ""hola"", chau\nfin"');
+    });
+
+    it('neutraliza textos que empiezan con = + - @', () => {
+      for (const bad of ['=SUMA(A1)', '+1', '-2', '@x']) {
+        expect(buildCSV([T({ description: bad })])).toContain(`"'${bad}"`);
+      }
+      expect(buildCSV([T({ category: '=1+1' })])).toContain(`"'=1+1"`);
+    });
+
+    it('no antepone apóstrofo a texto común', () => {
+      expect(buildCSV([T({ description: 'Café' })])).toContain('"Café"');
+    });
+
+    it('lista vacía: solo el encabezado', () => {
+      expect(lines(buildCSV([]))).toEqual(['Fecha,Tipo,Categoria,Monto,Descripcion']);
+    });
+
+    it('fecha inválida o ausente da celda vacía', () => {
+      expect(lines(buildCSV([T({ date: 'nope' })]))[1]).toMatch(/^"","Gasto"/);
+      expect(lines(buildCSV([T({ date: undefined })]))[1]).toMatch(/^"","Gasto"/);
+      expect(buildCSV([T({ date: 'nope' })])).not.toContain('Invalid');
+    });
+  });
+
+  describe('exportToCSV', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('descarga un Blob con nombre con fecha y libera la URL', () => {
+      URL.createObjectURL = vi.fn(() => 'blob:x');
+      URL.revokeObjectURL = vi.fn();
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+      const name = exportToCSV([T()]);
+      expect(name).toMatch(/^mis_finanzas_\d{4}-\d{2}-\d{2}\.csv$/);
+      expect(URL.createObjectURL.mock.calls[0][0].type).toBe('text/csv;charset=utf-8');
+      expect(click).toHaveBeenCalledTimes(1);
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x');
+    });
+  });
+
+  describe('exportToPDF', () => {
+    it('usa el título nuevo, el rótulo de tipo, encabezado neutro y devuelve el nombre', () => {
+      const name = exportToPDF([T({ type: 'transfer' })]);
+      expect(name).toMatch(/^mis_finanzas_\d{4}-\d{2}-\d{2}\.pdf$/);
+      expect(pdf.save).toHaveBeenCalledWith(name);
+      expect(pdf.text).toHaveBeenCalledWith('Movimientos · Finanzas Personales', 14, 22);
+      const opts = pdf.table.mock.calls[0][1];
+      expect(opts.body[0][1]).toBe('Transferencia');
+      expect(opts.headStyles.fillColor).toEqual([19, 19, 17]);
     });
   });
 });
