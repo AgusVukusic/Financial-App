@@ -21,6 +21,34 @@
   color: var(--ink2);
 }
 
+/* Cuentas como botones: el nombre largo se acorta, nunca ensancha la hoja */
+.accountChip {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.accountName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupError {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0 0;
+  color: var(--bad);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.groupError svg {
+  flex: none;
+  margin-top: 1px;
+}
+
 /* Tipo de movimiento: tres opciones del mismo ancho */
 .types {
   display: grid;

@@ -31,6 +31,10 @@ describe('AddTransactionModal (hoja)', () => {
   };
 
   const typeEntry = (value) => fireEvent.change(screen.getByLabelText('Qué y cuánto'), { target: { value } });
+  // Las cuentas son botones dentro de un grupo con nombre (Cuenta, Desde, Hacia).
+  const accountButton = (group, name) => within(screen.getByRole('group', { name: group })).getByRole('button', { name });
+  const pickAccount = (group, name) => fireEvent.click(accountButton(group, name));
+  const expectPicked = (group, name) => expect(accountButton(group, name)).toHaveAttribute('aria-pressed', 'true');
   const yesterday = () => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
@@ -170,7 +174,7 @@ describe('AddTransactionModal (hoja)', () => {
   it('reconoce la cuenta y la fecha del texto y las saca de la descripción', async () => {
     const { onAdd } = setup();
     typeEntry('uber 4500 efectivo ayer');
-    expect(screen.getByLabelText('Cuenta')).toHaveValue('a2');
+    expectPicked('Cuenta', 'Efectivo');
     expect(screen.getByText(/Leí/).textContent).toMatch(/Uber · Transporte · Efectivo · /);
     fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalled());
@@ -179,12 +183,28 @@ describe('AddTransactionModal (hoja)', () => {
 
   it('la cuenta elegida a mano manda sobre la del texto', async () => {
     const { onAdd } = setup();
-    fireEvent.change(screen.getByLabelText('Cuenta'), { target: { value: 'a1' } });
+    pickAccount('Cuenta', 'Mercado Pago');
     typeEntry('uber 4500 efectivo');
-    expect(screen.getByLabelText('Cuenta')).toHaveValue('a1');
+    expectPicked('Cuenta', 'Mercado Pago');
     fireEvent.click(screen.getByRole('button', { name: /^Guardar gasto/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalled());
     expect(onAdd.mock.calls[0][0].accountId).toBe('a1');
+  });
+
+  it('las cuentas son botones (no una lista desplegable) y uno solo queda elegido', () => {
+    setup();
+    const group = screen.getByRole('group', { name: 'Cuenta' });
+    const buttons = within(group).getAllByRole('button');
+    expect(buttons.map((b) => b.textContent)).toEqual(['Mercado Pago', 'Efectivo']);
+    expect(buttons.filter((b) => b.getAttribute('aria-pressed') === 'true')).toHaveLength(1);
+    expectPicked('Cuenta', 'Mercado Pago');
+    expect(screen.queryByRole('combobox')).toBeNull(); // ya no hay una lista desplegable
+  });
+
+  it('con una cuenta de nombre larguísimo el botón la muestra entera para quien la lee, aunque se acorte a la vista', () => {
+    const largo = 'Caja de Ahorro Banco Provincia de Buenos Aires S.A.';
+    setup({ accounts: [{ id: 'l1', name: largo }, ...ACCOUNTS] });
+    expect(accountButton('Cuenta', largo)).toHaveAttribute('title', largo);
   });
 
   it('una descripción de más de 30 letras se recorta y lo avisa', async () => {
@@ -200,12 +220,13 @@ describe('AddTransactionModal (hoja)', () => {
     const { onAdd } = setup();
     fireEvent.click(screen.getByRole('button', { name: 'Transferencia' }));
     typeEntry('retiro 500');
-    fireEvent.change(screen.getByLabelText('Hacia'), { target: { value: 'a1' } });
+    pickAccount('Hacia', 'Mercado Pago');
     fireEvent.click(screen.getByRole('button', { name: /^Guardar transferencia/ }));
     expect(await screen.findByText(/tienen que ser distintas/)).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('tienen que ser distintas');
     expect(onAdd).not.toHaveBeenCalled();
 
-    fireEvent.change(screen.getByLabelText('Hacia'), { target: { value: 'a2' } });
+    pickAccount('Hacia', 'Efectivo');
     fireEvent.click(screen.getByRole('button', { name: /^Guardar transferencia/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalled());
     expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'transfer', amount: 500, accountId: 'a1', transferToAccountId: 'a2', category: 'Transferencia', description: 'Retiro' });
@@ -215,8 +236,8 @@ describe('AddTransactionModal (hoja)', () => {
     const { onAdd } = setup();
     fireEvent.click(screen.getByRole('button', { name: 'Transferencia' }));
     typeEntry('retiro 60000 efectivo');
-    expect(screen.getByLabelText('Desde')).toHaveValue('a1');
-    expect(screen.getByLabelText('Hacia')).toHaveValue('a2');
+    expectPicked('Desde', 'Mercado Pago');
+    expectPicked('Hacia', 'Efectivo');
     fireEvent.click(screen.getByRole('button', { name: /^Guardar transferencia/ }));
     await waitFor(() => expect(onAdd).toHaveBeenCalled());
     expect(onAdd.mock.calls[0][0]).toMatchObject({ type: 'transfer', accountId: 'a1', transferToAccountId: 'a2', description: 'Retiro efectivo' });

@@ -1,10 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
-import { ArrowRightLeft } from 'lucide-react';
+import { AlertCircle, ArrowRightLeft } from 'lucide-react';
 import Button from './ui/Button';
 import Chip from './ui/Chip';
 import Field from './ui/Field';
 import Input from './ui/Input';
-import Select from './ui/Select';
 import Sheet from './ui/Sheet';
 import { useToast } from './ui/ToastContext';
 import { useDialog } from '../contexts/DialogContext';
@@ -45,6 +44,28 @@ const amountHints = (token) => {
   if (token.thousands) hints.push('k o mil multiplica por 1.000');
   return hints;
 };
+
+/** Cuentas como botones: un toque elige. El nombre largo se acorta con "…" (el nombre completo es el del botón). */
+const AccountChips = ({ id, label, accounts, value, onChange, error }) => (
+  <div>
+    <p className={styles.groupLabel} id={id}>
+      {label}
+    </p>
+    <div role="group" aria-labelledby={id} className={styles.group}>
+      {accounts.map((acc) => (
+        <Chip key={acc.id} pressed={value === acc.id} onClick={() => onChange(acc.id)} className={styles.accountChip} title={acc.name}>
+          <span className={styles.accountName}>{acc.name}</span>
+        </Chip>
+      ))}
+    </div>
+    {error && (
+      <p className={styles.groupError} role="alert">
+        <AlertCircle size={16} aria-hidden="true" />
+        <span>{error}</span>
+      </p>
+    )}
+  </div>
+);
 
 /**
  * Formulario de movimiento. Se monta solo mientras la hoja está abierta, así que el estado inicial sale de las props
@@ -159,12 +180,6 @@ const TransactionForm = ({ onClose, onAdd, onEdit, onDelete, initialData, accoun
   if (accounts.length === 0) {
     return <p className={styles.note}>Creá al menos una cuenta antes de anotar movimientos.</p>;
   }
-
-  const accountOptions = accounts.map((acc) => (
-    <option key={acc.id} value={acc.id}>
-      {acc.name}
-    </option>
-  ));
 
   const hints = natural && parsed.ok ? amountHints(parsed.amountToken) : [];
   const token = natural && parsed.ok ? parsed.amountToken : null;
@@ -286,45 +301,29 @@ const TransactionForm = ({ onClose, onAdd, onEdit, onDelete, initialData, accoun
       )}
 
       {type !== 'transfer' ? (
-        <Field label="Cuenta">
-          {(p) => (
-            <Select
-              {...p}
-              fullWidth
-              value={accountId}
-              onChange={(e) => {
-                setAccountChoice(e.target.value);
-                touch('account');
-              }}
-            >
-              {accountOptions}
-            </Select>
-          )}
-        </Field>
+        <AccountChips
+          id="cuenta-label"
+          label="Cuenta"
+          accounts={accounts}
+          value={accountId}
+          onChange={(id) => {
+            setAccountChoice(id);
+            touch('account');
+          }}
+        />
       ) : (
         <>
-          <Field label="Desde">
-            {(p) => (
-              <Select
-                {...p}
-                fullWidth
-                value={accountId}
-                onChange={(e) => {
-                  setAccountChoice(e.target.value);
-                  touch('account');
-                }}
-              >
-                {accountOptions}
-              </Select>
-            )}
-          </Field>
-          <Field label="Hacia" error={errors.accounts}>
-            {(p) => (
-              <Select {...p} fullWidth value={transferToAccountId} onChange={(e) => setTransferToAccountId(e.target.value)}>
-                {accountOptions}
-              </Select>
-            )}
-          </Field>
+          <AccountChips
+            id="desde-label"
+            label="Desde"
+            accounts={accounts}
+            value={accountId}
+            onChange={(id) => {
+              setAccountChoice(id);
+              touch('account');
+            }}
+          />
+          <AccountChips id="hacia-label" label="Hacia" accounts={accounts} value={transferToAccountId} onChange={setTransferToAccountId} error={errors.accounts} />
         </>
       )}
 
