@@ -75,6 +75,16 @@ export const exportToCSV = (transactions) => {
   return fileName;
 };
 
+/**
+ * jsPDF escribe con Helvetica (Latin-1): un emoji sale como basura ("Ø>Ý") y se sale de la celda. Se quitan solo en el PDF;
+ * el CSV es UTF-8 y los conserva.
+ */
+export const pdfText = (value) =>
+  String(value ?? '')
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Modifier}\u200d\ufe0f\u20e3]/gu, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
 /** Genera y descarga el PDF; devuelve el nombre del archivo. */
 export const exportToPDF = (transactions) => {
   const doc = new jsPDF();
@@ -86,9 +96,9 @@ export const exportToPDF = (transactions) => {
   const tableRows = (transactions || []).map((t) => [
     formatDate(t.date),
     typeLabel(t),
-    t.category,
+    pdfText(t.category),
     formatCurrency(t.amount),
-    t.description || '',
+    pdfText(t.description),
   ]);
 
   autoTable(doc, {
@@ -97,6 +107,15 @@ export const exportToPDF = (transactions) => {
     startY: 30,
     theme: 'grid',
     styles: { fontSize: 10 },
+    // Anchos fijos para lo que no debe partirse (fecha, tipo, categoría, monto); la descripción toma el resto y baja de renglón.
+    // Sin esto, una descripción muy larga le saca ancho a las demás y los montos se cortan ("$ 1.250." / "001").
+    columnStyles: {
+      0: { cellWidth: 34 },
+      1: { cellWidth: 27 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 32, halign: 'right' },
+      4: { cellWidth: 'auto' },
+    },
     // jsPDF necesita RGB numérico: tinta neutra del sistema con texto claro.
     headStyles: { fillColor: [19, 19, 17], textColor: [255, 255, 255] },
   });
