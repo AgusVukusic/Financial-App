@@ -4,6 +4,7 @@ import './Layout.css';
 /**
  * Estructura de la app: contenido + navegación principal.
  * Celular: barra inferior anclada al borde (nunca flota sobre el contenido). Escritorio: riel lateral.
+ * La navegación va antes del contenido en el DOM (ambas están `fixed`): el riel de la izquierda es lo primero que alcanza Tab.
  * "Gastos fijos" es una vista dentro de Inicio, así que Inicio queda marcado como actual.
  */
 const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
@@ -26,9 +27,6 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
       <a className="layout__skip" href="#contenido">
         Saltar al contenido
       </a>
-      <main className="layout__main" id="contenido" tabIndex={-1}>
-        {children}
-      </main>
 
       <nav className="layout__nav" aria-label="Navegación principal">
         {item('home', 'Inicio', Home)}
@@ -39,6 +37,10 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
         </button>
         {item('profile', 'Perfil', User)}
       </nav>
+
+      <main className="layout__main" id="contenido" tabIndex={-1}>
+        {children}
+      </main>
     </div>
   );
 };
