@@ -196,6 +196,11 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   - Sin uso tras este PR (borrar con OK): `src/components/LandingPage.css`.
   - No probado en navegador: "Reenviar correo", sin conexión, instalación real de la PWA, escritorio.
 
+- **Fase 5 · A · Limpieza** (rama `feature/ui-cleanup`, 2026-11-15; cuerpo del PR en `pr-cleanup.md`): borrados autorizados por el usuario
+  (`SubscriptionsManager.css`, `LandingPage.css`, `profile/SubscriptionsCard.jsx`, `dashboard/ExpenseChart.jsx`, reglas `.budget-alert`, 2 capturas viejas,
+  dependencia `recharts`), `ConfirmDialog` sin `style` inline y 24 alias legados fuera de `tokens.css`. Quedan 13 alias que lee Grupos.
+  Lint 0 errores (9 avisos), 328 pruebas, build OK. El bundle no cambió (recharts no entraba al build).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
@@ -206,7 +211,6 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 - Fase 4: Reportes, Gastos fijos (confirmar pagar con `destructive: false`, sin segundo aviso), Perfil, Landing/Login/Activación
   (hallazgo 7: login sin verificar; errores técnicos de Firebase en texto humano).
-- Fase 5: lint/tests/build, pasada final de accesibilidad y `prefers-reduced-motion`, quitar alias legados de `tokens.css`, `DESIGN.md`, resumen.
-- Verificar y pedir OK antes de borrar `profile/SubscriptionsCard.jsx` y `dashboard/ExpenseChart.jsx` (parecen sin uso).
+- Fase 5: A limpieza (hecha, PR por abrir), B accesibilidad y movimiento, C PWA, D `DESIGN.md` y resumen.
 - Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
 - Preguntas abiertas para el usuario: ver `handoff.md` sección 12.

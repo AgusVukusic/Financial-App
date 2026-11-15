@@ -18,7 +18,6 @@ A modern, full-featured personal and group finance tracking application built wi
 * **Backend & Database**: [Firebase](https://firebase.google.com/) (Authentication & Cloud Firestore)
 * **Animations**: [Framer Motion](https://www.framer.com/motion/)
 * **Icons**: [Lucide React](https://lucide.dev/)
-* **Charts**: [Recharts](https://recharts.org/)
 * **PDF Generation**: [jsPDF](https://parall.ax/products/jspdf)
 
 ## 📦 Installation & Setup
