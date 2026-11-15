@@ -291,6 +291,16 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
   (`--fs-display-sm`). Revisar el diff y comparar los `var(--…)` nuevos contra `tokens.css`.
 - No usar `git rm --cached` ni dejar de trackear capturas viejas: cuenta como borrado y necesita OK.
 - En los cuerpos de PR, contar las pruebas nuevas (diferencia entre corridas), no estimarlas.
+- **Casos extremos (unidad B):** `node scripts/seed-worstcase.js` crea `peor@prueba.test` (límites reales del servidor: cuenta de 40 caracteres, descripción de 200, saldo de 12 cifras,
+  emoji, topes de $ 1 y de $ 999.999.999) y `vacio@prueba.test` (activado y sin datos), ambos `Prueba-1234`, solo emulador. Probar con `ana` **y** con `peor`: `ana` sola no mostró 4 roturas
+  que `peor` sí (zoom 200 % con cifras de 15 cifras, frecuentes cortados, rótulos de la barra pisados, Entró/Salió partidos).
+- **Playwright** (`mcp__playwright__*`, cargar con ToolSearch): `browser_run_code_unsafe` recibe `page`; no tiene `require` y solo lee archivos dentro del repo (por ejemplo `.playwright-mcp/`, ignorado por git).
+  Para cambiar de usuario: `localStorage.clear(); sessionStorage.clear(); indexedDB.deleteDatabase(...)` desde la página y recargar. Para los emuladores no hace falta el panel: `page.context().setOffline(true)` prueba el error de sin conexión.
+  Los PDF se bajan con `page.waitForEvent('download')` + `saveAs` dentro del repo y se miran con `Read` (renderiza las páginas).
+- Una captura sacada justo después de cambiar de tema (`body.light-theme`) pilla los colores a mitad de transición (botones que parecen grises): esperar ~500 ms.
+- El lint local también recorre `.playwright-mcp/` (el CI no, porque está ignorado): borrar los scripts de prueba que se dejen ahí.
+- Otro proceso de Claude puede estar usando esta misma carpeta (puertos 9099, 8080, 5002 y 5173 ya ocupados al empezar la unidad B). En la unidad B se vació su Firestore del emulador con `DELETE` y se volvió a sembrar: avisar antes de repetirlo.
+- Con `:has()`: el aviso (`Toast.module.css`) mira `body:has([role='dialog'])`; las hojas y diálogos se desmontan al cerrar (verificado: 0 `[role=dialog]` en reposo). Un `motion.div` deja `opacity` inline: para ocultarlo desde CSS hace falta `!important`.
 
 ## 9. Protocolo de git por pantalla
 
@@ -318,6 +328,8 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 - "Dejemos de inventar la rueda": investigar apps reales y construir sobre eso (hecho).
 - Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó la lista de limpieza
   (`SubscriptionsManager.css`, `LandingPage.css`, `SubscriptionsCard.jsx`, `ExpenseChart.jsx`, `.budget-alert`, dos capturas viejas, `recharts`). **No autorizó** ningún otro borrado.
+- **Unidad B (accesibilidad):** el aviso ("Listo: …") se oculta mientras hay una hoja o un diálogo abierto (`Toast.module.css`, con `:has`); la navegación va antes del contenido en el DOM.
+  Dos hallazgos de `break-ui` los resolvió el usuario dejándolos como están (descripciones largas en un campo de un renglón; centavos redondeados a pesos enteros en las listas): no volver a plantearlos. Ver `pr-a11y.md`.
 - **Ícono de la PWA:** que lo proponga yo con el lenguaje de Panel de taller (Doto + naranja) y le muestre opciones antes de aplicarlo.
 - Mergeó él los PRs #5 a #12.
 - **Cifras protagonistas en Doto:** no le gustó la mono para el "gasto mensual estimado" de Gastos fijos; quedó en Doto con el "$" naranja, como el saldo del Inicio. Aprobado.

@@ -36,9 +36,13 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap; /* con el texto al 200 % los botones se apilan */
   gap: var(--sp-3);
 }
 
 .actions > button {
-  flex: 1;
+  flex: 1 1 6rem;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }

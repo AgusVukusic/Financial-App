@@ -81,3 +81,23 @@
 .toast :focus-visible {
   outline-color: var(--bg);
 }
+
+/*
+ * Con una hoja o un diálogo abierto, los avisos de abajo taparían "Guardar" (z-toast está por encima de z-sheet):
+ *  - los de éxito o información (role="status") no se ven ni reciben toques; siguen en el DOM, así que el lector
+ *    de pantalla los anuncia igual, y reaparecen al cerrarse la hoja;
+ *  - los errores (role="alert") se muestran arriba, para que nunca se pierdan ni tapen el botón.
+ */
+body:has([role='dialog']) .container,
+body:has([role='alertdialog']) .container {
+  top: calc(var(--sp-4) + env(safe-area-inset-top, 0px));
+  bottom: auto;
+}
+
+body:has([role='dialog']) .toast[role='status'],
+body:has([role='alertdialog']) .toast[role='status'] {
+  position: absolute;
+  inset-inline: 0;
+  opacity: 0 !important; /* framer-motion deja opacity inline */
+  pointer-events: none;
+}

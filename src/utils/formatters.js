@@ -75,6 +75,19 @@ export const exportToCSV = (transactions) => {
   return fileName;
 };
 
+/**
+ * jsPDF escribe con Helvetica (WinAnsi): lo que esa fuente no tiene (emoji, flechas, ✓, ≥) sale como basura ("Ø>Ý") y se
+ * sale de la celda. En el PDF se dejan solo los caracteres que sí tiene (letras con tilde y eñe, ¿ ¡, comillas y rayas
+ * tipográficas del teclado del iPhone, €, ©, ®, ™, …); el CSV es UTF-8 y conserva todo.
+ */
+const PDF_SAFE = /[\u0020-\u007e\u00a0-\u00ff\u0152\u0153\u0160\u0161\u0178\u017d\u017e\u0192\u02c6\u02dc\u2013\u2014\u2018-\u201a\u201c-\u201e\u2020-\u2022\u2026\u2030\u2039\u203a\u20ac\u2122]/;
+export const pdfText = (value) =>
+  Array.from(String(value ?? ''))
+    .filter((ch) => PDF_SAFE.test(ch))
+    .join('')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
 /** Genera y descarga el PDF; devuelve el nombre del archivo. */
 export const exportToPDF = (transactions) => {
   const doc = new jsPDF();
@@ -86,9 +99,9 @@ export const exportToPDF = (transactions) => {
   const tableRows = (transactions || []).map((t) => [
     formatDate(t.date),
     typeLabel(t),
-    t.category,
+    pdfText(t.category),
     formatCurrency(t.amount),
-    t.description || '',
+    pdfText(t.description),
   ]);
 
   autoTable(doc, {
@@ -97,6 +110,15 @@ export const exportToPDF = (transactions) => {
     startY: 30,
     theme: 'grid',
     styles: { fontSize: 10 },
+    // Anchos fijos para lo que no debe partirse (fecha, tipo, categoría, monto); la descripción toma el resto y baja de renglón.
+    // Sin esto, una descripción muy larga le saca ancho a las demás y los montos se cortan ("$ 1.250." / "001").
+    columnStyles: {
+      0: { cellWidth: 34 },
+      1: { cellWidth: 27 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 32, halign: 'right' },
+      4: { cellWidth: 'auto' },
+    },
     // jsPDF necesita RGB numérico: tinta neutra del sistema con texto claro.
     headStyles: { fillColor: [19, 19, 17], textColor: [255, 255, 255] },
   });

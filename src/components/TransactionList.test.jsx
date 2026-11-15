@@ -63,6 +63,13 @@ describe('TransactionList', () => {
     expect(screen.queryByRole('button', { name: /restantes/ })).toBeNull();
   });
 
+  it('si queda uno solo por ver lo dice en singular', () => {
+    const many = Array.from({ length: 21 }, (_, i) => tx({ id: `t${i}`, description: `Gasto ${i}` }));
+    render(<TransactionList transactions={many} accounts={ACCOUNTS} />);
+    expect(screen.getByRole('button', { name: 'Ver el movimiento restante' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Ver los 1 restantes/ })).toBeNull();
+  });
+
   it('sin movimientos invita a anotar el primero', () => {
     const onOpenAdd = vi.fn();
     render(<TransactionList transactions={[]} accounts={ACCOUNTS} onOpenAdd={onOpenAdd} />);

@@ -12,7 +12,8 @@
   letter-spacing: var(--ls-label);
   line-height: 1.2;
   text-transform: uppercase;
-  white-space: nowrap;
+  max-width: 100%; /* con el texto grande una etiqueta larga baja de renglón en vez de ensanchar la pantalla */
+  overflow-wrap: anywhere;
 }
 
 .accent {

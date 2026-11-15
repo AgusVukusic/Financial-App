@@ -43,7 +43,7 @@
 /* Tamaño: lo que entra en el ancho de la tarjeta menos el signo $, con tope de 48 px (igual que BalanceCard). */
 .value,
 .valueMono {
-  font-size: clamp(1.5rem, calc((100cqw - 30px) / (var(--chars, 10) * 0.6)), var(--fs-display));
+  font-size: clamp(12px, calc((100cqw - 30px) / (var(--chars, 10) * 0.6)), var(--fs-display));
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }

@@ -40,7 +40,7 @@
  */
 .value,
 .valueMono {
-  font-size: clamp(1.5rem, calc((100cqw - 30px) / (var(--chars, 10) * 0.6)), var(--fs-display));
+  font-size: clamp(12px, calc((100cqw - 30px) / (var(--chars, 10) * 0.6)), var(--fs-display));
   color: var(--ink);
 }
 
@@ -57,7 +57,8 @@
 
 .io {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Entró y Salió lado a lado; con el texto al 200 % se apilan para que la cifra no se parta */
+  grid-template-columns: repeat(auto-fit, minmax(max(7rem, calc((100% - var(--sp-2)) / 2)), 1fr));
   gap: var(--sp-2);
   margin-top: var(--sp-3);
 }

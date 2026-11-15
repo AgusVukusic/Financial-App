@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { formatCurrency, formatDate, typeLabel, buildCSV, exportToCSV, exportToPDF } from './formatters';
+import { formatCurrency, formatDate, typeLabel, buildCSV, exportToCSV, exportToPDF, pdfText } from './formatters';
 
 // jsPDF no corre en jsdom: se reemplaza por un doble que registra las llamadas.
 const pdf = vi.hoisted(() => ({ save: vi.fn(), text: vi.fn(), setFontSize: vi.fn(), table: vi.fn() }));
@@ -119,6 +119,25 @@ describe('Formatters Utils', () => {
       const opts = pdf.table.mock.calls[0][1];
       expect(opts.body[0][1]).toBe('Transferencia');
       expect(opts.headStyles.fillColor).toEqual([19, 19, 17]);
+    });
+
+    it('quita los emoji de la descripción (el PDF no los puede escribir) y conserva tildes y eñes', () => {
+      expect(pdfText('Empanadas 🥟🥟 para la cena')).toBe('Empanadas para la cena');
+      expect(pdfText('Café con leche · año 2026')).toBe('Café con leche · año 2026');
+      expect(pdfText('Efectivo 👍🏽')).toBe('Efectivo');
+      expect(pdfText('María’s “cena” — 3 pizzas… € ¿Qué? © ® ™ «ok»')).toBe('María’s “cena” — 3 pizzas… € ¿Qué? © ® ™ «ok»'); // teclado del iPhone
+      expect(pdfText('50% ≥ 2 → 3 ✓')).toBe('50% 2 3');
+      expect(pdfText(undefined)).toBe('');
+      exportToPDF([T({ description: 'Pizza 🍕 del viernes' })]);
+      const opts = pdf.table.mock.calls.at(-1)[1];
+      expect(opts.body[0][4]).toBe('Pizza del viernes');
+    });
+
+    it('fija el ancho de fecha, tipo, categoría y monto para que no se partan', () => {
+      exportToPDF([T()]);
+      const { columnStyles } = pdf.table.mock.calls.at(-1)[1];
+      expect(columnStyles[3]).toMatchObject({ halign: 'right' });
+      expect(columnStyles[0].cellWidth).toBeGreaterThanOrEqual(34);
     });
   });
 });
