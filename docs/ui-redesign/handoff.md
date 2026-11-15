@@ -1,22 +1,26 @@
 # Traspaso de sesión: rediseño de UI de Financial App
 
 Documento de continuidad. Está escrito para que una sesión nueva siga el trabajo como si fuera la misma. Leelo completo antes de
-tocar nada; después leé `progress.md` (registro cronológico) y `design-system.md` (reglas y componentes). Última actualización: 2026-11-14,
-con `main` en `14e9add` (PR #7 mergeado, CI en verde).
+tocar nada; después leé `progress.md` (registro cronológico) y `design-system.md` (reglas y componentes). Última actualización: 2026-11-15,
+con `main` en `38c7f0d` (PR #12 mergeado). **Fase 4 completa: todas las pantallas están rehechas y en producción. Falta solo la fase 5 (cierre).**
+El CI de `main` tras el merge de #12 no se comprobó (el usuario dijo que no hacía falta): verificarlo al retomar.
 
 ---
 
 ## 0. Cómo retomar (primeros pasos, en orden)
 
 1. Leer, en este orden: este archivo, `docs/ui-redesign/progress.md`, `docs/ui-redesign/design-system.md`, `PRODUCT.md`, `CLAUDE.md` (raíz del repo) y
-   `~/.claude/CLAUDE.md` del usuario (estilo de respuesta y reglas de trabajo, resumidas en la sección 2).
+   `~/.claude/CLAUDE.md` del usuario (estilo de respuesta, reparto de trabajo entre modelos y reglas, resumidas en la sección 2). Después hojear las secciones
+   "No probado / límites" de `pr-reports.md`, `pr-subscriptions.md`, `pr-profile.md` y `pr-auth.md`: son la deuda de verificación de la fase 5.
 2. Verificar el estado real, sin confiar en este documento:
-   - `git fetch origin && git status -sb && git log --oneline origin/main -5`.
+   - `git fetch origin && git status -sb && git log --oneline origin/main -8`.
    - ¿Hay PRs abiertos o ramas `feature/ui-*` sin mergear? API pública, sin `gh` (no está instalado): ver sección 8.
    - CI de `main` (check-runs del último commit): debe estar en verde.
-3. Parar en `main` actualizado (`git checkout main && git pull --ff-only`) y crear una rama nueva por pantalla (sección 9).
-4. Decirle al usuario en dos líneas dónde quedó el trabajo y qué pantalla sigue (Reportes, salvo que haya cambiado el orden), y **seguir** sin esperar
-   respuesta, salvo que falte un dato que solo el usuario tiene.
+   - **Este archivo puede estar modificado sin commitear en el árbol de trabajo** (se actualizó localmente el 2026-11-15 sobre `main`): no descartarlo;
+     commitearlo en la primera rama de la fase 5 (`docs(ui): …`).
+3. Pararse en `main` actualizado (`git pull --ff-only`; los cambios locales de este archivo no chocan) y crear una rama nueva por unidad (sección 9).
+4. Decirle al usuario en dos líneas dónde quedó el trabajo y por dónde se arranca, y **preguntarle de entrada las decisiones 1 y 2 de la sección 12**
+   (borrados e ícono de la PWA), que traban parte de la fase 5. Mientras responde, avanzar con lo que no depende de eso.
 5. Mantener la lista de tareas del turno (`update_plan`) y cerrar cada turno con `wrap_up`, como pide el entorno de la app de escritorio.
 
 ## 1. El proyecto y el pedido original
@@ -70,44 +74,55 @@ De `~/.claude/CLAUDE.md` y del prompt inicial:
 
 ## 3. Estado actual
 
-### Hecho y mergeado en `main`
+### Hecho y mergeado en `main` (todo en producción)
 
 | PR | Rama | Contenido |
 |---|---|---|
 | #5 | `feature/ui-design-system` | Docs de auditoría/direcciones/conceptos, tokens claro/oscuro, componentes base, página `/showcase.html` (solo dev) |
 | #6 | `feature/ui-layout` | Navegación (barra inferior anclada / riel lateral ≥768 px), `AppHeader`, `MonthSelector`, **Dashboard** completo (saldo Doto + `Odometer`, Anotar rápido con Deshacer, Para pagar, Cuentas) |
 | #7 | `feature/ui-transaction-sheet` | `AddTransactionModal` y `AddAccountModal` como hojas (`Sheet`), lista de Movimientos, eliminar dentro de la hoja, `parseAmountInput`, borrado de 5 CSS viejos |
+| #8 | `docs/ui-handoff` | Primera versión de este traspaso |
+| #9 | `feature/ui-reports` | **Reportes**: alertas en una línea, "Topes del mes" (renglón-botón + `Meter` + estado en texto), tope en `Sheet`, "En qué se fue" (`DitherBar` + leyenda con %), "Últimos 6 meses" en CSS propio con tabla. Sin recharts |
+| #10 | `feature/ui-subscriptions` | **Gastos fijos**: pagar con una confirmación no destructiva + toast con Deshacer, lista por vencimiento, alta/edición en `Sheet`, eliminar con confirmación |
+| #11 | `feature/ui-profile` | **Perfil**: cuenta con email, exportaciones rotuladas, cierre de sesión no destructivo. Exportaciones PDF/CSV corregidas en `utils/formatters.js` |
+| #12 | `feature/ui-auth` | **Landing / ingreso / registro / activación / ErrorBoundary / carga**: base `auth/AuthShell`, arreglo del login tras verificar el correo, errores de Firebase en texto humano, guía de instalación por dispositivo, título de pestaña |
 
-`main` = `14e9add`. CI en verde (jobs "Lint, unit tests and build" y "Firestore rules and Cloud Functions (emulators)"). Verifiqué el CI de `main` por API.
-Todo esto **ya está en producción**.
+`main` = `38c7f0d`. Al cerrar la sesión: lint 0 errores (9 avisos conocidos), 328 pruebas, build OK en local sobre `feature/ui-auth`.
 
 ### Pantallas
 
-| Pantalla | Estado |
-|---|---|
-| Layout / navegación / encabezado / selector de mes | ✅ rehecho |
-| Dashboard (Inicio) | ✅ rehecho |
-| Modal de movimiento + modal de cuenta | ✅ rehechos (hojas) |
-| TransactionList (Movimientos) | ✅ rehecha |
-| **Reportes** (`Reports.jsx`, `reports/*`, `dashboard/BudgetAlerts.jsx`) | ✅ rehecho (PR #9 mergeado) |
-| **Gastos fijos** (`SubscriptionsManager.jsx`, 255 líneas) | ✅ rehecho (PR #10 mergeado) |
-| **Perfil** (`Profile.jsx`) | ✅ rehecho (PR #11 mergeado) |
-| **Landing / Login / Activación** (`LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`, `auth/AuthShell`) | ✅ rehecho en `feature/ui-auth` (PR pendiente de merge; ver `pr-auth.md`). Hallazgo 7 resuelto: la causa era la sesión sin verificar que quedaba abierta, no `user.reload()` |
-| Pasada final (fase 5) | ⏳ **siguiente** (después de la parada ✋ y del merge de `feature/ui-auth`) |
+Todas rehechas: Layout/navegación, Dashboard, hojas de movimiento y cuenta, Movimientos, Reportes, Gastos fijos, Perfil, Landing/Login/Activación.
+**Lo único pendiente es la fase 5 (sección 6).** El detalle de cada pantalla (qué cambió, cómo se verificó, qué no se probó) está en `pr-<pantalla>.md` y en `progress.md`.
 
-Archivos que parecen **huérfanos** (verificar con grep antes de proponer borrarlos; borrar solo con OK del usuario): `src/components/profile/SubscriptionsCard.jsx`
-(133 líneas, no se importa en ninguna parte) y `src/components/dashboard/ExpenseChart.jsx` (62 líneas, tampoco). También quedarán sin uso los CSS por pantalla de las
-pantallas que se rehagan (`SubscriptionsManager.css`, `LandingPage.css`).
+Cosas de las pantallas nuevas que conviene saber:
+
+- **Reportes.** El gráfico viejo sumaba las transferencias como gasto; ahora cada mes sale de `calculateTotalsAndCategories` (cambio de número hecho a propósito,
+  con prueba). `setBudget` acepta 0 como "sin tope" ("Quitar tope"). Las categorías fuera de las 6 fijas se suman a "Otros" solo en la distribución.
+- **Gastos fijos.** Deshacer un pago = `deleteTransaction(requestId)` con el mismo `requestId` del pago; el servidor restaura saldo y `lastPaidAt` (verificado en el
+  emulador leyendo Firestore). "Pagado este mes" se afirma solo si `lastPaidDate` cae en el mes en curso: el estado `paid` de `getSubscriptionStatus` significa
+  "faltan más de 5 días", no "pagado". Heredado y no tocado: los gastos anuales calculan el vencimiento como mensuales (`subscriptionUtils`).
+- **Perfil / exportaciones.** `typeLabel` (Ingreso/Gasto/Transferencia) y `buildCSV` (Blob, comillas escapadas, BOM, guarda de fórmulas). Separador coma y punto decimal, como antes.
+- **Login (hallazgo 7).** La causa no era `user.reload()`: con el correo sin verificar la sesión de Firebase quedaba abierta y el segundo ingreso (mismo uid) no
+  disparaba `onAuthStateChanged`. Arreglo solo en `WelcomeScreen.jsx`: se cierra esa sesión; "Reenviar correo" reingresa con lo del formulario. `useUser` no se tocó.
+- **Landing.** Por decisión del usuario, "Instalar la app" es la acción principal e "Ingresar" la secundaria (en modo instalado solo se ve "Ingresar"). Si el navegador
+  ofrece el aviso nativo se usa ese; si no, `auth/InstallGuide` muestra los pasos del dispositivo detectado (`utils/installGuide.js`, 9 plataformas, textos sin jerga).
+  `APP_NAME = 'Finanzas'` está repetido a mano ahí (es el `short_name` del manifest).
+
+### Archivos sin uso (borrar solo con OK del usuario; verificar con grep antes)
+
+`src/components/SubscriptionsManager.css`, `src/components/LandingPage.css`, `src/components/profile/SubscriptionsCard.jsx`, `src/components/dashboard/ExpenseChart.jsx`,
+las reglas `.budget-alert` de `src/index.css`, la dependencia `recharts` (solo la importa `ExpenseChart`). A revisar: `Dashboard.css`, las clases globales viejas de
+`index.css` (`glass-panel`, `btn-primary`, `btn-secondary`, `text-gradient`, `text-secondary`) y las capturas `docs/ui-redesign/auth/01-landing-claro-393.jpg` y
+`06-instalar-oscuro-320.jpg` (Landing anterior, ya no referenciadas). El detector de impeccable marca 3 "side-tab" en `SubscriptionsManager.css`: son reales, del CSS
+viejo huérfano, y se resuelven borrando el archivo.
 
 ### Cobertura de la auditoría (26 hallazgos, `audit.md`)
 
-Resueltos: 1 transferencia desborda, 2 modal de gasto lento, 3 editar/borrar de 24 px, 5 contraste claro, 6 modales sin a11y, 8 nav tapa contenido, 10 cuentas en
-carrusel, 12 Gastos fijos sin "volver", 15 toasts, 18 modales translúcidos, 21 movimiento (base), 22 transferencias sin origen→destino. Parciales: 4 (objetivos de
-44 px: faltan Reportes, Gastos fijos, Perfil), 9 (jerarquía del Dashboard: se mantuvo el saldo total primero, a pedido), 17 (identidad: faltan las pantallas
-pendientes), 19 (escritorio: hay riel, el contenido sigue en una columna de 880 px), 20 (PWA: hay `theme-color` y `viewport-fit`, **falta ícono propio**,
-`apple-touch-icon`), 24 (voseo en las pantallas pendientes), 26 (estilos inline en las pantallas pendientes). **Pendientes: 7 (login sin verificar, ver 6.4), 11
-(pagar un gasto fijo pide dos diálogos), 13 (colores de Reportes ambiguos), 14 (alertas apiladas y ejes "$2000k"), 16 (mensajes de error técnicos), 23 (Perfil vacío), 25
-(Landing: "Descargar App" como acción principal; título de pestaña "Dashboard" antes de iniciar sesión).**
+Resueltos: 1, 2, 3, 5, 6, 7 (login tras verificar), 8, 10, 11 (pagar en un paso), 12, 13 (colores de Reportes), 14 (alertas y ejes), 15, 16 (errores en texto humano),
+18, 21 (base), 22, 23 (Perfil), 24 (voseo), 25 (título de pestaña; la acción principal de la Landing volvió a ser instalar **por decisión del usuario**).
+Parciales: 4 (objetivos de 44 px: medidos pantalla por pantalla, falta la pasada global de la fase 5), 9 (se mantuvo el saldo total primero, a pedido), 17 (identidad:
+falta ícono propio), 19 (escritorio: riel + columna de 880 px), 20 (PWA: falta ícono propio, `apple-touch-icon`, fuentes offline), 26 (quedan `style={{…}}` fuera de
+las pantallas rehechas: comprobar con grep).
 
 ## 4. Decisiones de diseño y por qué
 
@@ -157,75 +172,67 @@ definidos al final de `tokens.css`, declarados **en cada selector de tema** (si 
 **Contrato verificado de Deshacer** (no se tocó la capa de datos): el id del documento de un gasto es el `requestId` que manda el cliente (`functions/finance/transactions.js`,
 ADR 001); `voidTransaction(requestId)` lo anula con un movimiento compensatorio que los mappers ocultan. `addTransaction` acepta `data.requestId` y no devuelve nada.
 
-## 6. Lo que falta, pantalla por pantalla
+**Agregado en las pantallas de noviembre (PRs #9 a #12):**
+- Reportes: `Reports.jsx` (orquestador) + `components/reports/` (`BudgetRow`, `BudgetSheet`, `BudgetsSection`, `DistributionSection`, `MonthlyChart`, `Swatch`),
+  `dashboard/BudgetAlerts.jsx` reescrito, `utils/reportsData.js` (`budgetStatus`, `alertSummary`, `distribution`, `monthlySeries`, `formatCompact`, `niceMax`).
+- Gastos fijos: `SubscriptionsManager.jsx` + `components/subscriptions/` (`SubscriptionRow`, `SubscriptionSheet`).
+- Perfil: `Profile.jsx` + `Profile.module.css`; `utils/formatters.js` (`typeLabel`, `buildCSV`, `exportToCSV`/`exportToPDF` devuelven el nombre del archivo).
+- Previo al ingreso: `components/auth/` (`AuthShell`, `auth.module.css`, `InstallGuide`), `LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`,
+  `ErrorBoundary.jsx`, `utils/authErrors.js` (`authErrorMessage`), `utils/installGuide.js` (`detectInstallPlatform`, `INSTALL_GUIDES`).
+- `App.jsx`: pasa `monthLabel` a Reportes, `onDeleteTransaction`/`onAddAccountClick` a Gastos fijos, `email` a Perfil; título de pestaña "Finanzas Personales"
+  (sin sesión) o "<Sección> · Finanzas Personales".
+- Pruebas por pantalla: `reports/reports.test.jsx`, `subscriptions/subscriptions.test.jsx`, `profile/profile.test.jsx`, `auth/auth.test.jsx`, más las de cada utilidad.
 
-Para cada una: rama nueva desde `main`, rehacer, pruebas, verificar (sección 10), commits, push, cuerpo de PR en `docs/ui-redesign/pr-<pantalla>.md`, ✋ cada 2 pantallas.
-Antes de cada pantalla leer su código completo y su CSS. Convertir `style={{…}}` y CSS por pantalla a tokens + CSS Modules + componentes de `ui/`.
+## 6. Lo que falta: fase 5 (cierre)
 
-### 6.1 Reportes (`Reports.jsx`, 196 líneas; `dashboard/BudgetAlerts.jsx`, 47)
-- Hoy: tres alertas apiladas arriba, gráfico de barras de 6 meses (recharts, ejes "$2000k"), torta de distribución sin etiquetas, presupuestos por categoría con barra y edición
-  inline (engranaje de ~16 px), colores de categoría distintos entre punto y barra (hallazgo 13). Usa `useAllTransactions(uid)` y `updateBudget(category, amount)` (`setBudget`,
-  montos en pesos; tope por categoría).
-- Hacia dónde: **Meter** de 10 segmentos por categoría (ya existe) con estado en texto ("Superado por $ 87.499" con ícono, "Cerca del límite · 93%", "Quedan $ 41.419", "Sin tope");
-  gráfico de gasto por categoría con **DitherBar** + leyenda en texto con porcentajes (no depender del color); evolución de 6 meses con ejes legibles ("$ 2 M"), colores
-  por tokens (`--in` / tinta, no rojo para el gasto) y `role="img"` + tabla alternativa o resumen en texto; las alertas se resumen en una línea con acción; el tope se edita en
-  una `Sheet` o campo con 44 px usando `parseAmountInput` (no `type="number"`); "termómetro de ritmo" (gastado vs esperado a la fecha) es una idea de la investigación que cabe acá.
-  Tooltips de recharts ya usan tokens (se parchearon). Casos extremos: sin presupuestos, sin movimientos, un solo mes, montos enormes, categoría sin tope.
-- Cuidado: no cambiar cómo se calcula nada (`utils/calculations.js` tiene pruebas).
+Las pantallas están todas hechas. La fase 5 se agrupa en pocas unidades, cada una en su rama y su PR, sin apilar (esperar el merge de una antes de la siguiente).
+Orden sugerido:
 
-### 6.2 Gastos fijos (`SubscriptionsManager.jsx`, 255 líneas + `SubscriptionsManager.css`)
-- Hoy: tarjetas con borde lateral de color (patrón que el detector de impeccable marca), botón "Pagar" que abre un diálogo de confirmación y luego un **segundo diálogo "Aviso /
-  Entendido"** (hallazgo 11), formulario de alta/edición inline, estados "Vencido hace N días" con pluralización mala ("1 días").
-- Hacia dónde: ordenar por vencimiento con estado en texto+ícono (usar `dueText` de `utils/dashboardFormat.js`); **Pagar con `confirm(..., { destructive: false, confirmText: 'Pagar' })`**
-  y resultado como toast (sin el segundo diálogo), idealmente con **Deshacer**: `paySubscription(id, requestId)` crea el gasto con ese `requestId`, y `voidTransaction` de un pago
-  de gasto fijo debería revertir `lastPaidAt` (`readVoidPlan` en `functions/finance/transactions.js` trae `subRef`/`sub`). **Verificar leyendo `functions/finance/subscriptions.js` y
-  `transactions.js` y probar en el emulador antes de ofrecer Deshacer**; si no se sostiene, es una necesidad de la capa de datos: parar y preguntar.
-  Alta/edición en una `Sheet` (monto con `parseAmountInput`, día de vencimiento, ciclo mensual/anual, categoría, cuenta obligatoria); eliminar con confirmación `destructive` (rojo OK).
-  Sin tarjetas con borde lateral. Pagados distinguibles (Card `dashed` + Tag "Listo"). Mantener "Volver" (ya está en `AppHeader`).
+### 6.1 Limpieza (`feature/ui-cleanup`) — depende de la decisión 1 de la sección 12
+- Borrar lo autorizado y nada más (lista en la sección 3).
+- Quitar los alias legados del final de `src/styles/tokens.css`. Antes, buscar con grep cada alias en `src/`, incluidos los archivos de Grupos (que no se tocan):
+  si Grupos todavía usa alguno, ese alias queda y se anota.
+- Quitar los `style={{…}}` que queden fuera de Grupos (`grep -rn "style={{" src`).
+- Si se va `recharts` hay que tocar `package.json` y el lockfile: mostrar el cambio antes y correr build y pruebas después.
 
-### 6.3 Perfil (`Profile.jsx`, 67 líneas)
-- Hoy: avatar, "Plan Cloud Activo" (no significa nada, hallazgo 23), botones PDF/CSV sin explicar, "Cerrar sesión" con confirm. Usa `useAllTransactions` y `exportToPDF/exportToCSV`.
-- Hacia dónde: mostrar nombre y **email** (App tiene `user.email`; pasarlo como prop), exportar rotulado ("Exportar movimientos · PDF/CSV", con qué período), tema (el toggle ya está en
-  el encabezado; opcional agregar "Tema: sistema/claro/oscuro" si se quiere), cerrar sesión con `confirm(..., { destructive: false, confirmText: 'Cerrar sesión' })`, versión/estado de la
-  Beta, enlace a ayuda. Objetivos de 44 px. Estado de carga/error de la exportación visible.
+### 6.2 Accesibilidad y movimiento (`feature/ui-a11y`)
+- Script de objetivos de 44 px y de scroll horizontal en **todas** las pantallas, a 320, 393 y ~1100 px, en claro y oscuro. En las sesiones anteriores no se
+  cruzaron todas las combinaciones de tema y ancho.
+- Contraste por cálculo de cualquier color que no sea un token ya medido. Foco visible y orden de tabulación en cada pantalla, hoja y diálogo; Escape con diálogos apilados.
+- Zoom de texto al 200 %.
+- Ruta de movimiento completo con Playwright (`browser_emulate_media {reducedMotion:'no-preference'}`). Las pantallas previas al ingreso quedaron sin animación de
+  entrada: decidir si alguna la necesita.
+- Correr la skill `break-ui` de verdad en una pantalla densa (Reportes o Gastos fijos). **Nunca se corrió**: los casos extremos fueron a mano y en pruebas.
+- Deuda de verificación anotada en los `pr-*.md`: "Reenviar correo" y el error de sin conexión en el navegador; "Crear una cuenta" desde la hoja de Gastos fijos
+  con un usuario sin cuentas; el toast que tapa "Guardar tope" si se reabre la hoja enseguida; el PDF exportado, mirándolo renderizado; escritorio en las pantallas
+  previas al ingreso; ErrorBoundary en el navegador.
+- Lo que no se puede verificar desde acá se declara y se le pide al usuario: Safari, iPhone real, lector de pantalla, abrir el CSV en Excel, y **seguir la guía de
+  instalación en un iPhone y un Android reales** (los nombres de las opciones de cada navegador se escribieron de memoria y cambian entre versiones).
 
-### 6.4 Landing / Login / Activación (`LandingPage.jsx`+`.css`, `WelcomeScreen.jsx` 205 líneas con ~21 estilos inline, `ActivationScreen.jsx` 91 líneas)
-- **Pruebas existentes que deben seguir pasando:** `ActivationScreen.test.jsx`.
-- **Hallazgo 7 (bug real, Alta):** el invitado se registra, verifica el email y vuelve a "Ingresar", pero el aviso "Tu correo electrónico no está verificado" no se va y el login no
-  entra hasta recargar. **Hipótesis a confirmar:** `signInWithEmailAndPassword` devuelve un `user` con `emailVerified` en caché; hay que hacer `await user.reload()` (o leer
-  `auth.currentUser` después de `reload()`) antes de chequear `emailVerified`; además el toast de error está en `duration 0` y no se cierra. Reproducir en el emulador (verificar con
-  `http://127.0.0.1:9099/emulator/v1/projects/financial-app-beta/oobCodes` o marcando `emailVerified` por la API de Auth del emulador), arreglar en `WelcomeScreen.jsx`/`App.jsx`
-  (no es capa de datos) y cubrir con una prueba (mockear `firebase/auth`).
-- Hallazgo 16: los errores muestran `err.message` crudo ("Firebase: Error (auth/network-request-failed)"). Mapear códigos a mensajes humanos con acción ("Sin conexión. Probá de nuevo").
-- Hallazgo 25: la Landing tiene "Descargar App" como botón principal aunque la acción real es entrar; el título de la pestaña dice "Dashboard" antes de iniciar sesión (`App.jsx` `document.title`).
-  Usar `usePWA` (instalación) como acción secundaria. Landing = modo Persuade (pero es una app privada con invitación: simple, sin marketing inflado). Revisar el modal de instrucciones de iOS
-  (div con `onClick`, sin rol, hallazgo de a11y): pasarlo a `Sheet`.
-- Formularios con `Field`/`Input` (16 px, sin zoom en iOS), contraseña con mostrar/ocultar, `autocomplete` correcto (`email`, `current-password`/`new-password`), botón de reenviar verificación visible y claro,
-  estado de "te enviamos un correo" con instrucciones. `ErrorBoundary.jsx` (42 líneas, estilos inline) también entra acá (tiene prueba `ErrorBoundary.test.jsx`).
-- Activación (`ActivationScreen`): estados "activando", "no estás en la lista de invitados" (con el email y "Cerrar sesión") y error de conexión con "Reintentar". Es una pantalla de uso único: clara y breve.
+### 6.3 PWA (`feature/ui-pwa`) — depende de la decisión 2 de la sección 12
+- Ícono propio (hoy `vite.config.js` apunta a una URL externa de flaticon), `apple-touch-icon`, metas `apple-mobile-web-app-*`.
+- Cache offline de las fuentes de Google (la PWA no las precachea).
+- `vite.config.js` no es capa de datos, pero cambia el manifest de producción: mostrar el cambio antes. Si cambia el `short_name`, actualizar `APP_NAME` en
+  `src/utils/installGuide.js`.
 
-### 6.5 Fase 5: cierre
-- `npm run lint`, `npm test`, `npm run build` y CI en verde en el último PR.
-- **Pasada final de accesibilidad:** foco visible en todo, orden de tabulación, `aria-*` en controles propios, objetivos de 44 px (auditar con un script como el de la sesión: `getBoundingClientRect` de
-  `button,input,select,a`), contraste (script con los tokens), lector de pantalla (no se probó nunca: decirlo), zoom de texto al 200 %.
-- **`prefers-reduced-motion`:** probar la ruta de movimiento completo con Playwright (`browser_emulate_media reducedMotion: no-preference`) porque el panel integrado emula "reducir movimiento".
-- **break-ui:** correr la skill de verdad en alguna pantalla densa (Reportes) o declarar que se hicieron casos extremos a mano.
-- Quitar los alias legados de `tokens.css`, los CSS sin uso y los `style={{…}}` restantes (`grep -rn "style={{" src`).
-- Ícono de la PWA propio (hoy `vite.config.js` apunta a una URL externa de flaticon), `apple-touch-icon`, `apple-mobile-web-app-*`; fuentes de Google sin caché offline (la PWA no las precachea).
-- `DESIGN.md` con `/impeccable document` (impeccable lo lee al iniciar sesión y hoy dice "no hay DESIGN.md"; se evitó a propósito durante el trabajo). Actualizar `CLAUDE.md` (sección de UI) y `progress.md`.
-- Resumen final corto al usuario.
+### 6.4 Documentación (`docs/ui-closing`)
+- `DESIGN.md` con `/impeccable document` (se evitó a propósito durante el trabajo).
+- Actualizar la sección de UI de `CLAUDE.md` (título de pestaña, carpetas `reports/`, `subscriptions/`, `auth/`, utilidades nuevas; el lint tiene 9 avisos, no 12).
+- Dejar al día este archivo y `progress.md`.
+- Resumen final corto al usuario: qué quedó hecho, qué quedó sin probar en dispositivos reales y qué decisiones de la sección 12 siguen abiertas.
 
-## 7. Deuda y decisiones abiertas
+Paradas ✋ en la fase 5: antes de cualquier borrado, antes de tocar `package.json` o `vite.config.js`, y al terminar cada unidad.
 
-- **Frecuentes limitados al mes seleccionado** (el hook solo trae ese mes): al empezar un mes no hay frecuentes. Ampliarlo necesita un dato nuevo (p. ej. un hook o consulta de los últimos 90 días):
-  **preguntar al usuario antes** (es capa de datos).
-- Desktop: el contenido sigue en una columna de 880 px; la `Sheet` se centra en la ventana, no en la columna del contenido (como el toast, que ya se corrigió). Una grilla de dos columnas en ≥1024 px
-  queda como mejora opcional.
-- Entrada de texto natural ("café 3500") del concepto 3: **no implementada**; `CK.parse` del prototipo (`docs/ui-redesign/concepts/common.js`) es la referencia. Proponerla al usuario como mejora de Anotar.
-- `SubscriptionsCard` y `ExpenseChart` huérfanos (ver sección 3).
-- Hallazgo 24 (voseo): hay textos viejos en las pantallas pendientes ("Registra", "Debes").
-- Las confirmaciones de `DialogContext` usan botón rojo por defecto; las no destructivas deben pasar `destructive: false` (pendiente en Gastos fijos y Perfil).
-- `.impeccable/config.json` guarda ignores del detector de diseño (3 entradas, con motivo); `.claude/` y `.impeccable/` están **sin commitear a propósito** (skills instaladas y config local).
+## 7. Deuda y límites conocidos
+
+- **Frecuentes limitados al mes seleccionado** (el hook solo trae ese mes). Ampliarlo necesita un dato nuevo de la capa de datos: preguntar antes.
+- Desktop: el contenido sigue en una columna de 880 px; la `Sheet` se centra en la ventana; los medidores de Reportes se estiran a todo el ancho.
+- Entrada de texto natural ("café 3500"): no implementada; `CK.parse` de `docs/ui-redesign/concepts/common.js` es la referencia.
+- Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). "Termómetro de ritmo" no construido.
+- Gastos fijos: Deshacer dura lo que el toast (8 s); después, el pago se anula desde Movimientos. A 320 px "Pagar" baja a un renglón propio.
+- Perfil: `useAllTransactions` no distingue "cargando" de "sin movimientos" (los botones de exportar arrancan deshabilitados un instante).
+- Ingreso: después de registrarse la contraseña se vacía, así que "Reenviar correo" pide escribirla de nuevo.
+- `.impeccable/config.json` guarda ignores del detector (3 entradas, con motivo); `.claude/` y `.impeccable/` están **sin commitear a propósito**.
 
 ## 8. Entorno y trampas conocidas (leer: ahorra horas)
 
@@ -264,6 +271,27 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 `agent-skills:*`. **No están instaladas** `emil-design-eng`, `review-animations`, `apple-design`. El flujo de impeccable de "decision page" (`serve-question`) se sustituyó por páginas de comparación
 (artifacts) en las fases 2 y 3. `PRODUCT.md` ya existe en la raíz (hecho a partir del repo y de las respuestas del usuario; algunos datos están marcados como inferidos).
 
+**Aprendido en las sesiones de noviembre (PRs #9 a #12):**
+- El scratchpad cambia de ruta entre sesiones: usar el que indique el entorno de la sesión actual.
+- `sleep` en Bash está bloqueado. Los emuladores tardan ~20 s en levantar: si el seed da "fetch failed", esperar y reintentar.
+- Preview de Vercel: `…/deployments?per_page=1` y su `statuses_url`; comprobar que el `sha` sea el de la rama (tarda más de un minuto; el filtro `?sha=` necesita
+  el sha completo). Consultar una vez; si no está, decir que Vercel lo comenta en el PR.
+- Usuarios de prueba (solo emulador): `ana@prueba.test` lo crea el seed. Para probar registro y verificación, crear uno nuevo desde la UI, abrir su `oobLink`
+  (`http://127.0.0.1:9099/emulator/v1/projects/financial-app-beta/oobCodes`) y crear `betaInvites/<email>` con un PATCH al emulador de Firestore con
+  `Authorization: Bearer owner` (como hace el seed). Un usuario verificado sin invitación muestra la activación denegada.
+- Leer Firestore del emulador para verificar una escritura: REST `http://127.0.0.1:8080/v1/projects/financial-app-beta/databases/(default)/documents/<colección>`
+  con `Authorization: Bearer owner`.
+- Navegador integrado: el preset `mobile` (o cualquier ancho < 768) emula un Chrome de Android; sirve para ver la guía de instalación de Android, no la de iPhone
+  (esa se ve desde el desplegable "Tengo otro celular o navegador"). Para interactuar de forma confiable, `javascript_tool` con clicks por texto y el setter nativo
+  de `value` + evento `input` (ese camino saltea `maxLength`). Para verificar descargas sin bajar archivos, interceptar `URL.createObjectURL` y leer el Blob
+  (el BOM se comprueba con `arrayBuffer`; `text()` lo quita).
+- Código escrito con heredocs de Bash pierde barras invertidas y caracteres especiales (regex, BOM, `\n`): escribir archivos con Write/Edit; para parches con
+  CRLF o espacios duros, un `.mjs` creado con Write y ejecutado con `node`.
+- Los informes de los agentes ejecutores no son prueba: hubo uno que dio por "sin uso" un archivo que sí se importaba y un token CSS inexistente
+  (`--fs-display-sm`). Revisar el diff y comparar los `var(--…)` nuevos contra `tokens.css`.
+- No usar `git rm --cached` ni dejar de trackear capturas viejas: cuenta como borrado y necesita OK.
+- En los cuerpos de PR, contar las pruebas nuevas (diferencia entre corridas), no estimarlas.
+
 ## 9. Protocolo de git por pantalla
 
 1. `git checkout main && git pull --ff-only origin main && git checkout -b feature/ui-<pantalla>` (si hay un PR abierto del que dependés: avisar y esperar el merge).
@@ -287,19 +315,27 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 ## 11. Lo que el usuario ya decidió o pidió (para no volver a preguntar)
 
 - Dirección: Panel de taller (aprobada). Claro y oscuro con igual importancia. El saldo total va primero.
-- "Dejemos de inventar la rueda": investigar apps reales (incluidas las arriesgadas) y construir sobre eso (hecho).
-- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css`. **No autorizó** ningún otro borrado.
-- Aprobó mergear los PRs #5, #6 y #7 (los mergeó él).
-- Pidió probar en formato iPhone (no tamaño máximo) cuando fue posible.
-- Quiere respuestas breves; los cierres de turno traen: qué cambió, cómo verificaste, qué no se probó y **una sola pregunta** con botones.
+- "Dejemos de inventar la rueda": investigar apps reales y construir sobre eso (hecho).
+- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). **No autorizó** ningún otro borrado.
+- Mergeó él los PRs #5 a #12.
+- **Cifras protagonistas en Doto:** no le gustó la mono para el "gasto mensual estimado" de Gastos fijos; quedó en Doto con el "$" naranja, como el saldo del Inicio. Aprobado.
+- **Landing: "Instalar la app" es la acción principal** e "Ingresar" la secundaria. No revertirlo.
+- **Instrucciones para gente no técnica:** pidió que quien no sabe qué es "el menú del navegador" pueda instalar la app. Regla general de copy: decir qué dibujo
+  buscar, dónde está en la pantalla y qué tocar; sin jerga.
+- Pidió probar en formato iPhone cuando fue posible.
+- Quiere respuestas breves; los cierres de turno traen: qué cambió, cómo se verificó, qué no se probó y **una sola pregunta** con botones.
+- Si dice que no hace falta comprobar algo (un merge, el CI), no comprobarlo en ese turno.
 
 ## 12. Preguntas abiertas para el usuario
 
-1. ¿Ampliar los frecuentes a los últimos meses? (requiere dato nuevo de la capa de datos).
-2. ¿Entrada por texto natural ("café 3500") en Anotar? (idea del concepto 3, no construida).
-3. ¿Grilla de dos columnas en escritorio (≥1024 px)?
-4. ¿Borrar `profile/SubscriptionsCard.jsx` y `dashboard/ExpenseChart.jsx` (huérfanos)? Verificar y pedir OK.
-5. ¿Ícono propio para la PWA? Necesita un asset del usuario o autorización para proponer uno.
-6. ¿Unificar las categorías de Gastos fijos con las 6 de la app? Hoy "Entretenimiento" y "Software" quedan fuera de los topes y caen en "Otros" en Reportes.
-8. ¿CSV con `;` y coma decimal para Excel en español? Hoy usa coma y punto, como antes.
-7. ¿Borrar `SubscriptionsManager.css`, las reglas `.budget-alert` de `index.css` y la dependencia `recharts` (sin uso)?
+Las dos primeras ya se le hicieron sin respuesta y traban parte de la fase 5: volver a preguntarlas al empezar.
+
+1. **Borrados:** ¿se borran los archivos sin uso de la sección 3 (incluida la dependencia `recharts`)? Verificar con grep y pedir OK con la lista exacta.
+2. **Ícono propio de la PWA:** ¿tiene un asset o autoriza a proponer uno con el lenguaje del sistema?
+3. ¿Unificar las categorías de Gastos fijos (Entretenimiento, Servicios, Software, Hogar, Transporte, Otros) con las 6 de la app? Hoy esos pagos quedan fuera de los
+   topes y caen en "Otros" en Reportes.
+4. ¿CSV con `;` y coma decimal para Excel en español? Hoy usa coma y punto.
+5. ¿Ampliar los frecuentes a los últimos meses? (requiere un dato nuevo de la capa de datos).
+6. ¿Entrada por texto natural ("café 3500") en Anotar?
+7. ¿Grilla de dos columnas en escritorio (≥1024 px)?
+8. ¿"Termómetro de ritmo" en Reportes (gastado vs. esperado a la fecha)?
