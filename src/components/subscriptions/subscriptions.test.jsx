@@ -29,7 +29,7 @@ const sub = (over) => ({
   ...over,
 });
 
-const NETFLIX = sub({ id: 's-netflix', description: 'Netflix', amount: 1500, dueDate: 14, category: 'Entretenimiento' }); // venció ayer
+const NETFLIX = sub({ id: 's-netflix', description: 'Netflix', amount: 1500, dueDate: 14, category: 'Servicios' }); // venció ayer
 const ALQUILER = sub({ id: 's-alquiler', description: 'Alquiler', amount: 100000, dueDate: 15, category: 'Hogar' }); // hoy
 const GAS = sub({ id: 's-gas', description: 'Gas', amount: 12000, dueDate: 18 }); // en 3 días
 const INTERNET = sub({ id: 's-internet', description: 'Internet', amount: 30000, dueDate: 28 }); // faltan 13 días, sin pagar
@@ -278,7 +278,7 @@ describe('Gastos fijos: hoja de alta y edición', () => {
     expect(addSubscription.mock.calls[0][0]).toMatchObject({
       description: 'Spotify',
       amount: 1500,
-      category: 'Entretenimiento',
+      category: 'Servicios',
       dueDate: 20,
       cycle: 'yearly',
       accountId: 'a2',
@@ -353,7 +353,7 @@ describe('Gastos fijos: hoja de alta y edición', () => {
     expect(screen.getByLabelText('Monto ($)')).toHaveValue('1500,5');
     expect(screen.getByLabelText('Día del mes en que vence')).toHaveValue('14');
     expect(screen.getByLabelText('Frecuencia')).toHaveValue('monthly');
-    expect(screen.getByLabelText('Categoría')).toHaveValue('Entretenimiento');
+    expect(screen.getByLabelText('Categoría')).toHaveValue('Servicios');
     expect(screen.getByLabelText('Cuenta de pago')).toHaveValue('a1');
     expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeInTheDocument();
   });
@@ -367,7 +367,7 @@ describe('Gastos fijos: hoja de alta y edición', () => {
     expect(editSubscription).toHaveBeenCalledWith('s-netflix', {
       description: 'Netflix',
       amount: 2000,
-      category: 'Entretenimiento',
+      category: 'Servicios',
       dueDate: 14,
       cycle: 'monthly',
       accountId: 'a1',
@@ -376,22 +376,25 @@ describe('Gastos fijos: hoja de alta y edición', () => {
     expect(await screen.findByText('Cambios guardados')).toBeInTheDocument();
   });
 
-  it('una categoría fuera de la lista se ofrece como opción y se conserva al guardar', async () => {
-    const { editSubscription } = setup({ subscriptions: [{ ...NETFLIX, category: 'Mascotas' }] });
+  it('un gasto fijo con una categoría vieja se muestra como "Otros", avisa y se actualiza al guardar', async () => {
+    const { editSubscription } = setup({ subscriptions: [{ ...NETFLIX, category: 'Entretenimiento' }] });
     await openEdit('Netflix');
     const select = screen.getByLabelText('Categoría');
-    expect(within(select).getByRole('option', { name: 'Mascotas' })).toBeInTheDocument();
-    expect(within(select).getAllByRole('option')).toHaveLength(7);
-    expect(select).toHaveValue('Mascotas');
+    expect(within(select).getAllByRole('option')).toHaveLength(6);
+    expect(within(select).queryByRole('option', { name: 'Entretenimiento' })).toBeNull();
+    expect(select).toHaveValue('Otros');
+    expect(screen.getByText(/Antes era "Entretenimiento"/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
     await waitFor(() => expect(editSubscription).toHaveBeenCalledTimes(1));
-    expect(editSubscription.mock.calls[0][1].category).toBe('Mascotas');
+    expect(editSubscription.mock.calls[0][1].category).toBe('Otros');
   });
 
-  it('una categoría de la lista no agrega opciones extra', async () => {
+  it('las categorías de Gastos fijos son las 6 de la app y no avisan nada si ya son válidas', async () => {
     setup();
     await openEdit('Netflix');
-    expect(within(screen.getByLabelText('Categoría')).getAllByRole('option')).toHaveLength(6);
+    const select = screen.getByLabelText('Categoría');
+    expect(within(select).getAllByRole('option').map((o) => o.textContent)).toEqual(['Comida', 'Compras', 'Hogar', 'Transporte', 'Servicios', 'Otros']);
+    expect(screen.queryByText(/Antes era/)).toBeNull();
   });
 
   it('eliminar pide confirmación (destructiva), aclara que los pagos no se borran y borra por id', async () => {

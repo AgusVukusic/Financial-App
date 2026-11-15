@@ -8,11 +8,10 @@ import { useToast } from '../ui/ToastContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { useRequestId } from '../../hooks/useRequestId';
 import { parseAmountInput, formatAmountInput } from '../../utils/amountInput';
+import { REPORT_CATEGORIES as CATEGORIES } from '../../utils/reportsData';
 import formStyles from '../FormSheet.module.css';
 import styles from './SubscriptionSheet.module.css';
 
-// La lista de categorías es decisión de producto: no se cambia acá.
-const CATEGORIES = ['Entretenimiento', 'Servicios', 'Software', 'Hogar', 'Transporte', 'Otros'];
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 /** Formulario de gasto fijo; se monta solo con la hoja abierta (el estado inicial sale de las props). */
@@ -25,9 +24,11 @@ const SubscriptionForm = ({ sub, accounts, onClose, onAdd, onEdit, onDelete }) =
   const accountRef = useRef(null);
   const isEdit = Boolean(sub && sub.id);
 
-  const initialCategory = sub?.category || 'Entretenimiento';
-  // Si el gasto fijo trae una categoría que no está en la lista, se ofrece igual para que guardar no la reescriba.
-  const categoryOptions = CATEGORIES.includes(initialCategory) ? CATEGORIES : [...CATEGORIES, initialCategory];
+  // Las categorías son las mismas 6 de toda la app (topes y Reportes). Un gasto fijo viejo con otra categoría
+  // ("Entretenimiento", "Software"…) se muestra como "Otros" y se actualiza al guardar.
+  const storedCategory = sub?.category || 'Servicios';
+  const legacyCategory = CATEGORIES.includes(storedCategory) ? null : storedCategory;
+  const initialCategory = legacyCategory ? 'Otros' : storedCategory;
 
   const [description, setDescription] = useState(sub?.description || '');
   const [amount, setAmount] = useState(sub ? formatAmountInput(sub.amount) : '');
@@ -151,10 +152,13 @@ const SubscriptionForm = ({ sub, accounts, onClose, onAdd, onEdit, onDelete }) =
         )}
       </Field>
 
-      <Field label="Categoría">
+      <Field
+        label="Categoría"
+        hint={legacyCategory ? `Antes era "${legacyCategory}". Elegí una de las categorías de la app.` : undefined}
+      >
         {(p) => (
           <Select {...p} fullWidth value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categoryOptions.map((c) => (
+            {CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
