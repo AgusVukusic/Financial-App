@@ -7,25 +7,43 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       workbox: {
         // Las llamadas al backend nunca se resuelven con el index.html del service worker
         navigateFallbackDenylist: [/^\/api\//],
+        // Las fuentes (Doto, Geist Mono, Hanken Grotesk) vienen de Google: sin esto, sin conexión la app cae a tipografías del sistema.
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'google-fonts-css' },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-files',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       manifest: {
         name: 'Finanzas Personales',
         short_name: 'Finanzas',
         description: 'Controla tus gastos de forma fácil y rápida',
+        lang: 'es',
+        start_url: '/',
+        scope: '/',
         theme_color: '#131311',
         background_color: '#131311',
         display: 'standalone',
         icons: [
-          {
-            src: 'https://cdn-icons-png.flaticon.com/512/5501/5501360.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       }
     })
   ],

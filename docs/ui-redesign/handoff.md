@@ -326,11 +326,12 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 
 - Dirección: Panel de taller (aprobada). Claro y oscuro con igual importancia. El saldo total va primero.
 - "Dejemos de inventar la rueda": investigar apps reales y construir sobre eso (hecho).
-- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó la lista de limpieza
+- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó también borrar `public/icons.svg` (plantilla de Vite) y la lista de limpieza
   (`SubscriptionsManager.css`, `LandingPage.css`, `SubscriptionsCard.jsx`, `ExpenseChart.jsx`, `.budget-alert`, dos capturas viejas, `recharts`). **No autorizó** ningún otro borrado.
 - **Unidad B (accesibilidad):** el aviso ("Listo: …") se oculta mientras hay una hoja o un diálogo abierto (`Toast.module.css`, con `:has`); la navegación va antes del contenido en el DOM.
   Dos hallazgos de `break-ui` los resolvió el usuario dejándolos como están (descripciones largas en un campo de un renglón; centavos redondeados a pesos enteros en las listas): no volver a plantearlos. Ver `pr-a11y.md`.
-- **Ícono de la PWA:** que lo proponga yo con el lenguaje de Panel de taller (Doto + naranja) y le muestre opciones antes de aplicarlo.
+- **Ícono de la PWA:** pidió que lo propusiera yo; eligió la opción **A** (puntos naranja sobre oscuro, `docs/ui-redesign/pwa/`). Aprobó el cambio de `vite.config.js` para esta unidad.
+- **Barra de estado de iOS:** `black` (decisión mía, a revisar en un iPhone real: con el tema claro queda una barra negra).
 - Mergeó él los PRs #5 a #12.
 - **Cifras protagonistas en Doto:** no le gustó la mono para el "gasto mensual estimado" de Gastos fijos; quedó en Doto con el "$" naranja, como el saldo del Inicio. Aprobado.
 - **Landing: "Instalar la app" es la acción principal** e "Ingresar" la secundaria. No revertirlo.
