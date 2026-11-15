@@ -201,6 +201,15 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   dependencia `recharts`), `ConfirmDialog` sin `style` inline y 24 alias legados fuera de `tokens.css`. Quedan 13 alias que lee Grupos.
   Lint 0 errores (9 avisos), 328 pruebas, build OK. El bundle no cambió (recharts no entraba al build).
 
+- **Fase 5 · B · Accesibilidad y movimiento** (rama `feature/ui-a11y`, 2026-11-15; cuerpo del PR en `pr-a11y.md`, capturas en `a11y/`): barrido con Playwright de
+  objetivos de 44 px, desbordes y elementos tapados (17 estados × 320/393/1100 × claro/oscuro, con `ana` y con `peor`): 0 hallazgos; contraste calculado del texto: 0 bajo AA;
+  foco, Tab y Escape apilado; zoom 200 %; movimiento completo y reducido; `break-ui` corrido de verdad con `scripts/seed-worstcase.js` (usuarios `peor@` y `vacio@prueba.test`);
+  deuda de los `pr-*.md` cerrada. Cada barrido llevó un control negativo.
+  - Corregido: riel de escritorio al final del orden de Tab (`Layout.jsx`, ahora el `nav` va antes del `main`); scroll lateral con texto al 200 % a 320 px (saldo, `Tag`,
+    `SectionHeader`, `ConfirmDialog`); el aviso tapaba el botón de abajo de una hoja (`Toast.module.css`); "Ver los 1 restantes"; PDF con montos partidos, fecha en dos renglones y emoji como basura.
+  - Decisiones del usuario pendientes: descripciones de 31 a 200 caracteres en un campo de un renglón; centavos redondeados a pesos enteros en las listas.
+  - Pruebas 328 → 331. Lint 0 errores (9 avisos).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
@@ -211,6 +220,6 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 - Fase 4: Reportes, Gastos fijos (confirmar pagar con `destructive: false`, sin segundo aviso), Perfil, Landing/Login/Activación
   (hallazgo 7: login sin verificar; errores técnicos de Firebase en texto humano).
-- Fase 5: A limpieza (hecha, PR por abrir), B accesibilidad y movimiento, C PWA, D `DESIGN.md` y resumen.
+- Fase 5: A limpieza (mergeada, #13), B accesibilidad y movimiento (rama subida, PR por abrir), C PWA, D `DESIGN.md` y resumen.
 - Ícono propio de la PWA y `apple-touch-icon`; cache offline de las fuentes.
 - Preguntas abiertas para el usuario: ver `handoff.md` sección 12.
