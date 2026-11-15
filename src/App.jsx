@@ -197,6 +197,8 @@ function App() {
           deleteSubscription={deleteSubscription}
           editSubscription={editSubscription}
           paySubscription={paySubscription}
+          onDeleteTransaction={deleteTransaction}
+          onAddAccountClick={() => handleOpenAccountModal()}
           accounts={accounts}
         />
       )}
