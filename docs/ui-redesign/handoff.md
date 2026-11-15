@@ -316,7 +316,9 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 
 - Dirección: Panel de taller (aprobada). Claro y oscuro con igual importancia. El saldo total va primero.
 - "Dejemos de inventar la rueda": investigar apps reales y construir sobre eso (hecho).
-- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). **No autorizó** ningún otro borrado.
+- Autorizó borrar `Toast.css`, `ConfirmDialog.css`, `App.css`, `AddTransactionModal.css` y `TransactionList.css` (ya borrados). El 2026-11-15 autorizó la lista de limpieza
+  (`SubscriptionsManager.css`, `LandingPage.css`, `SubscriptionsCard.jsx`, `ExpenseChart.jsx`, `.budget-alert`, dos capturas viejas, `recharts`). **No autorizó** ningún otro borrado.
+- **Ícono de la PWA:** que lo proponga yo con el lenguaje de Panel de taller (Doto + naranja) y le muestre opciones antes de aplicarlo.
 - Mergeó él los PRs #5 a #12.
 - **Cifras protagonistas en Doto:** no le gustó la mono para el "gasto mensual estimado" de Gastos fijos; quedó en Doto con el "$" naranja, como el saldo del Inicio. Aprobado.
 - **Landing: "Instalar la app" es la acción principal** e "Ingresar" la secundaria. No revertirlo.
@@ -330,8 +332,8 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 
 Las dos primeras ya se le hicieron sin respuesta y traban parte de la fase 5: volver a preguntarlas al empezar.
 
-1. **Borrados:** ¿se borran los archivos sin uso de la sección 3 (incluida la dependencia `recharts`)? Verificar con grep y pedir OK con la lista exacta.
-2. **Ícono propio de la PWA:** ¿tiene un asset o autoriza a proponer uno con el lenguaje del sistema?
+1. ~~Borrados~~: respondida y aplicada en `feature/ui-cleanup` (sección 11).
+2. ~~Ícono propio de la PWA~~: respondida: que lo proponga yo (sección 11). Falta hacerlo en la unidad C.
 3. ¿Unificar las categorías de Gastos fijos (Entretenimiento, Servicios, Software, Hogar, Transporte, Otros) con las 6 de la app? Hoy esos pagos quedan fuera de los
    topes y caen en "Otros" en Reportes.
 4. ¿CSV con `;` y coma decimal para Excel en español? Hoy usa coma y punto.
