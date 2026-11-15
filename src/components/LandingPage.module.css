@@ -1,0 +1,13 @@
+.bar {
+  height: 12px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-left: var(--sp-5);
+  font-size: var(--fs-body);
+  color: var(--ink);
+  line-height: 1.4;
+}

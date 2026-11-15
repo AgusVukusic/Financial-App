@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Button from './ui/Button';
+import AuthShell from './auth/AuthShell';
+import shared from './auth/auth.module.css';
 
 const GENERIC_ERROR = 'No pudimos activar tu cuenta. Revisá tu conexión e intentá de nuevo.';
 
@@ -46,45 +48,47 @@ const ActivationScreen = ({ email, onActivate, onSignOut, connectionError = fals
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, backgroundColor: 'var(--bg-base)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 9999, padding: 'var(--spacing-xl)'
-    }}>
-      <div className="glass-panel" role="status" aria-live="polite" style={{
-        padding: 'var(--spacing-xl)', maxWidth: '400px', width: '100%',
-        textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)'
-      }}>
+    <AuthShell>
+      <div className={shared.stack} role="status" aria-live="polite">
+        <p className={shared.kicker}>Beta por invitación</p>
+
         {state === 'activating' && (
           <>
-            <h1 style={{ fontSize: '1.4rem' }}>Activando tu cuenta…</h1>
-            <p className="text-secondary">Estamos verificando tu invitación a la Beta.</p>
+            <h1 className={shared.heading}>Activando tu cuenta…</h1>
+            <p className={shared.muted}>Estamos verificando tu invitación a la Beta.</p>
           </>
         )}
 
         {state === 'denied' && (
           <>
-            <h1 style={{ fontSize: '1.4rem' }}>Acceso no habilitado</h1>
-            <p className="text-secondary">{message}</p>
-            {email && <p className="text-secondary" style={{ fontSize: '0.85rem' }}>Cuenta: {email}</p>}
+            <h1 className={shared.heading}>Tu correo no está invitado</h1>
+            <p className={shared.muted}>{message}</p>
+            {email && <p className={shared.mono}>Cuenta: {email}</p>}
+            <p className={shared.muted}>Pedile a quien te invitó que sume este correo.</p>
           </>
         )}
 
         {state === 'error' && (
           <>
-            <h1 style={{ fontSize: '1.4rem' }}>Algo salió mal</h1>
-            <p className="text-secondary">{message}</p>
+            <h1 className={shared.heading}>Algo salió mal</h1>
+            <p className={shared.muted}>{message}</p>
           </>
         )}
-
-        {state !== 'activating' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-            {state === 'error' && <Button onClick={handleRetry}>Reintentar</Button>}
-            <Button variant="ghost" onClick={onSignOut}>Cerrar sesión</Button>
-          </div>
-        )}
       </div>
-    </div>
+
+      {state !== 'activating' && (
+        <div className={shared.actions}>
+          {state === 'error' && (
+            <Button variant="primary" size="lg" block onClick={handleRetry}>
+              Reintentar
+            </Button>
+          )}
+          <Button variant="key" block onClick={onSignOut}>
+            Cerrar sesión
+          </Button>
+        </div>
+      )}
+    </AuthShell>
   );
 };
 

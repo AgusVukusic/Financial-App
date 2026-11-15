@@ -17,6 +17,8 @@ import Profile from './components/Profile';
 import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
 import LandingPage from './components/LandingPage';
+import AuthShell from './components/auth/AuthShell';
+import authStyles from './components/auth/auth.module.css';
 
 import AppHeader from './components/AppHeader';
 import MonthSelector from './components/MonthSelector';
@@ -88,20 +90,21 @@ function App() {
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
   useEffect(() => {
+    const base = 'Finanzas Personales';
     const titles = {
-      home: 'Dashboard - Financial App',
-      reports: 'Reportes - Financial App',
-      profile: 'Perfil - Financial App',
-      subscriptions: 'Gastos Fijos - Financial App'
+      home: 'Inicio',
+      reports: 'Reportes',
+      profile: 'Perfil',
+      subscriptions: 'Gastos fijos'
     };
-    document.title = titles[activeTab] || 'Financial App';
-  }, [activeTab]);
+    document.title = activeUid && titles[activeTab] ? `${titles[activeTab]} · ${base}` : base;
+  }, [activeTab, activeUid]);
 
   if (loading || (user && accessStatus === 'checking') || (activeUid && loadingAccounts)) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-base)' }}>
-        <p style={{ color: 'var(--text-primary)' }}>Cargando...</p>
-      </div>
+      <AuthShell>
+        <p role="status" className={authStyles.muted}>Cargando…</p>
+      </AuthShell>
     );
   }
 
