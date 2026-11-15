@@ -81,3 +81,17 @@
 .toast :focus-visible {
   outline-color: var(--bg);
 }
+
+/*
+ * Con una hoja o un diálogo abierto el aviso no se ve ni recibe toques: abajo tapaba "Guardar" (z-toast está por
+ * encima de z-sheet). Sigue en el DOM, así que el lector de pantalla lo anuncia igual, y reaparece al cerrarse.
+ */
+body:has([role='dialog']) .container,
+body:has([role='alertdialog']) .container {
+  opacity: 0;
+}
+
+body:has([role='dialog']) .toast,
+body:has([role='alertdialog']) .toast {
+  pointer-events: none;
+}
