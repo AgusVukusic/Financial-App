@@ -197,7 +197,7 @@ Una paleta de tinta y papel con un solo golpe de color. Dos temas con los mismos
 **Character:** Una grotesca humana y legible para leer, una monoespaciada de instrumento para etiquetar y medir, y una fuente de puntos para lo que hay que ver de lejos. Las tres juntas son el tablero.
 
 ### Hierarchy
-- **Display** (Doto 700, 3 rem / 48 px, 1,2): el saldo total del Inicio y el gasto mensual estimado de Gastos fijos, con el "$" en naranja. Se achica para entrar en el ancho y pasa a Geist Mono desde los 12 caracteres.
+- **Display** (Doto 700, 3 rem / 48 px, 1,2): el saldo total del Inicio y el gasto mensual estimado de Gastos fijos, con el "$" en naranja. Se achica para entrar en el ancho y pasa a Geist Mono cuando el número ya formateado supera los 12 caracteres (contando los puntos).
 - **Figure** (Geist Mono 600, 1,5 rem / 24 px, tabular): cifras destacadas.
 - **Title** (Hanken Grotesk 700, 1,25 rem / 20 px, 1,2): títulos de pantalla y de hoja.
 - **Lead** (Hanken Grotesk 600, 1,0625 rem / 17 px): texto de botones grandes y énfasis.
@@ -275,14 +275,10 @@ El **Odometer** hace rodar cada dígito (`transform`, 800 ms, desacelerado) y de
 ### Do:
 - **Do** reservar el naranja para lo que se puede tocar (botón principal, numerales, pestaña actual, foco).
 - **Do** mostrar el estado con texto + ícono (+ forma): "Superado por $ 26.302.374" con ícono de alerta; el gasto "−$ 29.800" en tinta; el ingreso "+$ 120.000" en verde.
-- **Do** poner en Doto con el "$" naranja la cifra protagonista de cada pantalla (saldo, gasto mensual) y pasar a mono desde los 12 caracteres.
+- **Do** poner en Doto con el "$" naranja la cifra protagonista de cada pantalla (saldo, gasto mensual) y pasar a mono cuando el número formateado supera los 12 caracteres.
 - **Do** dar 44 px de alto como mínimo a todo lo que se toca y 56 px a las acciones principales.
-- **Do** componer los montos con `parseAmountInput` y mostrarlos con separador argentino (`$ 15.373.721`).
 - **Do** usar los tokens de `src/styles/tokens.css` y los componentes de `src/components/ui/`.
 - **Do** mover solo `transform` y `opacity`, y respetar `prefers-reduced-motion`.
-- **Do** probar cada pantalla en claro y oscuro, a 320, 393 y ~1100 px, con texto al 200 % y con datos de peor caso.
-- **Do** escribir en voseo rioplatense ("Anotá", "Pagá", "Elegí"), sin jerga, diciendo qué dibujo buscar y qué tocar.
-- **Do** ofrecer Deshacer con un aviso en lugar de un segundo diálogo cuando la acción es reversible; confirmaciones que no borran con `destructive: false`.
 
 ### Don't:
 - **Don't** usar el naranja para marcar un estado ni como decoración.
@@ -292,5 +288,3 @@ El **Odometer** hace rodar cada dígito (`transform`, 800 ms, desacelerado) y de
 - **Don't** usar `style={{…}}` con valores fijos, colores hex sueltos ni los alias antiguos (`--text-primary`, `--spacing-*`, …): solo los lee Grupos.
 - **Don't** usar `--acc` como texto sobre `--chip` en el tema claro (3,97:1).
 - **Don't** cortar una cifra con puntos suspensivos: se acortan los nombres, nunca los montos.
-- **Don't** rediseñar ni mostrar Grupos: está fuera de la Beta.
-- **Don't** hacer que "Instalar la app" deje de ser la acción principal de la Landing (decisión del usuario).

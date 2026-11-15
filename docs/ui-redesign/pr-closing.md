@@ -4,7 +4,7 @@
 
 - **Los montos ya no se cortan a 320 px** (hueco que quedó de la unidad B, detectado al documentar la regla "las cifras nunca se cortan"):
   - En "Anotar rápido", la cifra de cada tecla se achica según su largo (los montos normales siguen en 12 px; uno de 8 cifras baja a 10,7 px). Antes "$ 25.000.000" salía como "$ 25.000…".
-  - En "Cuentas", un saldo muy largo baja de renglón en vez de cortarse. En 393 px y escritorio nada cambia.
+  - En "Cuentas", un saldo muy largo (17 caracteres, como $ 124.240.331.049) baja de renglón en vez de cortarse. Con saldos normales (hasta unos 14 caracteres) las filas siguen midiendo 60 px a 320, 360 y 393 px, y en escritorio nada cambia.
 - Todo lo demás es documentación; no cambia lo que ve la gente.
 
 ## Qué se agrega
@@ -32,7 +32,7 @@
 - **Aparatos reales**: iPhone, Android, Safari, lector de pantalla, abrir el CSV en Excel y seguir la guía de instalación (Landing) en un iPhone y un Android reales. Esto sigue pendiente de vos.
 - **`DESIGN.md`**: no pasé las preguntas de creatividad de `/impeccable document` (nombre de la dirección, voz): usé la dirección que ya aprobaste y el lenguaje de `design-system.md`. Si querés ajustar algo de la voz o los nombres, se edita ahí.
 - El validador oficial del formato `DESIGN.md` no se corrió (no está instalado).
-- El saldo de una cuenta que baja de renglón a 320 px hace esa fila más alta (87 a 95 px en lugar de 60).
+- Con saldos de 17 caracteres a 320 px la fila de la cuenta mide 87 px en lugar de 60 (el resto sigue en 60 a 62 px). Lo comprobé con `ana` (datos normales) y con `peor` a 320, 360 y 393 px, claro y oscuro.
 
 ## Lo que queda abierto (no lo resolví por mi cuenta)
 
