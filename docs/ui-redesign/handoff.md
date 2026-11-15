@@ -351,10 +351,14 @@ Las dos primeras están respondidas. Las demás (3 a 8) siguen abiertas: no reso
 
 1. ~~Borrados~~: respondida y aplicada en `feature/ui-cleanup` (sección 11).
 2. ~~Ícono propio de la PWA~~: respondida y hecha (opción A, sección 11).
-3. ¿Unificar las categorías de Gastos fijos (Entretenimiento, Servicios, Software, Hogar, Transporte, Otros) con las 6 de la app? Hoy esos pagos quedan fuera de los
-   topes y caen en "Otros" en Reportes.
-4. ¿CSV con `;` y coma decimal para Excel en español? Hoy usa coma y punto.
-5. ¿Ampliar los frecuentes a los últimos meses? (requiere un dato nuevo de la capa de datos).
-6. ¿Entrada por texto natural ("café 3500") en Anotar?
-7. ¿Grilla de dos columnas en escritorio (≥1024 px)?
-8. ¿"Termómetro de ritmo" en Reportes (gastado vs. esperado a la fecha)?
+Respuestas del usuario (2026-11-15, después de cerrar el rediseño; dejó el orden y la forma a criterio del asistente). Se implementan en PRs aparte, uno por vez:
+
+3. ~~Categorías de Gastos fijos~~: **sí, unificar con las 6 de la app.** Hecho en `feature/ui-categories-csv` (`pr-categories-csv.md`).
+4. ~~CSV para Excel~~: **sí, que se lea bien en Excel.** Hecho en la misma rama (`;`, coma decimal).
+5. Frecuentes de varios meses: **no entendió la pregunta.** Hay que explicarla con un ejemplo (hoy "Anotar rápido" solo mira los movimientos del mes que se está viendo: el día 1 de cada mes aparece vacío)
+   y recién después decidir. Necesita un dato nuevo de la capa de datos (consultar movimientos de los últimos meses): **preguntar antes de tocarla**.
+6. **Texto natural ("café 3500") para anotar un movimiento: sí, quiere volver a eso.** "A mí me gustaba mucho más el texto natural que como está armado ahora la pantalla de ingresar un movimiento": no es un
+   agregado, reemplaza como camino principal al formulario de la hoja. Referencia del analizador: `docs/ui-redesign/concepts/common.js` (`CK.parse`).
+7. Dos columnas en escritorio: **preguntó cómo se arregla.** Propuesta del asistente: desde 1024 px, Inicio en dos columnas (saldo, anotar rápido, para pagar y cuentas a la izquierda; Movimientos a la derecha),
+   Reportes y Gastos fijos igual, Perfil sigue en una columna.
+8. Termómetro de ritmo en Reportes: **sí** ("perfecto").

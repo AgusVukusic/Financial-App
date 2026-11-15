@@ -219,6 +219,10 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   sidecar `.impeccable/design.json` (sin commitear a propósito), sección de UI de `CLAUDE.md` y `design-system.md` al día, handoff y progress cerrados. Al escribirla se encontró y corrigió un hueco de la
   unidad B: a 320 px el monto de los frecuentes y el saldo de las cuentas se cortaban con puntos suspensivos con las cifras de `peor`.
 
+- **Después del cierre · PR 1** (rama `feature/ui-categories-csv`, 2026-11-15; `pr-categories-csv.md`): decisiones 3 y 4 del usuario. Gastos fijos usa las 6 categorías de la app (los viejos se muestran como "Otros" con aviso)
+  y el CSV usa `;` y coma decimal para Excel en español. Pruebas 331 → 333. Siguen, en este orden y un PR por vez: texto natural al anotar (6), termómetro de ritmo (8), dos columnas en escritorio (7);
+  los frecuentes de varios meses (5) esperan la explicación al usuario.
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
