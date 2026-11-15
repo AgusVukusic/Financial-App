@@ -224,7 +224,7 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   los frecuentes de los últimos 3 meses (5) están autorizados por el usuario (tocar la capa de datos solo para leer) y van al final.
 
 - **Después del cierre · PR 2** (rama `feature/ui-natural-entry`, 2026-11-15; `pr-natural-entry.md`, capturas en `natural-entry/`): decisión 6. La hoja de un movimiento nuevo se anota escribiendo ("café 3500") con
-  interpretación visible y correcciones con toques (`utils/naturalEntry.js` + `AddTransactionModal.jsx`); editar sigue con el formulario. Pruebas 333 → 388. Verificado contra el emulador (saldo y documento).
+  interpretación visible y correcciones con toques (`utils/naturalEntry.js` + `AddTransactionModal.jsx`); editar sigue con el formulario. Cuentas en botones a pedido del usuario. Pruebas 333 → 390. Verificado contra el emulador (saldo y documento).
   Sin probar: teclados reales, autocorrector de iOS, dictado y lector de pantalla. Sigue el termómetro de ritmo (8), después las dos columnas (7) y por último los frecuentes de 3 meses (5).
 
 ## Pantallas terminadas / PRs

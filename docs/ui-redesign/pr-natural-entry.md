@@ -12,7 +12,8 @@ La hoja **"Nuevo movimiento"** (botón Anotar y los botones "Anotar un gasto" / 
 
 Cómo se lee el número, que es donde más se puede equivocar: el punto separa miles (`1.500` = mil quinientos), la coma es decimal (`3,5`), `k` o `mil` multiplican por 1.000. Si hay varios números (`3 empanadas 4500`) se toma el que lleva `$`, `k` o `mil`, y si no, el más grande. La confirmación aclara cómo leyó un número dudoso y **muestra los centavos tal como se guardan** (`$ 3,5`, no `$ 4`).
 
-- **Editar un movimiento que ya existe no cambió**: sigue el formulario completo (Monto, Categoría, Cuenta, Fecha y descripción).
+- **La cuenta va en botones** (pedido tuyo después de ver la primera versión): un toque elige; el nombre largo se acorta con "…" y el botón sigue siendo de 44 px. En transferencias, "Desde" y "Hacia" también son botones.
+- **Editar un movimiento que ya existe**: sigue el formulario completo (Monto, Categoría, Fecha y descripción), con la cuenta también en botones.
 - **Transferencias:** el tipo se elige a mano y las cuentas Desde/Hacia también. El texto no elige cuenta ahí (¿origen o destino?) y la palabra queda en la descripción.
 - La descripción se recorta a 30 letras (el límite del formulario de antes) y la confirmación lo avisa.
 - El botón dice lo que va a guardar: **"Guardar gasto · $ 3.500"**.
@@ -22,7 +23,7 @@ No cambia nada en el servidor ni en lo que se guarda: el movimiento sale por el 
 
 ## Capturas
 
-`docs/ui-redesign/natural-entry/`: `01` hoja vacía, `02` "uber 4500 efectivo ayer" (oscuro), `03` solo "café" (orienta, sin rojo), `04` "sueldo 1.850.000" como ingreso (claro), `05` descripción larga a 320 px, `06` centavos, `07` escritorio.
+`docs/ui-redesign/natural-entry/`: `01` hoja vacía, `02` "uber 4500 efectivo ayer" (oscuro), `03` solo "café" (orienta, sin rojo), `04` "sueldo 1.850.000" como ingreso (claro), `05` descripción larga a 320 px, `06` centavos, `07` escritorio, `08` a `10` cuentas como botones (393 px oscuro, 320 px claro y transferencia).
 
 ## Cómo probarlo
 
@@ -32,13 +33,14 @@ No cambia nada en el servidor ni en lo que se guarda: el movimiento sale por el 
 
 ## Verificación
 
-- **Pruebas: 333 → 388** (43 del analizador `utils/naturalEntry.js`, más las de la hoja reescritas para escribir en vez de llenar campos). Lint 0 errores (9 avisos). Build OK.
+- **Pruebas: 333 → 390** (43 del analizador `utils/naturalEntry.js`, más las de la hoja reescritas para escribir en vez de llenar campos). Lint 0 errores (9 avisos). Build OK.
+- **Cuentas como botones** (navegador, usuario `peor` con nombres largos, 320/393/1100 px, claro y oscuro): todos de 44 px o más, sin desbordes; solo un nombre de 38 letras se acorta con "…" a 320 px (queda del ancho completo).
 - **Contra el emulador** (usuario `peor`): anotar `prueba natural 3500 efectivo` bajó el saldo de la cuenta Efectivo en 350000 centavos (-10.490.040.060 → -10.490.390.060) y creó un movimiento `expense / OUT / 350000`, descripción "Prueba natural", categoría "Otros" y esa cuenta.
 - **Navegador (Playwright)**, hoja abierta a 320, 393 y 1100 px, claro y oscuro y a 320 px con texto al 200 %: ningún objetivo menor de 44 px, sin scroll lateral, el botón de guardar libre (medido sin mover la hoja), la confirmación sin desbordes con una descripción larga ("compra grande del mes en el mayorista 45.000 efectivo ayer").
 
 ## Diferencias con el concepto que te gustaba (`concepts/k3`)
 
-Mantiene el renglón de texto, el resaltado del monto, la frase "Leí…" y las correcciones con toques. **No incluye** (decisiones mías, se pueden agregar): el teclado numérico propio; la cuenta como botones (usa la lista desplegable de siempre, que escala a muchas cuentas); y el botón dice "Guardar gasto · $ 3.500" en lugar de "Anotar · $ 3.500". Entiende también ingresos y transferencias (el concepto era solo de gastos).
+Mantiene el renglón de texto, el resaltado del monto, la frase "Leí…" y las correcciones con toques. **No incluye** (decisiones mías, se pueden agregar): el teclado numérico propio; y el botón dice "Guardar gasto · $ 3.500" en lugar de "Anotar · $ 3.500". Entiende también ingresos y transferencias (el concepto era solo de gastos).
 
 ## No probado / límites
 
