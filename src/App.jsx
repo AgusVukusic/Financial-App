@@ -185,6 +185,7 @@ function App() {
       {activeTab === 'profile' && (
         <Profile 
           userName={userName}
+          email={user?.email}
           uid={user?.uid}
           onClearData={handleClearData} 
         />

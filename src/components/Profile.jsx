@@ -1,66 +1,100 @@
-import { User, Shield, FileText } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { FileText, FileSpreadsheet, LogOut } from 'lucide-react';
 import { exportToPDF, exportToCSV } from '../utils/formatters';
-import { motion } from 'framer-motion';
 import { useDialog } from '../contexts/DialogContext';
-import Card from './ui/Card';
-import Button from './ui/Button';
 import { useAllTransactions } from '../hooks/useAllTransactions';
+import Button from './ui/Button';
+import Card from './ui/Card';
+import SectionHeader from './ui/SectionHeader';
+import Tag from './ui/Tag';
+import { useToast } from './ui/ToastContext';
+import styles from './Profile.module.css';
 
-const Profile = ({ userName, uid, onClearData }) => {
+const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
+
+/**
+ * Perfil: cuenta, exportación de movimientos y cierre de sesión.
+ * El encabezado de la app ya dice "Perfil" y saluda: acá no se repite.
+ */
+const Profile = ({ userName, email, uid, onClearData }) => {
   const { confirm } = useDialog();
-  const allTransactions = useAllTransactions(uid);
+  const { showToast } = useToast();
+  const allTransactions = useAllTransactions(uid) || [];
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false); // guarda síncrona: dos toques en el mismo tick no exportan dos veces
 
-  const handleClearData = async () => {
-    const isConfirmed = await confirm("¿Estás seguro de que deseas cerrar sesión? (Tus datos en la nube no se borrarán)");
-    if (isConfirmed) {
-      onClearData();
+  const count = allTransactions.length;
+  const empty = count === 0;
+
+  const runExport = async (exporter) => {
+    if (busyRef.current || empty) return;
+    busyRef.current = true;
+    setBusy(true);
+    try {
+      // Deja pintar el botón deshabilitado antes del trabajo síncrono (el PDF es pesado).
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const sorted = [...allTransactions].sort(byDateDesc);
+      const fileName = exporter(sorted);
+      showToast(`Se descargó ${fileName}`, 'success');
+    } catch {
+      showToast('No se pudo exportar. Probá de nuevo.', 'error');
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
     }
   };
 
-  const handleExportData = () => {
-    exportToCSV(allTransactions);
+  const handleLogout = async () => {
+    const ok = await confirm('¿Cerrar sesión? Tus datos quedan guardados en tu cuenta.', 'Cerrar sesión', {
+      confirmText: 'Cerrar sesión',
+      destructive: false,
+    });
+    if (ok) onClearData();
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="profile-container" style={{ padding: 'var(--spacing-md) 0' }}>
-      <h2 style={{ marginBottom: 'var(--spacing-lg)' }}>Mi Perfil</h2>
-      
-      <Card className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
-          <User size={32} color="currentColor" style={{ color: 'var(--onacc)' }} />
-        </div>
-        <div style={{ overflow: 'hidden' }}>
-          <h3 style={{ fontSize: '1.2rem', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userName}</h3>
-          <p className="text-secondary" style={{ margin: 0, fontSize: '0.9rem' }}>Plan Cloud Activo</p>
-        </div>
-      </Card>
+    <div className={styles.screen}>
+      <section aria-label="Cuenta">
+        <SectionHeader index="00" title="Cuenta" />
+        <Card className={styles.account}>
+          <p className={styles.name}>{userName}</p>
+          {email && <p className={styles.email}>{email}</p>}
+          <Tag>Beta por invitación</Tag>
+        </Card>
+      </section>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-          <Card style={{ flex: 1, padding: 0 }}>
-            <Button variant="ghost" onClick={() => exportToPDF(allTransactions || [])} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <FileText size={20} className="text-secondary" />
-              <span>PDF</span>
-            </Button>
-          </Card>
-          <Card style={{ flex: 1, padding: 0 }}>
-            <Button variant="ghost" onClick={handleExportData} style={{ width: '100%', height: '100%', padding: 'var(--spacing-md)', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <Shield size={20} className="text-secondary" />
-              <span>CSV</span>
-            </Button>
-          </Card>
+      <section aria-label="Exportar movimientos">
+        <SectionHeader index="01" title="Exportar movimientos" />
+        <p className={styles.lead}>Todos tus movimientos, del más nuevo al más viejo.</p>
+        <p className={styles.count}>{empty ? 'Todavía no hay movimientos para exportar.' : count === 1 ? '1 movimiento' : `${count} movimientos`}</p>
+        <div className={styles.actions}>
+          <button type="button" className={styles.action} disabled={empty || busy} onClick={() => runExport(exportToPDF)}>
+            <FileText size={22} aria-hidden="true" className={styles.icon} />
+            <span className={styles.text}>
+              <span className={styles.title}>Descargar PDF</span>
+              <span className={styles.desc}>Para imprimir o compartir</span>
+            </span>
+          </button>
+          <button type="button" className={styles.action} disabled={empty || busy} onClick={() => runExport(exportToCSV)}>
+            <FileSpreadsheet size={22} aria-hidden="true" className={styles.icon} />
+            <span className={styles.text}>
+              <span className={styles.title}>Descargar CSV</span>
+              <span className={styles.desc}>Para abrir en Excel o Google Sheets</span>
+            </span>
+          </button>
         </div>
+      </section>
 
-        <Button 
-          variant="danger" 
-          onClick={handleClearData}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', justifyContent: 'center', marginTop: 'var(--spacing-md)' }}
-        >
-          <User size={20} />
-          <span>Cerrar sesión</span>
+      <section aria-label="Sesión">
+        <SectionHeader index="02" title="Sesión" />
+        <Button variant="outline" block onClick={handleLogout}>
+          <LogOut size={18} aria-hidden="true" />
+          Cerrar sesión
         </Button>
-      </div>
-    </motion.div>
+      </section>
+
+      <p className={styles.footer}>Finanzas Personales · Beta</p>
+    </div>
   );
 };
 
