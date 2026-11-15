@@ -89,8 +89,8 @@ Todo esto **ya está en producción**.
 | Dashboard (Inicio) | ✅ rehecho |
 | Modal de movimiento + modal de cuenta | ✅ rehechos (hojas) |
 | TransactionList (Movimientos) | ✅ rehecha |
-| **Reportes** (`Reports.jsx`, `dashboard/BudgetAlerts.jsx`) | ⏳ **siguiente**. Solo lee tokens (se ve bien, pero es el diseño viejo) |
-| **Gastos fijos** (`SubscriptionsManager.jsx`, 255 líneas) | ⏳ pendiente |
+| **Reportes** (`Reports.jsx`, `reports/*`, `dashboard/BudgetAlerts.jsx`) | ✅ rehecho en `feature/ui-reports` (PR pendiente de merge; ver `pr-reports.md`) |
+| **Gastos fijos** (`SubscriptionsManager.jsx`, 255 líneas) | ⏳ **siguiente** (esperar el merge de Reportes) |
 | **Perfil** (`Profile.jsx`) | ⏳ pendiente |
 | **Landing / Login / Activación** (`LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`) | ⏳ pendiente |
 | Pasada final (fase 5) | ⏳ pendiente |

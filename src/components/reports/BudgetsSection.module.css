@@ -1,0 +1,16 @@
+.section {
+  scroll-margin-top: var(--sp-4);
+}
+
+.hint {
+  margin-bottom: var(--sp-3);
+  color: var(--ink2);
+  font-size: var(--fs-small);
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}

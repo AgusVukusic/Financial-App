@@ -1,0 +1,44 @@
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surf);
+  border: var(--bw) solid var(--rule);
+  border-radius: var(--r-lg);
+}
+
+.text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-2);
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.part {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.part > svg {
+  flex: none;
+}
+
+.over {
+  color: var(--bad);
+}
+
+.near {
+  color: var(--warn);
+}
+
+.sep {
+  color: var(--ink2);
+}
