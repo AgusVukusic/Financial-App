@@ -66,8 +66,8 @@ De `~/.claude/CLAUDE.md` y del prompt inicial:
   la base** (no apilar PRs). Se puede hacer push de ramas `feature/ui-*`. PR hacia `main` con: qué cambia y por qué, capturas antes/después (375 px y escritorio),
   cómo probarlo y link al preview de Vercel. CI (lint, tests, build) en verde antes de pedir el merge. **El merge lo hace el usuario** (o vos solo con su OK explícito
   para ese PR). Sin `force push`, sin reescribir historia pusheada, sin borrar ramas remotas sin avisar.
-- **Mensajes de commit:** terminan con `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` (o la atribución que indique el sistema en esa sesión). Cuerpos de PR
-  terminan con `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- **Mensajes de commit y PR: sin atribución.** Desde el 2026-11-16 la regla del usuario (`~/.claude/CLAUDE.md`) prohíbe `Co-Authored-By`, "Generated with Claude Code" y enlaces de sesión en commits y cuerpos de PR
+  (los commits viejos no se reescriben). No cambiar `user.name`/`user.email` de git.
 - **Cada hallazgo de auditoría** lleva severidad, pantalla, problema, impacto, propuesta y evidencia (formato ya usado en `audit.md`).
 - Después de cada pantalla: verificarla en el navegador (375 px y escritorio, claro y oscuro) y probarla con casos extremos (la skill `break-ui`: se hicieron
   casos extremos a mano y en pruebas, no se corrió la skill como tal; decirlo siempre con honestidad).
@@ -174,8 +174,8 @@ definidos al final de `tokens.css`, declarados **en cada selector de tema** (si 
 ADR 001); `voidTransaction(requestId)` lo anula con un movimiento compensatorio que los mappers ocultan. `addTransaction` acepta `data.requestId` y no devuelve nada.
 
 **Agregado en las pantallas de noviembre (PRs #9 a #12):**
-- Reportes: `Reports.jsx` (orquestador) + `components/reports/` (`BudgetRow`, `BudgetSheet`, `BudgetsSection`, `DistributionSection`, `MonthlyChart`, `Swatch`),
-  `dashboard/BudgetAlerts.jsx` reescrito, `utils/reportsData.js` (`budgetStatus`, `alertSummary`, `distribution`, `monthlySeries`, `formatCompact`, `niceMax`).
+- Reportes: `Reports.jsx` (orquestador) + `components/reports/` (`BudgetRow`, `BudgetSheet`, `BudgetsSection`, `DistributionSection`, `MonthlyChart`, `PaceCard`, `Swatch`),
+  `dashboard/BudgetAlerts.jsx` reescrito, `utils/reportsData.js` (`budgetStatus`, `alertSummary`, `distribution`, `monthlySeries`, `formatCompact`, `niceMax`, `paceStatus`).
 - Gastos fijos: `SubscriptionsManager.jsx` + `components/subscriptions/` (`SubscriptionRow`, `SubscriptionSheet`).
 - Perfil: `Profile.jsx` + `Profile.module.css`; `utils/formatters.js` (`typeLabel`, `buildCSV`, `exportToCSV`/`exportToPDF` devuelven el nombre del archivo).
 - Previo al ingreso: `components/auth/` (`AuthShell`, `auth.module.css`, `InstallGuide`), `LandingPage.jsx`, `WelcomeScreen.jsx`, `ActivationScreen.jsx`,
@@ -232,7 +232,7 @@ Paradas ✋ en la fase 5: antes de cualquier borrado, antes de tocar `package.js
 - **Frecuentes limitados al mes seleccionado** (el hook solo trae ese mes). Ampliarlo necesita un dato nuevo de la capa de datos: preguntar antes.
 - Desktop: el contenido sigue en una columna de 880 px; la `Sheet` se centra en la ventana; los medidores de Reportes se estiran a todo el ancho.
 - Entrada de texto natural ("café 3500"): no implementada; `CK.parse` de `docs/ui-redesign/concepts/common.js` es la referencia.
-- Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). "Termómetro de ritmo" no construido.
+- Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). El termómetro de ritmo ya está (`feature/ui-reports-pace`); el día en que aparece y la tolerancia son constantes mías.
 - Gastos fijos: Deshacer dura lo que el toast (8 s); después, el pago se anula desde Movimientos. A 320 px "Pagar" baja a un renglón propio.
 - Perfil: `useAllTransactions` no distingue "cargando" de "sin movimientos" (los botones de exportar arrancan deshabilitados un instante).
 - Ingreso: después de registrarse la contraseña se vacía, así que "Reenviar correo" pide escribirla de nuevo.
@@ -309,7 +309,7 @@ presupuestos y 5 gastos fijos; vaciar antes con `curl -X DELETE http://127.0.0.1
 ## 9. Protocolo de git por pantalla
 
 1. `git checkout main && git pull --ff-only origin main && git checkout -b feature/ui-<pantalla>` (si hay un PR abierto del que dependés: avisar y esperar el merge).
-2. Trabajar, commitear en pasos chicos (convencionales, con la línea `Co-Authored-By`).
+2. Trabajar, commitear en pasos chicos (convencionales, sin líneas de atribución).
 3. `npm run lint && npm test && npm run build` antes del push (los tres deben pasar; hoy lint tiene 0 errores y unos 9 avisos conocidos de reglas del compilador de React).
 4. `git push -u origin feature/ui-<pantalla>`.
 5. Escribir `docs/ui-redesign/pr-<pantalla>.md` (qué cambia **en producción** al mergear, antes/después con rutas de capturas, cómo probarlo, verificación honesta, límites) y actualizar `progress.md`.
@@ -362,4 +362,4 @@ Respuestas del usuario (2026-11-15, después de cerrar el rediseño; dejó el or
    agregado, reemplaza como camino principal al formulario de la hoja. Referencia del analizador: `docs/ui-redesign/concepts/common.js` (`CK.parse`).
 7. Dos columnas en escritorio: **preguntó cómo se arregla.** Propuesta del asistente: desde 1024 px, Inicio en dos columnas (saldo, anotar rápido, para pagar y cuentas a la izquierda; Movimientos a la derecha),
    Reportes y Gastos fijos igual, Perfil sigue en una columna.
-8. Termómetro de ritmo en Reportes: **sí** ("perfecto").
+8. ~~Termómetro de ritmo en Reportes~~: **sí** ("perfecto"). Hecho en `feature/ui-reports-pace` (`pr-reports-pace.md`). Dentro de "00 Topes del mes", solo mes en curso con algún tope. **Pendiente de su visto bueno** (dos números míos, no de la propuesta): se oculta los días 1 a 3 (`PACE_FIRST_DAY`) y "en ritmo" es ±10 %.

@@ -227,6 +227,8 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
   interpretación visible y correcciones con toques (`utils/naturalEntry.js` + `AddTransactionModal.jsx`); editar sigue con el formulario. Cuentas en botones a pedido del usuario. Pruebas 333 → 390. Verificado contra el emulador (saldo y documento).
   Sin probar: teclados reales, autocorrector de iOS, dictado y lector de pantalla. Sigue el termómetro de ritmo (8), después las dos columnas (7) y por último los frecuentes de 3 meses (5).
 
+- **Después del cierre · PR 3** (rama `feature/ui-reports-pace`, 2026-11-16; `pr-reports-pace.md`, capturas en `reports-pace/`): decisión 8. Tarjeta "Ritmo del mes" dentro de "00 Topes del mes" (`paceStatus` en `utils/reportsData.js` + `reports/PaceCard`): gastado en categorías con tope contra suma de topes × día/días del mes; solo mes en curso, con algún tope y desde el día 4; "En ritmo" = ±10 %. Pruebas 390 → 405. Verificado contra el emulador (`ana`, `peor`, 320/393/1100, claro/oscuro, 200 %). Los días 1 a 3 y los ±10 % son decisiones mías, a validar. Sigue las dos columnas en escritorio (7) y por último los frecuentes de 3 meses (5).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).
