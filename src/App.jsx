@@ -182,6 +182,8 @@ function App() {
           budgets={budgets} 
           updateBudget={updateBudget}
           monthLabel={`${monthNames[selectedMonth]} ${selectedYear}`}
+          month={selectedMonth}
+          year={selectedYear}
         />
       )}
 

@@ -1,0 +1,83 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--sp-3);
+}
+
+.kicker,
+.day {
+  color: var(--ink2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.day {
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  color: var(--ink);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.status > svg {
+  flex: none;
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.figures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: 0;
+}
+
+.fig {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--sp-3);
+  font-size: var(--fs-small);
+}
+
+.fig dt {
+  min-width: 0;
+  color: var(--ink2);
+  overflow-wrap: anywhere;
+}
+
+.fig dd {
+  margin: 0 0 0 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  color: var(--ink2);
+  font-size: var(--fs-small);
+}
