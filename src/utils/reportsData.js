@@ -130,3 +130,40 @@ export const niceMax = (n) => {
   const step = [1, 2, 4, 6, 8, 10].find((s) => s * mag >= v * (1 - 1e-12));
   return step * mag;
 };
+/** Los primeros días del mes un solo gasto grande dispara el ritmo (el alquiler el día 1): recién desde el día 4 se muestra. */
+export const PACE_FIRST_DAY = 4;
+/** Hasta cuánto se puede pasar (o quedar corto) del gasto esperado y seguir "en ritmo": ±10 %. */
+const PACE_TOLERANCE = 10;
+
+/**
+ * Ritmo de gasto del mes en curso frente a los topes. Esperado = suma de los topes × (día de hoy / días del mes);
+ * gastado = lo gastado en las categorías que tienen tope (las 6 fijas, que son las que se ven en la pantalla).
+ *   fast: más del 10 % por encima de lo esperado · on: dentro de ±10 % · slow: más del 10 % por debajo.
+ * Devuelve null si no hay nada para mostrar: no es el mes en curso, ningún tope cargado, o es antes del día
+ * `PACE_FIRST_DAY`. `month` es 0-11. `today` se inyecta para las pruebas.
+ */
+export const paceStatus = ({ budgets = {}, expensesByCategory = {}, year, month, today = new Date() } = {}) => {
+  if (!Number.isInteger(year) || !Number.isInteger(month)) return null;
+  if (today.getFullYear() !== year || today.getMonth() !== month) return null;
+  const day = today.getDate();
+  if (day < PACE_FIRST_DAY) return null;
+
+  const days = new Date(year, month + 1, 0).getDate();
+  let limit = 0;
+  let spent = 0;
+  REPORT_CATEGORIES.forEach((category) => {
+    const l = budgets?.[category];
+    if (!hasLimit(l)) return;
+    limit += cents(l);
+    spent += Math.max(0, cents(expensesByCategory?.[category]));
+  });
+  if (limit <= 0) return null;
+
+  const expected = Math.round((limit * day) / days);
+  let state = 'on';
+  if (spent * 100 > expected * (100 + PACE_TOLERANCE)) state = 'fast';
+  else if (spent * 100 < expected * (100 - PACE_TOLERANCE)) state = 'slow';
+
+  const text = { fast: 'Vas más rápido de lo esperado', on: 'En ritmo', slow: 'Vas más lento de lo esperado' }[state];
+  return { state, text, spent: spent / 100, expected: expected / 100, limit: limit / 100, day, days };
+};
