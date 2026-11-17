@@ -38,3 +38,16 @@ firebase-export/
 
 !.env.example
 .playwright-mcp/
+
+# Herramientas locales de Claude y del sistema de diseno (no van a GitHub)
+.claude/
+.impeccable/
+
+# Generados por herramientas locales
+.vercel/
+.firebase/
+coverage/
+
+# Basura del sistema operativo
+Thumbs.db
+desktop.ini
