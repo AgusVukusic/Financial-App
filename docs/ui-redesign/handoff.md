@@ -232,7 +232,7 @@ Paradas ✋ en la fase 5: antes de cualquier borrado, antes de tocar `package.js
 - **Frecuentes limitados al mes seleccionado** (el hook solo trae ese mes). Ampliarlo necesita un dato nuevo de la capa de datos: preguntar antes.
 - Desktop: el contenido sigue en una columna de 880 px; la `Sheet` se centra en la ventana; los medidores de Reportes se estiran a todo el ancho.
 - Entrada de texto natural ("café 3500"): no implementada; `CK.parse` de `docs/ui-redesign/concepts/common.js` es la referencia.
-- Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). El termómetro de ritmo ya está (`feature/ui-reports-pace`); el día en que aparece y la tolerancia son constantes mías.
+- Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). El termómetro de ritmo ya está (`feature/ui-reports-pace`); el día en que aparece (4) y la tolerancia (±10 %) fueron aprobados por el usuario.
 - Gastos fijos: Deshacer dura lo que el toast (8 s); después, el pago se anula desde Movimientos. A 320 px "Pagar" baja a un renglón propio.
 - Perfil: `useAllTransactions` no distingue "cargando" de "sin movimientos" (los botones de exportar arrancan deshabilitados un instante).
 - Ingreso: después de registrarse la contraseña se vacía, así que "Reenviar correo" pide escribirla de nuevo.
@@ -362,4 +362,4 @@ Respuestas del usuario (2026-11-15, después de cerrar el rediseño; dejó el or
    agregado, reemplaza como camino principal al formulario de la hoja. Referencia del analizador: `docs/ui-redesign/concepts/common.js` (`CK.parse`).
 7. Dos columnas en escritorio: **preguntó cómo se arregla.** Propuesta del asistente: desde 1024 px, Inicio en dos columnas (saldo, anotar rápido, para pagar y cuentas a la izquierda; Movimientos a la derecha),
    Reportes y Gastos fijos igual, Perfil sigue en una columna.
-8. ~~Termómetro de ritmo en Reportes~~: **sí** ("perfecto"). Hecho en `feature/ui-reports-pace` (`pr-reports-pace.md`). Dentro de "00 Topes del mes", solo mes en curso con algún tope. **Pendiente de su visto bueno** (dos números míos, no de la propuesta): se oculta los días 1 a 3 (`PACE_FIRST_DAY`) y "en ritmo" es ±10 %.
+8. ~~Termómetro de ritmo en Reportes~~: **sí** ("perfecto"). Hecho en `feature/ui-reports-pace` (`pr-reports-pace.md`). Dentro de "00 Topes del mes", solo mes en curso con algún tope. **Aprobado por el usuario (2026-11-16, "Así está bien")**: se oculta los días 1 a 3 (`PACE_FIRST_DAY`) y "en ritmo" es ±10 %. No volver a plantearlo.

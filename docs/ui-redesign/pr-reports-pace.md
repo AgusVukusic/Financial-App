@@ -22,9 +22,9 @@
 2. `peor@prueba.test` (topes de $ 1 y de $ 999.999.999): "Vas más lento de lo esperado".
 3. Mes anterior en el selector, o `vacio@prueba.test`: la tarjeta no aparece.
 
-## Decisiones de diseño mías (a validar por el usuario)
+## Decisiones de diseño (aprobadas por el usuario: "Así está bien")
 
-La propuesta aprobada ("perfecto") no fijaba estos dos números; los elegí yo y cambiarlos es tocar una constante en `src/utils/reportsData.js`:
+La propuesta aprobada ("perfecto") no fijaba estos dos números; los elegí yo y el usuario los aprobó. Cambiarlos es tocar una constante en `src/utils/reportsData.js`:
 
 - **Desde el día 4** (`PACE_FIRST_DAY`). Los primeros días un solo gasto grande (el alquiler el día 1) dispara "más rápido" con un esperado de 1/30 de los topes. Desde el 4 ya hay algo de base.
 - **Tolerancia de ±10 %** para "En ritmo". Sin banda, cualquier peso de diferencia cambiaría el mensaje todos los días.
