@@ -46,7 +46,7 @@ describe('Layout', () => {
     expect(onAddClick).toHaveBeenCalledTimes(1);
   });
 
-  it('Inicio, Reportes y Gastos fijos usan el ancho de dos columnas; Perfil sigue en una', () => {
+  it('solo Perfil se queda en una columna angosta; las demás pantallas usan el ancho completo', () => {
     const main = () => document.getElementById('contenido');
     ['home', 'reports', 'subscriptions'].forEach((tab) => {
       const { unmount } = render(
@@ -54,11 +54,11 @@ describe('Layout', () => {
           <p>contenido</p>
         </Layout>,
       );
-      expect(main()).toHaveClass('layout__main--wide');
+      expect(main()).not.toHaveClass('layout__main--narrow');
       unmount();
     });
     setup('profile');
-    expect(main()).not.toHaveClass('layout__main--wide');
+    expect(main()).toHaveClass('layout__main--narrow');
   });
 
   it('ofrece saltar al contenido y el contenido tiene ese destino', () => {

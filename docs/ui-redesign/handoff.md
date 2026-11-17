@@ -230,7 +230,7 @@ Paradas ✋ en la fase 5: antes de cualquier borrado, antes de tocar `package.js
 ## 7. Deuda y límites conocidos
 
 - **Frecuentes limitados al mes seleccionado** (el hook solo trae ese mes). Ampliarlo necesita un dato nuevo de la capa de datos: preguntar antes.
-- Desktop: desde 1024 px Inicio, Reportes y Gastos fijos van en dos columnas de hasta 1120 px (`ui/Columns`); Perfil y los anchos de 768 a 1023 px siguen en una columna de 880 px. La `Sheet` se centra en la ventana. La barra del mes ocupa todo el ancho del contenido.
+- Desktop: desde 1024 px Inicio, Reportes y Gastos fijos van en dos columnas de hasta 1120 px (`ui/Columns`); Perfil (880 px, alineado a la izquierda del contenido de 1120 px, decisión del usuario: así el encabezado no se mueve al cambiar de pestaña) y los anchos de 768 a 1023 px siguen en una columna de 880 px. La `Sheet` se centra en la ventana. La barra del mes ocupa todo el ancho del contenido.
 - Entrada de texto natural ("café 3500"): no implementada; `CK.parse` de `docs/ui-redesign/concepts/common.js` es la referencia.
 - Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). El termómetro de ritmo ya está (`feature/ui-reports-pace`); el día en que aparece (4) y la tolerancia (±10 %) fueron aprobados por el usuario.
 - Gastos fijos: Deshacer dura lo que el toast (8 s); después, el pago se anula desde Movimientos. A 320 px "Pagar" baja a un renglón propio.

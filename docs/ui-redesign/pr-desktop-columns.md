@@ -7,14 +7,14 @@ Desde **1024 px de ancho** (compu o tablet apaisada), tres pantallas se parten e
 - **Inicio:** a la izquierda el saldo, "Anotar rápido", "Para pagar" y "Cuentas"; a la derecha "Movimientos". La barra del mes queda arriba, a todo el ancho.
 - **Reportes:** a la izquierda la línea de alertas y "00 Topes del mes" (con el ritmo del mes); a la derecha "01 En qué se fue" y "02 Últimos 6 meses".
 - **Gastos fijos:** a la izquierda "00 Resumen" con el botón "Nuevo gasto fijo"; a la derecha "01 Vencimientos".
-- **Perfil sigue en una columna** de 880 px, como hoy.
-- El contenido de esas tres pantallas pasa de 880 a **1120 px** de ancho máximo (columnas de 5 y 6 partes, con 32 px entre ellas). Las hojas (anotar, tope y gasto fijo, las que medí) siguen centradas en la ventana.
+- **Perfil sigue en una columna** de 880 px, pero alineada a la izquierda del contenido (decisión del usuario, opción B, ver abajo).
+- El contenido pasa de 880 a **1120 px** de ancho máximo (columnas de 5 y 6 partes, con 32 px entre ellas). Las hojas (anotar, tope y gasto fijo, las que medí) siguen centradas en la ventana.
 - No cambia nada en el servidor, las reglas, los hooks ni los datos. La numeración de las secciones queda igual ("03 Movimientos" sigue siendo 03).
 
 ## Cómo está hecho
 
 - Dos contenedores nuevos en `src/components/ui/Columns.jsx` (`Columns` y `Column`, con su CSS). Por debajo de 1024 px valen `display: contents`: no generan caja, así que los hijos se apilan como antes. Desde 1024 px, `Columns` es una grilla y cada `Column` una pila vertical.
-- `Layout` agrega la clase `layout__main--wide` (ancho 1120 px desde 1024 px) a todo menos Perfil.
+- `Layout` fija el contenido en 1120 px desde 1024 px y le agrega la clase `layout__main--narrow` solo a Perfil, cuyos hijos directos (encabezado y pantalla) se quedan en 880 px, pegados al borde izquierdo.
 - **Orden de Tab:** no se cambió el DOM, solo se agruparon los hijos. Sigue siendo: "Saltar al contenido" → navegación → encabezado y mes → columna izquierda entera → columna derecha.
 
 ## Antes / después
@@ -23,7 +23,7 @@ Desde **1024 px de ancho** (compu o tablet apaisada), tres pantallas se parten e
 - Después (todas con `ana`):
   - `docs/ui-redesign/desktop-columns/inicio-claro-1100.png` y `inicio-oscuro-1100.png`
   - `reportes-claro-1100.png` y `reportes-claro-1440.png`
-  - `gastos-claro-1100.png` y `perfil-claro-1100.png` (Perfil sigue igual)
+  - `gastos-claro-1100.png` y `perfil-claro-1100.png` y `perfil-claro-1440.png` (Perfil en 880 px a la izquierda)
   - `hoja-centrada-1100.png` (hoja de "Nuevo gasto fijo" abierta sobre las dos columnas)
 
 ## Cómo probarlo
@@ -35,17 +35,17 @@ Desde **1024 px de ancho** (compu o tablet apaisada), tres pantallas se parten e
 
 ## Verificación
 
-- Lint 0 errores (9 avisos conocidos). Pruebas: **405 → 408** (3 nuevas: `Columns` en `shell.test.jsx` y la clase de ancho de `Layout`). Build OK.
-- **Nada cambia por debajo de 1024 px:** con `ana`, medí la posición y el tamaño de todos los elementos del contenido y de la navegación (Inicio, Reportes, Perfil y Gastos fijos) a 393, 768 y 1023 px en `main` y en esta rama: los 12 resultados dieron exactamente el mismo número de elementos y la misma huella de coordenadas. En cada corrida comprobé antes que el código era el que creía: en `main` no existe ningún contenedor `Columns` ni la clase `layout__main--wide`; en la rama sí.
+- Lint 0 errores (9 avisos conocidos). Pruebas: **405 → 408** (3 nuevas: `Columns` y la clase `layout__main--narrow` de `Layout`, en `shell.test.jsx`). Build OK.
+- **Nada cambia por debajo de 1024 px:** con `ana`, medí la posición y el tamaño de todos los elementos del contenido y de la navegación (Inicio, Reportes, Perfil y Gastos fijos) a 393, 768 y 1023 px en `main` y en esta rama: los 12 resultados dieron exactamente el mismo número de elementos y la misma huella de coordenadas. En cada corrida comprobé antes que el código era el que creía: en `main` no existe ningún contenedor `Columns` ni la clase `layout__main--narrow` en Perfil; en la rama sí.
 - A 1023 px `Columns` es `display: contents` y el contenido mide 880 px; a 1024 px es una grilla (391 y 469 px) y el contenido 1120 px.
 - Barrido con `ana` y `peor`: 1024, 1100 y 1440 px × claro/oscuro × texto 100 % y 200 % × las 4 pantallas (96 combinaciones): sin scroll horizontal y **ningún monto cortado con puntos suspensivos**. Lo que sí se acorta, como siempre, son nombres y el renglón de detalle de Movimientos (fecha · categoría · cuenta), nunca las cifras.
 - Teclado: el orden de los controles en el DOM es columna izquierda y después derecha en Inicio y Gastos fijos; mi primer Tab arrancó en la navegación (venía de haber quitado el foco del botón Inicio, así que no probé el tramo "Saltar al contenido → navegación": ese orden sale del DOM, que no cambió). En Reportes la columna derecha no tiene controles que Tab alcance hasta abrir la tabla ("Ver en tabla" es un `details`, que mi barrido no cuenta).
 - Las hojas de tope, de anotar y de gasto fijo quedan centradas en la ventana a 1100 px (centro 550 = mitad de la ventana).
 - Detector de diseño de impeccable sobre los archivos tocados: 0 problemas. Un aviso informativo (`border-radius: 2px` en `Layout.css`, el indicador del riel) es anterior a este PR y no lo toqué.
 
-## Cosa que cambia y conviene que la veas (pendiente de tu decisión)
+## Decisión del usuario: Perfil alineado a la izquierda (opción B)
 
-Perfil queda centrado en 880 px y las otras tres pantallas en 1120 px, así que **al pasar de una pestaña a otra en escritorio el encabezado ("Hola, ana") se corre hacia los costados**. Medí el borde izquierdo del encabezado: a 1100 px es 112 px en Inicio, Reportes y Gastos fijos y 174 px en Perfil; a 1440 px, 222–224 px contra 344 px. Antes no pasaba (todo medía 880). Dos arreglos posibles: (A) dejarlo así, Perfil centrado; (B) poner todo en 1120 px y que Perfil use 880 px alineado a la izquierda, así el encabezado no se mueve.
+Con Perfil centrado en 880 px, el encabezado ("Hola, ana") se corría hacia los costados al cambiar de pestaña (borde izquierdo en 174 px contra 112 px a 1100 px de ancho). El usuario eligió la opción B: todo el contenido en 1120 px y Perfil en 880 px alineado a la izquierda. Medido después: el borde izquierdo del encabezado es 112 px en las cuatro pantallas a 1024 y 1100 px, y 222–224 px a 1440 px (los 2 px de diferencia son del scrollbar, que aparece en las pantallas largas y no en las cortas). Consecuencia: a 1440 px Perfil deja más espacio vacío a la derecha que a la izquierda.
 
 ## No probado / límites
 

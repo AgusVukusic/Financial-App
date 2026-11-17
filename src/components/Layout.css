@@ -173,10 +173,15 @@
   }
 }
 
-/* Escritorio ancho: las pantallas de dos columnas usan más ancho que la columna de lectura de 880 px */
+/* Escritorio ancho: el contenido mide 1120 px para las pantallas de dos columnas. Las de una columna (Perfil) se quedan en 880 px,
+   pegadas al borde izquierdo, para que el encabezado no cambie de lugar entre pestañas. */
 @media (min-width: 1024px) {
-  .layout__main--wide {
+  .layout__main {
     max-width: 1120px;
+  }
+
+  .layout__main--narrow > * {
+    max-width: 880px;
   }
 }
 
