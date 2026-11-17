@@ -174,7 +174,7 @@ definidos al final de `tokens.css`, declarados **en cada selector de tema** (si 
 ADR 001); `voidTransaction(requestId)` lo anula con un movimiento compensatorio que los mappers ocultan. `addTransaction` acepta `data.requestId` y no devuelve nada.
 
 **Agregado en las pantallas de noviembre (PRs #9 a #12):**
-- Reportes: `Reports.jsx` (orquestador) + `components/reports/` (`BudgetRow`, `BudgetSheet`, `BudgetsSection`, `DistributionSection`, `MonthlyChart`, `PaceCard`, `Swatch`),
+- Reportes: `Reports.jsx` (orquestador) + `components/reports/` (`BudgetRow`, `BudgetSheet`, `BudgetsSection`, `DistributionSection`, `MonthlyChart`, `PaceCard`, `Swatch`; en `ui/`: `Columns`/`Column`, dos columnas desde 1024 px),
   `dashboard/BudgetAlerts.jsx` reescrito, `utils/reportsData.js` (`budgetStatus`, `alertSummary`, `distribution`, `monthlySeries`, `formatCompact`, `niceMax`, `paceStatus`).
 - Gastos fijos: `SubscriptionsManager.jsx` + `components/subscriptions/` (`SubscriptionRow`, `SubscriptionSheet`).
 - Perfil: `Profile.jsx` + `Profile.module.css`; `utils/formatters.js` (`typeLabel`, `buildCSV`, `exportToCSV`/`exportToPDF` devuelven el nombre del archivo).
@@ -230,7 +230,7 @@ Paradas ✋ en la fase 5: antes de cualquier borrado, antes de tocar `package.js
 ## 7. Deuda y límites conocidos
 
 - **Frecuentes limitados al mes seleccionado** (el hook solo trae ese mes). Ampliarlo necesita un dato nuevo de la capa de datos: preguntar antes.
-- Desktop: el contenido sigue en una columna de 880 px; la `Sheet` se centra en la ventana; los medidores de Reportes se estiran a todo el ancho.
+- Desktop: desde 1024 px Inicio, Reportes y Gastos fijos van en dos columnas de hasta 1120 px (`ui/Columns`); Perfil (880 px, alineado a la izquierda del contenido de 1120 px, decisión del usuario: así el encabezado no se mueve al cambiar de pestaña) y los anchos de 768 a 1023 px siguen en una columna de 880 px. La `Sheet` se centra en la ventana. La barra del mes ocupa todo el ancho del contenido.
 - Entrada de texto natural ("café 3500"): no implementada; `CK.parse` de `docs/ui-redesign/concepts/common.js` es la referencia.
 - Reportes: los porcentajes de la leyenda se redondean por separado (pueden sumar 99 o 101). El termómetro de ritmo ya está (`feature/ui-reports-pace`); el día en que aparece (4) y la tolerancia (±10 %) fueron aprobados por el usuario.
 - Gastos fijos: Deshacer dura lo que el toast (8 s); después, el pago se anula desde Movimientos. A 320 px "Pagar" baja a un renglón propio.
@@ -360,6 +360,6 @@ Respuestas del usuario (2026-11-15, después de cerrar el rediseño; dejó el or
    con la consulta `transactions(userId, occurredAt)` de los últimos 3 meses). Va al final de la cola (después de texto natural, termómetro y dos columnas).
 6. ~~Texto natural~~ HECHO en `feature/ui-natural-entry` (`pr-natural-entry.md`; pendiente su veredicto sobre el diseño, y se le avisó que se construyó antes de mostrárselo). **Texto natural ("café 3500") para anotar un movimiento: sí, quiere volver a eso.** "A mí me gustaba mucho más el texto natural que como está armado ahora la pantalla de ingresar un movimiento": no es un
    agregado, reemplaza como camino principal al formulario de la hoja. Referencia del analizador: `docs/ui-redesign/concepts/common.js` (`CK.parse`).
-7. Dos columnas en escritorio: **preguntó cómo se arregla.** Propuesta del asistente: desde 1024 px, Inicio en dos columnas (saldo, anotar rápido, para pagar y cuentas a la izquierda; Movimientos a la derecha),
+7. ~~Dos columnas en escritorio~~: hecho en `feature/ui-desktop-columns` (`pr-desktop-columns.md`). **Preguntó cómo se arregla.** Propuesta del asistente: desde 1024 px, Inicio en dos columnas (saldo, anotar rápido, para pagar y cuentas a la izquierda; Movimientos a la derecha),
    Reportes y Gastos fijos igual, Perfil sigue en una columna.
 8. ~~Termómetro de ritmo en Reportes~~: **sí** ("perfecto"). Hecho en `feature/ui-reports-pace` (`pr-reports-pace.md`). Dentro de "00 Topes del mes", solo mes en curso con algún tope. **Aprobado por el usuario (2026-11-16, "Así está bien")**: se oculta los días 1 a 3 (`PACE_FIRST_DAY`) y "en ritmo" es ±10 %. No volver a plantearlo.

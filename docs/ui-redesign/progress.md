@@ -229,6 +229,8 @@ Dashboard solo los 3 botones de la navegación miden 40 px (Layout, fase 4); el 
 
 - **Después del cierre · PR 3** (rama `feature/ui-reports-pace`, 2026-11-16; `pr-reports-pace.md`, capturas en `reports-pace/`): decisión 8. Tarjeta "Ritmo del mes" dentro de "00 Topes del mes" (`paceStatus` en `utils/reportsData.js` + `reports/PaceCard`): gastado en categorías con tope contra suma de topes × día/días del mes; solo mes en curso, con algún tope y desde el día 4; "En ritmo" = ±10 %. Pruebas 390 → 405. Verificado contra el emulador (`ana`, `peor`, 320/393/1100, claro/oscuro, 200 %). Los días 1 a 3 y los ±10 % los aprobó el usuario ("Así está bien"). Sigue las dos columnas en escritorio (7) y por último los frecuentes de 3 meses (5).
 
+- **Después del cierre · PR 4** (rama `feature/ui-desktop-columns`, 2026-11-16; `pr-desktop-columns.md`, capturas en `desktop-columns/`): decisión 7. Desde 1024 px Inicio (saldo, anotar rápido, para pagar y cuentas | movimientos), Reportes (alertas y topes | en qué se fue y 6 meses) y Gastos fijos (resumen | vencimientos) van en dos columnas de hasta 1120 px; Perfil sigue en una columna de 880 px alineada a la izquierda (el usuario eligió esa opción para que el encabezado no salte entre pestañas). `ui/Columns` (`display: contents` por debajo de 1024 px). Pruebas 405 → 408. Verificado: por debajo de 1024 px la geometría de todos los elementos es idéntica antes y después (12 pantallas/anchos); 96 combinaciones con `ana` y `peor` sin scroll horizontal ni montos cortados. Sigue el último punto: frecuentes de 3 meses (5).
+
 ## Pantallas terminadas / PRs
 
 - #5 sistema de diseño (mergeado) · #6 Layout + Dashboard (mergeado) · #7 hojas de movimiento/cuenta + lista de Movimientos (mergeado; CI verde en `main`).

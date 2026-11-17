@@ -6,6 +6,7 @@ import { newRequestId } from '../services/api';
 import { useDialog } from '../contexts/DialogContext';
 import Button from './ui/Button';
 import Card from './ui/Card';
+import { Column, Columns } from './ui/Columns';
 import SectionHeader from './ui/SectionHeader';
 import { useToast } from './ui/ToastContext';
 import SubscriptionRow from './subscriptions/SubscriptionRow';
@@ -103,6 +104,8 @@ const SubscriptionsManager = ({
 
   return (
     <div className={styles.screen}>
+      <Columns>
+      <Column>
       <section aria-label="Resumen">
         <SectionHeader index="00" title="Resumen" />
         <Card variant="dotted" className={styles.summary}>
@@ -121,7 +124,9 @@ const SubscriptionsManager = ({
           Nuevo gasto fijo
         </Button>
       </section>
+      </Column>
 
+      <Column>
       <section aria-label="Vencimientos">
         <SectionHeader index="01" title="Vencimientos" meta={count > 0 ? 'Por fecha' : undefined} />
         {count === 0 ? (
@@ -139,6 +144,8 @@ const SubscriptionsManager = ({
           </ul>
         )}
       </section>
+      </Column>
+      </Columns>
 
       <SubscriptionSheet
         open={sheetOpen}

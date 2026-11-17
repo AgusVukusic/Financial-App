@@ -13,6 +13,7 @@ import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
 import AddAccountModal from './components/Accounts/AddAccountModal';
 import Reports from './components/Reports';
+import { Column, Columns } from './components/ui/Columns';
 import Profile from './components/Profile';
 import SubscriptionsManager from './components/SubscriptionsManager';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -147,6 +148,8 @@ function App() {
 
       {activeTab === 'home' && (
         <>
+          <Columns>
+          <Column>
           <Dashboard 
             balance={balance} 
             netWorth={totalNetWorth}
@@ -166,12 +169,16 @@ function App() {
             onAddAccountClick={() => handleOpenAccountModal()}
             onEditAccountClick={(acc) => handleOpenAccountModal(acc)}
           />
+          </Column>
+          <Column>
           <TransactionList
             transactions={transactions}
             accounts={accounts}
             onOpenAdd={handleOpenModal}
             onEdit={(t) => { setModalInitialData(t); setIsModalOpen(true); }}
           />
+          </Column>
+          </Columns>
         </>
       )}
 

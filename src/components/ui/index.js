@@ -2,6 +2,7 @@
 export { default as Button } from './Button';
 export { default as Card } from './Card';
 export { default as Chip } from './Chip';
+export { Column, Columns } from './Columns';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { Dither, DitherBar } from './Dither';
 export { default as Field } from './Field';

@@ -9,6 +9,9 @@ import './Layout.css';
  */
 const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
   const current = activeTab === 'subscriptions' ? 'home' : activeTab;
+  // Desde 1024 px el contenido mide 1120 px (Inicio, Reportes y Gastos fijos van en dos columnas). Perfil sigue en una columna de 880 px,
+  // pero alineada a la izquierda: así el encabezado no se corre al cambiar de pestaña.
+  const narrow = activeTab === 'profile';
 
   const item = (id, label, Icon) => (
     <button
@@ -38,7 +41,7 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
         {item('profile', 'Perfil', User)}
       </nav>
 
-      <main className="layout__main" id="contenido" tabIndex={-1}>
+      <main className={narrow ? 'layout__main layout__main--narrow' : 'layout__main'} id="contenido" tabIndex={-1}>
         {children}
       </main>
     </div>
