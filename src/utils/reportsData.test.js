@@ -9,6 +9,8 @@ import {
   monthlySeries,
   formatCompact,
   niceMax,
+  paceStatus,
+  PACE_FIRST_DAY,
 } from './reportsData';
 
 const flat = (s) => s.replace(/\s/g, ' ');
@@ -238,5 +240,80 @@ describe('budgetStatus con centavos', () => {
   it('la diferencia coincide con los pesos enteros que se muestran', () => {
     expect(flat(budgetStatus(138580.5, 180000).text)).toBe('Quedan $ 41.419');
     expect(flat(budgetStatus(100.2, 100).text)).toBe('Superado por $ 1');
+  });
+});
+
+describe('paceStatus', () => {
+  // Noviembre de 2026 tiene 30 días. Con topes por 300.000 el esperado al día 15 es 150.000.
+  const budgets = { Comida: 200000, Hogar: 100000 };
+  const at = (day, extra = {}) => ({
+    budgets,
+    year: 2026,
+    month: 10,
+    today: new Date(2026, 10, day, 12),
+    ...extra,
+  });
+
+  it('esperado = suma de topes × día / días del mes; gastado = solo categorías con tope', () => {
+    const r = paceStatus(at(15, { expensesByCategory: { Comida: 90000, Hogar: 60000, Compras: 999999 } }));
+    expect(r).toMatchObject({ expected: 150000, spent: 150000, limit: 300000, day: 15, days: 30 });
+    expect(r.state).toBe('on');
+    expect(r.text).toBe('En ritmo');
+  });
+
+  it('más del 10 % por encima de lo esperado es "más rápido"', () => {
+    expect(paceStatus(at(15, { expensesByCategory: { Comida: 165001 } })).state).toBe('fast');
+    expect(paceStatus(at(15, { expensesByCategory: { Comida: 165000 } })).state).toBe('on'); // justo el borde
+    expect(paceStatus(at(15, { expensesByCategory: { Comida: 200000 } })).text).toBe('Vas más rápido de lo esperado');
+  });
+
+  it('más del 10 % por debajo es "más lento", también sin gastos', () => {
+    expect(paceStatus(at(15, { expensesByCategory: { Comida: 134999 } })).state).toBe('slow');
+    expect(paceStatus(at(15, { expensesByCategory: { Comida: 135000 } })).state).toBe('on'); // justo el borde
+    const none = paceStatus(at(15, { expensesByCategory: {} }));
+    expect(none).toMatchObject({ state: 'slow', spent: 0, text: 'Vas más lento de lo esperado' });
+  });
+
+  it('una categoría sin tope (o con tope 0) no suma ni al esperado ni al gastado', () => {
+    const r = paceStatus(at(15, { budgets: { Comida: 300000, Hogar: 0 }, expensesByCategory: { Comida: 150000, Hogar: 500000 } }));
+    expect(r).toMatchObject({ limit: 300000, spent: 150000, state: 'on' });
+  });
+
+  it('un gasto negativo (ajuste) se toma como 0 y los valores raros no rompen', () => {
+    const r = paceStatus(at(15, { expensesByCategory: { Comida: -5000, Hogar: NaN } }));
+    expect(r.spent).toBe(0);
+    expect(() => paceStatus(at(15, { expensesByCategory: undefined, budgets: { Comida: 'x', Hogar: null } }))).not.toThrow();
+  });
+
+  it('devuelve null sin ningún tope cargado', () => {
+    expect(paceStatus(at(15, { budgets: {}, expensesByCategory: { Comida: 5 } }))).toBeNull();
+    expect(paceStatus(at(15, { budgets: { Comida: 0 } }))).toBeNull();
+    expect(paceStatus(at(15, { budgets: { Otra: 100 } }))).toBeNull(); // fuera de las 6 fijas no se ve en pantalla
+  });
+
+  it('solo para el mes en curso', () => {
+    expect(paceStatus(at(15, { month: 9 }))).toBeNull();
+    expect(paceStatus(at(15, { month: 11 }))).toBeNull();
+    expect(paceStatus(at(15, { year: 2025 }))).toBeNull();
+    expect(paceStatus(at(15, { year: undefined }))).toBeNull();
+  });
+
+  it('no se muestra los primeros días del mes', () => {
+    expect(PACE_FIRST_DAY).toBe(4);
+    expect(paceStatus(at(1))).toBeNull();
+    expect(paceStatus(at(3))).toBeNull();
+    expect(paceStatus(at(4))).not.toBeNull();
+  });
+
+  it('usa los días reales del mes (febrero de 2028 tiene 29) y el último día espera el tope entero', () => {
+    const feb = paceStatus({ budgets: { Comida: 290000 }, year: 2028, month: 1, today: new Date(2028, 1, 10) });
+    expect(feb).toMatchObject({ days: 29, expected: 100000 });
+    const last = paceStatus(at(30, { expensesByCategory: { Comida: 300000 } }));
+    expect(last).toMatchObject({ expected: 300000, state: 'on' });
+  });
+
+  it('compara en centavos: el ruido de decimales no cambia el estado', () => {
+    const r = paceStatus(at(15, { expensesByCategory: { Comida: 0.1 + 0.2 + 164999.7 } }));
+    expect(r.state).toBe('on'); // 165000,00 exactos
   });
 });

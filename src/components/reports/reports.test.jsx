@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ToastProvider } from '../ui/ToastContext';
 import Reports from '../Reports';
 import BudgetAlerts from '../dashboard/BudgetAlerts';
@@ -255,5 +255,61 @@ describe('Últimos 6 meses', () => {
     setup({ expensesByCategory: { Comida: 999999999999999 }, budgets: { Comida: 999999999999999 } });
     expect(screen.getByText('Llegaste al tope')).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: 'Últimos 6 meses' })).getByRole('table', { hidden: true })).toHaveTextContent(/999\.999\.999\.999\.999/);
+  });
+});
+
+describe('Ritmo del mes', () => {
+  // Hoy = 15 de noviembre de 2026 (30 días): con topes por 300.000 corresponden 150.000.
+  beforeEach(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date(2026, 10, 15, 12) }));
+  afterEach(() => vi.useRealTimers());
+
+  const budgets = { Comida: 200000, Hogar: 100000 };
+  const pace = () => screen.queryByRole('group', { name: 'Ritmo del mes' });
+
+  it('en el mes en curso con topes muestra el estado en palabras y el medidor', () => {
+    setup({ budgets, expensesByCategory: { Comida: 200000 }, month: 10, year: 2026 });
+    const card = within(pace());
+    expect(card.getByText('Vas más rápido de lo esperado')).toBeInTheDocument();
+    expect(card.getByText('Día 15 de 30')).toBeInTheDocument();
+    expect(card.getByText(/^\$\s200\.000$/)).toBeInTheDocument();
+    expect(card.getByText(/^\$\s150\.000$/)).toBeInTheDocument();
+    expect(card.getByRole('meter', { name: /Vas más rápido de lo esperado: llevás gastado/ })).toBeInTheDocument();
+  });
+
+  it('"en ritmo" y "más lento" también se dicen con palabras', () => {
+    const { unmount } = render(
+      <ToastProvider>
+        <Reports uid="u1" budgets={budgets} expensesByCategory={{ Comida: 150000 }} monthLabel={MONTH} month={10} year={2026} updateBudget={vi.fn()} />
+      </ToastProvider>,
+    );
+    expect(within(pace()).getByText('En ritmo')).toBeInTheDocument();
+    unmount();
+    setup({ budgets, expensesByCategory: { Comida: 10000 }, month: 10, year: 2026 });
+    expect(within(pace()).getByText('Vas más lento de lo esperado')).toBeInTheDocument();
+  });
+
+  it('en "en ritmo" el medidor no muestra el segmento de exceso aunque se haya gastado hasta un 10 % de más', () => {
+    setup({ budgets, expensesByCategory: { Comida: 160000 }, month: 10, year: 2026 });
+    const meter = within(pace()).getByRole('meter');
+    expect(meter).toHaveAttribute('aria-valuenow', '150000');
+    expect(meter.querySelectorAll('i')).toHaveLength(10);
+  });
+
+  it('no aparece en otro mes, sin topes ni sin mes elegido', () => {
+    const { unmount } = render(
+      <ToastProvider>
+        <Reports uid="u1" budgets={budgets} expensesByCategory={{}} monthLabel="Octubre 2026" month={9} year={2026} updateBudget={vi.fn()} />
+      </ToastProvider>,
+    );
+    expect(pace()).toBeNull();
+    unmount();
+    setup({ budgets: {}, month: 10, year: 2026 });
+    expect(pace()).toBeNull();
+  });
+
+  it('no aparece los primeros días del mes', () => {
+    vi.setSystemTime(new Date(2026, 10, 2, 12));
+    setup({ budgets, expensesByCategory: { Comida: 200000 }, month: 10, year: 2026 });
+    expect(pace()).toBeNull();
   });
 });
