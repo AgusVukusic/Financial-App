@@ -173,6 +173,13 @@
   }
 }
 
+/* Escritorio ancho: las pantallas de dos columnas usan más ancho que la columna de lectura de 880 px */
+@media (min-width: 1024px) {
+  .layout__main--wide {
+    max-width: 1120px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .layout__add {
     transition: none;

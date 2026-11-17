@@ -5,6 +5,7 @@ import BudgetAlerts from './dashboard/BudgetAlerts';
 import BudgetsSection from './reports/BudgetsSection';
 import DistributionSection from './reports/DistributionSection';
 import MonthlyChart from './reports/MonthlyChart';
+import { Column, Columns } from './ui/Columns';
 import styles from './Reports.module.css';
 
 /**
@@ -29,10 +30,16 @@ const Reports = ({ uid, expensesByCategory = {}, budgets = {}, updateBudget, mon
 
   return (
     <div className={styles.page}>
-      <BudgetAlerts budgets={budgets} expensesByCategory={expensesByCategory} onSeeBudgets={handleSeeBudgets} />
-      <BudgetsSection budgets={budgets} expensesByCategory={expensesByCategory} updateBudget={updateBudget} sectionRef={budgetsRef} pace={pace} />
-      <DistributionSection expensesByCategory={expensesByCategory} monthLabel={monthLabel} />
-      <MonthlyChart series={series} />
+      <Columns>
+        <Column>
+          <BudgetAlerts budgets={budgets} expensesByCategory={expensesByCategory} onSeeBudgets={handleSeeBudgets} />
+          <BudgetsSection budgets={budgets} expensesByCategory={expensesByCategory} updateBudget={updateBudget} sectionRef={budgetsRef} pace={pace} />
+        </Column>
+        <Column>
+          <DistributionSection expensesByCategory={expensesByCategory} monthLabel={monthLabel} />
+          <MonthlyChart series={series} />
+        </Column>
+      </Columns>
     </div>
   );
 };

@@ -9,6 +9,8 @@ import './Layout.css';
  */
 const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
   const current = activeTab === 'subscriptions' ? 'home' : activeTab;
+  // Inicio, Reportes y Gastos fijos se parten en dos columnas desde 1024 px y necesitan más ancho; Perfil sigue en una.
+  const wide = activeTab !== 'profile';
 
   const item = (id, label, Icon) => (
     <button
@@ -38,7 +40,7 @@ const Layout = ({ children, activeTab, onTabChange, onAddClick }) => {
         {item('profile', 'Perfil', User)}
       </nav>
 
-      <main className="layout__main" id="contenido" tabIndex={-1}>
+      <main className={wide ? 'layout__main layout__main--wide' : 'layout__main'} id="contenido" tabIndex={-1}>
         {children}
       </main>
     </div>

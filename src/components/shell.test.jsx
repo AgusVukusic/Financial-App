@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import Layout from './Layout';
 import AppHeader from './AppHeader';
 import MonthSelector from './MonthSelector';
+import { Column, Columns } from './ui/Columns';
 
 describe('Layout', () => {
   const setup = (activeTab = 'home') => {
@@ -45,6 +46,21 @@ describe('Layout', () => {
     expect(onAddClick).toHaveBeenCalledTimes(1);
   });
 
+  it('Inicio, Reportes y Gastos fijos usan el ancho de dos columnas; Perfil sigue en una', () => {
+    const main = () => document.getElementById('contenido');
+    ['home', 'reports', 'subscriptions'].forEach((tab) => {
+      const { unmount } = render(
+        <Layout activeTab={tab} onTabChange={vi.fn()} onAddClick={vi.fn()}>
+          <p>contenido</p>
+        </Layout>,
+      );
+      expect(main()).toHaveClass('layout__main--wide');
+      unmount();
+    });
+    setup('profile');
+    expect(main()).not.toHaveClass('layout__main--wide');
+  });
+
   it('ofrece saltar al contenido y el contenido tiene ese destino', () => {
     setup();
     expect(screen.getByRole('link', { name: 'Saltar al contenido' })).toHaveAttribute('href', '#contenido');
@@ -84,5 +100,34 @@ describe('MonthSelector', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Mes siguiente' }));
     expect(onChange).toHaveBeenNthCalledWith(1, -1);
     expect(onChange).toHaveBeenNthCalledWith(2, 1);
+  });
+});
+
+describe('Columns', () => {
+  it('deja los hijos en el orden del DOM (primera columna entera, después la segunda)', () => {
+    render(
+      <Columns>
+        <Column>
+          <button type="button">A1</button>
+          <button type="button">A2</button>
+        </Column>
+        <Column>
+          <button type="button">B1</button>
+        </Column>
+      </Columns>,
+    );
+    expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual(['A1', 'A2', 'B1']);
+  });
+
+  it('no agrega roles ni regiones: son contenedores sin semántica', () => {
+    const { container } = render(
+      <Columns>
+        <Column>
+          <p>uno</p>
+        </Column>
+      </Columns>,
+    );
+    expect(container.querySelector('[role]')).toBeNull();
+    expect(screen.getByText('uno')).toBeInTheDocument();
   });
 });
